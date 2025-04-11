@@ -42,7 +42,7 @@ fun ProductScreen() {
             var textValue by remember { mutableStateOf("") }
             SearchBarComponent(textValue, onChangeValue = { textValue = it })
 
-            LazyColumn(modifier = Modifier.padding()) {
+            LazyColumn {
                 items(ObjetosDePrueba.motorcycleProducts) {
                     ProductItem(it)
                 }
