@@ -28,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.facturacionelunico.presentation.productScreenTab.ProductScreenTab
+import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductCreateScreen
 import com.example.facturacionelunico.ui.theme.FacturacionElUnicoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -52,7 +53,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(navController = controller, startDestination = "ProductScreen", modifier = Modifier.padding(it)){
                         composable(route = "ProductScreen") {
-                            ProductScreenTab()
+                            ProductScreenTab(navController = controller)
+                        }
+
+                        composable(route = "ProductCreateScreen") {
+                            ProductCreateScreen(navController = controller)
                         }
                     }
                 }

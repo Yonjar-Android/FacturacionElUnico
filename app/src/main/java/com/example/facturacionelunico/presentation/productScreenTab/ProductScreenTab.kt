@@ -11,12 +11,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import com.example.facturacionelunico.presentation.productScreenTab.brandScreen.BrandScreen
 import com.example.facturacionelunico.presentation.productScreenTab.categoryScreen.CategoryScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductScreen
 
 @Composable
-fun ProductScreenTab(){
+fun ProductScreenTab(navController: NavController){
     Column(modifier = Modifier.fillMaxSize()) {
         var tabIndex by remember { mutableIntStateOf(0) }
         val tabs = listOf("Productos", "Categorías", "Marcas")
@@ -32,7 +33,8 @@ fun ProductScreenTab(){
 
         when(tabIndex){
             0 -> {
-                ProductScreen()
+                ProductScreen(navController = navController,
+                    )
             }
             1 -> {
                 CategoryScreen()

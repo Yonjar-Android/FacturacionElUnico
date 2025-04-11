@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.facturacionelunico.ObjetosDePrueba
 import com.example.facturacionelunico.domain.models.ProductDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
@@ -31,7 +32,7 @@ import com.example.facturacionelunico.presentation.sharedComponents.SearchBarCom
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
-fun ProductScreen() {
+fun ProductScreen(navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -49,7 +50,8 @@ fun ProductScreen() {
             }
         }
         AddButton(
-            modifier = Modifier.align(alignment = Alignment.BottomEnd)
+            modifier = Modifier.align(alignment = Alignment.BottomEnd),
+            functionClick = {navController.navigate("ProductCreateScreen")}
         )
     }
 }

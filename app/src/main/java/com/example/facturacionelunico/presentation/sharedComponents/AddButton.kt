@@ -16,14 +16,14 @@ import androidx.compose.ui.unit.dp
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
-fun AddButton(modifier: Modifier) {
+fun AddButton(modifier: Modifier, functionClick: () -> Unit) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         FloatingActionButton(
             modifier = Modifier.padding(end = 10.dp, bottom = 10.dp),
             shape = CircleShape,
             containerColor = blueUi,
             onClick = {
-
+                functionClick.invoke()
             }) {
             Icon(
                 imageVector = Icons.Default.Add,
