@@ -82,6 +82,13 @@ dependencies {
 
     //Compose Navigation
     implementation(libs.androidx.navigation.compose)
+
+    // Mock unit testing
+
+    testImplementation(libs.mockk)
+
+    // turbine unit testing
+    testImplementation(libs.turbine)
 }
 
 kapt {
