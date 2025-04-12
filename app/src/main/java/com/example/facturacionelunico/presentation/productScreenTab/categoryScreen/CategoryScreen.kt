@@ -2,6 +2,7 @@
 
 package com.example.facturacionelunico.presentation.productScreenTab.categoryScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,10 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.facturacionelunico.ObjetosDePrueba
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
@@ -42,7 +46,11 @@ import com.example.facturacionelunico.presentation.sharedComponents.SearchBarCom
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
-fun CategoryScreen() {
+fun CategoryScreen(
+    categoryScreenViewModel: CategoryScreenViewModel = hiltViewModel()
+) {
+
+    val categories by categoryScreenViewModel.categories.collectAsStateWithLifecycle()
 
     var showDialog by remember { mutableStateOf(false) }
     var textValueCategory by remember { mutableStateOf("") }
@@ -59,7 +67,7 @@ fun CategoryScreen() {
             Spacer(modifier = Modifier.size(10.dp))
 
             LazyColumn {
-                items(ObjetosDePrueba.motorcycleCategories) {
+                items(categories) {
                     CategoryItem(it)
                 }
             }
@@ -68,9 +76,11 @@ fun CategoryScreen() {
                 DialogCreateCategory(
                     value = textValueCategory,
                     dismiss = {
+                        textValueCategory = ""
                         showDialog = false
                     },
-                    onValueChange = { textValueCategory = it }
+                    onValueChange = { textValueCategory = it },
+                    viewModel = categoryScreenViewModel
                 )
             }
         }
@@ -122,8 +132,11 @@ fun CategoryItem(category: CategoryDomainModel) {
 fun DialogCreateCategory(
     value: String,
     onValueChange: (String) -> Unit,
-    dismiss: () -> Unit
+    dismiss: () -> Unit,
+    viewModel: CategoryScreenViewModel
 ) {
+    val context = LocalContext.current
+
     BasicAlertDialog(
         onDismissRequest = dismiss
     ) {
@@ -159,7 +172,12 @@ fun DialogCreateCategory(
             Button(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 onClick = {
-
+                    if (value.isEmpty()) {
+                        Toast.makeText(context, "Ingrese un nombre", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    dismiss.invoke()
+                    viewModel.createCategory(value)
                 }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
             ) {
                 Text(

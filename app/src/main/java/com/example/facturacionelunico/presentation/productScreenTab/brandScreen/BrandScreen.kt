@@ -2,6 +2,7 @@
 
 package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,10 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.facturacionelunico.ObjetosDePrueba
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.presentation.productScreenTab.categoryScreen.DialogCreateCategory
@@ -43,7 +47,11 @@ import com.example.facturacionelunico.presentation.sharedComponents.SearchBarCom
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
-fun BrandScreen() {
+fun BrandScreen(
+    brandScreenViewModel: BrandScreenViewModel = hiltViewModel()
+) {
+
+    val brands by brandScreenViewModel.brands.collectAsStateWithLifecycle()
 
     var showDialog by remember { mutableStateOf(false) }
     var textValueBrand by remember { mutableStateOf("") }
@@ -61,7 +69,7 @@ fun BrandScreen() {
             Spacer(modifier = Modifier.size(10.dp))
 
             LazyColumn {
-                items(ObjetosDePrueba.motorcycleBrands) {
+                items(brands) {
                     BrandItem(it)
                 }
             }
@@ -70,9 +78,11 @@ fun BrandScreen() {
                 DialogCreateBrand(
                     value = textValueBrand,
                     dismiss = {
+                        textValueBrand = ""
                         showDialog = false
                     },
-                    onValueChange = { textValueBrand = it }
+                    onValueChange = { textValueBrand = it },
+                    viewModel = brandScreenViewModel
                 )
             }
         }
@@ -124,8 +134,11 @@ fun BrandItem(brandItem: BrandDomainModel) {
 fun DialogCreateBrand(
     value: String,
     onValueChange: (String) -> Unit,
-    dismiss: () -> Unit
+    dismiss: () -> Unit,
+    viewModel: BrandScreenViewModel
 ) {
+    val context = LocalContext.current
+
     BasicAlertDialog(
         onDismissRequest = dismiss
     ) {
@@ -161,7 +174,12 @@ fun DialogCreateBrand(
             Button(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 onClick = {
-
+                    if (value.isEmpty()) {
+                        Toast.makeText(context, "Ingrese un nombre", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    dismiss.invoke()
+                    viewModel.createBrand(value)
                 }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
             ) {
                 Text(

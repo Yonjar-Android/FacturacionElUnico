@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.facturacionelunico.data.database.entities.CategoriaEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoriaDao {
@@ -11,5 +12,5 @@ interface CategoriaDao {
     suspend fun insert(categoria: CategoriaEntity)
 
     @Query("SELECT * FROM categoria")
-    suspend fun getAll(): List<CategoriaEntity>
+    fun getAll(): Flow<List<CategoriaEntity>>
 }
