@@ -2,10 +2,13 @@ package com.example.facturacionelunico.di
 
 import com.example.facturacionelunico.data.database.dao.CategoriaDao
 import com.example.facturacionelunico.data.database.dao.MarcaDao
+import com.example.facturacionelunico.data.database.dao.ProductoDao
 import com.example.facturacionelunico.data.repositories.BrandRepositoryImp
 import com.example.facturacionelunico.data.repositories.CategoryRepositoryImp
+import com.example.facturacionelunico.data.repositories.ProductRepositoryImp
 import com.example.facturacionelunico.domain.repositories.BrandRepository
 import com.example.facturacionelunico.domain.repositories.CategoryRepository
+import com.example.facturacionelunico.domain.repositories.ProductRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,7 +23,7 @@ object RepositoriesModule {
     @Singleton
     fun provideBrandRepository(
         brandDao: MarcaDao
-    ): BrandRepository{
+    ): BrandRepository {
         return BrandRepositoryImp(brandDao)
     }
 
@@ -28,7 +31,15 @@ object RepositoriesModule {
     @Singleton
     fun provideCategoryRepository(
         categoryDao: CategoriaDao
-    ): CategoryRepository{
+    ): CategoryRepository {
         return CategoryRepositoryImp(categoryDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProductRepository(
+        productDao: ProductoDao
+    ): ProductRepository {
+        return ProductRepositoryImp(productDao)
     }
 }

@@ -33,8 +33,7 @@ fun ProductScreenTab(navController: NavController){
 
         when(tabIndex){
             0 -> {
-                ProductScreen(navController = navController,
-                    )
+                ProductScreen(navController = navController)
             }
             1 -> {
                 CategoryScreen()

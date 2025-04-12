@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
@@ -24,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.facturacionelunico.ObjetosDePrueba
 import com.example.facturacionelunico.domain.models.ProductDomainModel
@@ -32,7 +35,13 @@ import com.example.facturacionelunico.presentation.sharedComponents.SearchBarCom
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
-fun ProductScreen(navController: NavController) {
+fun ProductScreen(
+    navController: NavController,
+    productScreenViewModel: ProductScreenViewModel = hiltViewModel()
+) {
+
+    val products by productScreenViewModel.products.collectAsStateWithLifecycle()
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -43,59 +52,63 @@ fun ProductScreen(navController: NavController) {
             var textValue by remember { mutableStateOf("") }
             SearchBarComponent(textValue, onChangeValue = { textValue = it })
 
+                Spacer(modifier = Modifier.size(25.dp))
+
             LazyColumn {
-                items(ObjetosDePrueba.motorcycleProducts) {
+                items(products) {
                     ProductItem(it)
                 }
             }
         }
         AddButton(
             modifier = Modifier.align(alignment = Alignment.BottomEnd),
-            functionClick = {navController.navigate("ProductCreateScreen")}
+            functionClick = { navController.navigate("ProductCreateScreen") }
         )
     }
 }
 
 @Composable
 fun ProductItem(product: ProductDomainModel) {
-        Row(modifier = Modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(15.dp)
-            .clickable{
+            .clickable {
 
             },
-            horizontalArrangement = Arrangement.SpaceBetween) {
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
 
-            Column(modifier = Modifier.weight(0.6f)) {
-                Text(
-                    text = product.productName, fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Start
-                )
+        Column(modifier = Modifier.weight(0.6f)) {
+            Text(
+                text = product.name, fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start
+            )
 
-                Text(
-
-                    text = product.brand, fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Start,
-                    color = Color.Gray
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(0.1f))
-
-            Column(modifier = Modifier.weight(0.3f), horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "C$ ${product.price}", fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold, color = blueUi,
-                    textAlign = TextAlign.End
-                )
-
-                Text(
-                    text = "stock ${product.stock}", fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold, color = Color.Gray,
-                    textAlign = TextAlign.End,
-                )
-            }
+            Text(
+                text = product.idBrand.toString(), fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start,
+                color = Color.Gray
+            )
         }
+
+        Spacer(modifier = Modifier.weight(0.1f))
+
+        Column(modifier = Modifier.weight(0.3f), horizontalAlignment = Alignment.End) {
+            Text(
+                text = "C$ ${product.priceSell}", fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold, color = blueUi,
+                textAlign = TextAlign.End
+            )
+
+            Text(
+                text = "stock ${product.stock}", fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold, color = Color.Gray,
+                textAlign = TextAlign.End,
+            )
+        }
+    }
 }
 

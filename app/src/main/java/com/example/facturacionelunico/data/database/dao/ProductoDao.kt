@@ -4,12 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.facturacionelunico.data.database.entities.ProductoEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductoDao {
     @Insert
-    suspend fun insert(producto: ProductoEntity)
+    suspend fun insert(product: ProductoEntity)
 
     @Query("SELECT * FROM producto")
-    suspend fun getAll(): List<ProductoEntity>
+    fun getAll(): Flow<List<ProductoEntity>>
 }
