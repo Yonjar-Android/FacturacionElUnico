@@ -170,6 +170,8 @@ fun ProductCreateScreen(
                         photo = ""
                     )
                 )
+
+                navController.navigateUp() // Navegar a la pantalla de productos una vez se ha creado
             }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
         ) {
             Text(

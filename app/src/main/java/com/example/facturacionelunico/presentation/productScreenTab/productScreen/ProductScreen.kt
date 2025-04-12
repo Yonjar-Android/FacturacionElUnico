@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.facturacionelunico.ObjetosDePrueba
+import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
@@ -52,11 +52,11 @@ fun ProductScreen(
             var textValue by remember { mutableStateOf("") }
             SearchBarComponent(textValue, onChangeValue = { textValue = it })
 
-                Spacer(modifier = Modifier.size(25.dp))
+            Spacer(modifier = Modifier.size(25.dp))
 
             LazyColumn {
                 items(products) {
-                    ProductItem(it)
+                    ProductItem(it, navController)
                 }
             }
         }
@@ -68,13 +68,13 @@ fun ProductScreen(
 }
 
 @Composable
-fun ProductItem(product: ProductDomainModel) {
+fun ProductItem(product: DetailedProductModel, controller: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(15.dp)
             .clickable {
-
+                controller.navigate("ProductDetailScreen/${product.id}")
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -87,7 +87,7 @@ fun ProductItem(product: ProductDomainModel) {
             )
 
             Text(
-                text = product.idBrand.toString(), fontSize = 16.sp,
+                text = product.brand.toString(), fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Start,
                 color = Color.Gray
@@ -98,7 +98,7 @@ fun ProductItem(product: ProductDomainModel) {
 
         Column(modifier = Modifier.weight(0.3f), horizontalAlignment = Alignment.End) {
             Text(
-                text = "C$ ${product.priceSell}", fontSize = 20.sp,
+                text = "C$ ${product.salePrice}", fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold, color = blueUi,
                 textAlign = TextAlign.End
             )

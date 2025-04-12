@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
+import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
 import com.example.facturacionelunico.domain.repositories.BrandRepository
 import com.example.facturacionelunico.domain.repositories.CategoryRepository
@@ -22,7 +23,7 @@ class ProductScreenViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository
 ): ViewModel() {
 
-    val products: StateFlow<List<ProductDomainModel>> = repository.getProducts()
+    val products: StateFlow<List<DetailedProductModel>> = repository.getProducts()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

@@ -24,11 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.facturacionelunico.presentation.productScreenTab.ProductScreenTab
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductCreateScreen
+import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductDetailScreen
 import com.example.facturacionelunico.ui.theme.FacturacionElUnicoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,18 +49,35 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
                     bottomBar = {
-                        BottomNav(selectedScreen = selectedScreen,
+                        BottomNav(
+                            selectedScreen = selectedScreen,
                             navController = controller,
-                            onChangeScreen = {selectedScreen = it})
+                            onChangeScreen = { selectedScreen = it })
                     }
                 ) {
-                    NavHost(navController = controller, startDestination = "ProductScreen", modifier = Modifier.padding(it)){
+                    NavHost(
+                        navController = controller,
+                        startDestination = "ProductScreen",
+                        modifier = Modifier.padding(it)
+                    ) {
                         composable(route = "ProductScreen") {
                             ProductScreenTab(navController = controller)
                         }
 
                         composable(route = "ProductCreateScreen") {
                             ProductCreateScreen(navController = controller)
+                        }
+
+                        composable(
+                            route = "ProductDetailScreen/{productId}",
+                            arguments = listOf(
+                                navArgument("productId") { type = NavType.LongType }
+                            )) { backStackEntry ->
+                            val productId = backStackEntry.arguments?.getLong("productId") ?: 0L
+                            ProductDetailScreen(
+                                navController = controller,
+                                productId = productId
+                            )
                         }
                     }
                 }
@@ -67,80 +87,92 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BottomNav(selectedScreen: Int,
-              navController: NavController,
-              onChangeScreen: (Int) -> Unit){
+fun BottomNav(
+    selectedScreen: Int,
+    navController: NavController,
+    onChangeScreen: (Int) -> Unit
+) {
     NavigationBar {
 
-        NavigationBarItem(selected = selectedScreen == 0, onClick = {
-            onChangeScreen.invoke(0)
-            navController.navigate("ProductScreen")
-        }, icon = {
-            NavIcon(
-                icon = R.drawable.helmet,
-                description = "Product icon interface"
-            )
-        },
+        NavigationBarItem(
+            selected = selectedScreen == 0, onClick = {
+                onChangeScreen.invoke(0)
+                navController.navigate("ProductScreen")
+            }, icon = {
+                NavIcon(
+                    icon = R.drawable.helmet,
+                    description = "Product icon interface"
+                )
+            },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
-            ))
+            )
+        )
 
-        NavigationBarItem(selected = selectedScreen == 1, onClick = {
-            onChangeScreen.invoke(1)
-            navController.navigate("ProductScreen")
-        }, icon = {
-            NavIcon(
-                icon = R.drawable.client,
-                description = "Client icon interface"
-            )
-        },
+        NavigationBarItem(
+            selected = selectedScreen == 1, onClick = {
+                onChangeScreen.invoke(1)
+                navController.navigate("ProductScreen")
+            }, icon = {
+                NavIcon(
+                    icon = R.drawable.client,
+                    description = "Client icon interface"
+                )
+            },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
-            ))
+            )
+        )
 
-        NavigationBarItem(selected = selectedScreen == 2, onClick = {
-            onChangeScreen.invoke(2)
-            navController.navigate("ProductScreen")
-        }, icon = {
-            NavIcon(
-                icon = R.drawable.cart,
-                description = "Sell icon interface"
-            )
-        },
+        NavigationBarItem(
+            selected = selectedScreen == 2, onClick = {
+                onChangeScreen.invoke(2)
+                navController.navigate("ProductScreen")
+            }, icon = {
+                NavIcon(
+                    icon = R.drawable.cart,
+                    description = "Sell icon interface"
+                )
+            },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
-            ))
+            )
+        )
 
-        NavigationBarItem(selected = selectedScreen == 3, onClick = {
-            onChangeScreen.invoke(3)
-            navController.navigate("ProductScreen")
-        }, icon = {
-            NavIcon(
-                icon = R.drawable.shopping_bag,
-                description = "Buy icon interface"
-            )
-        },
+        NavigationBarItem(
+            selected = selectedScreen == 3, onClick = {
+                onChangeScreen.invoke(3)
+                navController.navigate("ProductScreen")
+            }, icon = {
+                NavIcon(
+                    icon = R.drawable.shopping_bag,
+                    description = "Buy icon interface"
+                )
+            },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
-            ))
+            )
+        )
 
-        NavigationBarItem(selected = selectedScreen == 4, onClick = {
-            onChangeScreen.invoke(4)
-            navController.navigate("ProductScreen")
-        }, icon = {
-            NavIcon(
-                icon = R.drawable.report,
-                description = "Reports icon interface"
-            )
-        },
+        NavigationBarItem(
+            selected = selectedScreen == 4, onClick = {
+                onChangeScreen.invoke(4)
+                navController.navigate("ProductScreen")
+            }, icon = {
+                NavIcon(
+                    icon = R.drawable.report,
+                    description = "Reports icon interface"
+                )
+            },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
-            ))
+            )
+        )
     }
 }
 
 @Composable
-fun NavIcon(icon: Int, description: String){
+fun NavIcon(icon: Int, description: String) {
     Icon(
         painter = painterResource(icon),
         contentDescription = description,
