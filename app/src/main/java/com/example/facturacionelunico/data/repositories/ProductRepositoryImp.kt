@@ -16,7 +16,7 @@ class ProductRepositoryImp @Inject constructor(
     }
 
     override suspend fun getProductById(productId: Long): DetailedProductModel? {
-        return productDao.getDetailedByIdFlow(productId)
+        return productDao.getDetailedById(productId)
     }
 
     override suspend fun createProduct(productDomainModel: ProductDomainModel) {

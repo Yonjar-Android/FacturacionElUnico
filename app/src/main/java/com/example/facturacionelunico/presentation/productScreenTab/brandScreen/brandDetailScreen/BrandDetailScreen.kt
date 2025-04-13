@@ -1,29 +1,32 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
+package com.example.facturacionelunico.presentation.productScreenTab.brandScreen.brandDetailScreen
 
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,107 +44,93 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.BrandDomainModel
-import com.example.facturacionelunico.presentation.sharedComponents.AddButton
-import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
+import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductItem
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
-fun BrandScreen(
+fun BrandDetailScreen(
+    brandId: Long,
+    brandName:String,
     navController: NavController,
-    brandScreenViewModel: BrandScreenViewModel = hiltViewModel()
-) {
+    brandDetailScreenViewModel: BrandDetailScreenViewModel = hiltViewModel()
+){
+    LaunchedEffect(Unit) {
+        brandDetailScreenViewModel.getProductsByBrand(brandId)
+    }
 
-    val brands by brandScreenViewModel.brands.collectAsStateWithLifecycle()
+    val products by brandDetailScreenViewModel.products.collectAsStateWithLifecycle()
 
+    var textValue by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
-    var textValueBrand by remember { mutableStateOf("") }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 10.dp)
-        ) {
-            var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it })
-
-            Spacer(modifier = Modifier.size(10.dp))
-
-            LazyColumn {
-                items(brands) {
-                    BrandItem(it,
-                        navigate = { id, name ->
-                            navController.navigate("BrandDetailScreen/$id/$name")
-                        })
-                }
-            }
-
-            if (showDialog) {
-                DialogCreateBrand(
-                    value = textValueBrand,
-                    dismiss = {
-                        textValueBrand = ""
-                        showDialog = false
-                    },
-                    onValueChange = { textValueBrand = it },
-                    viewModel = brandScreenViewModel
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+                onClick = { navController.navigateUp() }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "arrow back icon"
                 )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                brandName, fontSize = 24.sp,
+                fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.weight(2f))
+        }
+
+        if (products.isNotEmpty()){
+            LazyColumn {
+                items(products) {
+                    ProductItem(
+                        it,
+                        controller = navController
+                    )
+                }
             }
         }
 
-        AddButton(
-            modifier = Modifier.align(Alignment.BottomEnd),
-            functionClick = { showDialog = true })
-    }
-}
-
-@Composable
-fun BrandItem(
-    brandItem: BrandDomainModel,
-    navigate: (Long, String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier.weight(0.6f),
-            text = brandItem.brandName, fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Start
-        )
-
-        Spacer(modifier = Modifier.weight(0.1f))
+        Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            modifier = Modifier.weight(0.3f),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = blueUi
-            ),
+            modifier = Modifier.fillMaxWidth(fraction = 0.9f),
             onClick = {
-                navigate.invoke(brandItem.brandId, brandItem.brandName)
-            }
+                showDialog = true
+            }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
         ) {
             Text(
-                text = "Ver productos", fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
+                "Editar Marca", fontWeight = FontWeight.Bold, fontSize = 24.sp,
                 color = Color.White
             )
         }
     }
+
+    if (showDialog){
+        DialogCreateBrand(
+            value = textValue,
+            onValueChange = { textValue = it },
+            dismiss = { showDialog = false },
+            idBrand = brandId,
+            viewModel = brandDetailScreenViewModel
+        )
+    }
+
 }
 
 @Composable
 fun DialogCreateBrand(
     value: String,
     onValueChange: (String) -> Unit,
+    idBrand: Long,
     dismiss: () -> Unit,
-    viewModel: BrandScreenViewModel
+    viewModel: BrandDetailScreenViewModel
 ) {
     val context = LocalContext.current
 
@@ -157,7 +146,7 @@ fun DialogCreateBrand(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Crear Marca", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Text("Editar Marca", fontWeight = FontWeight.Bold, fontSize = 24.sp)
 
             Column {
                 Text("Nombre de marca", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -185,11 +174,16 @@ fun DialogCreateBrand(
                         return@Button
                     }
                     dismiss.invoke()
-                    viewModel.createBrand(value)
+                    viewModel.updateBrand(
+                        BrandDomainModel(
+                            brandId = idBrand,
+                            brandName = value
+                        )
+                    )
                 }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
             ) {
                 Text(
-                    "Guardar", fontWeight = FontWeight.Bold, fontSize = 24.sp,
+                    "Actualizar", fontWeight = FontWeight.Bold, fontSize = 24.sp,
                     color = Color.White
                 )
             }

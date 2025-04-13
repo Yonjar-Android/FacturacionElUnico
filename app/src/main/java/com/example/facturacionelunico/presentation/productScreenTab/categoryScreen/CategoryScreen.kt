@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.facturacionelunico.ObjetosDePrueba
+import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
@@ -47,6 +47,7 @@ import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
 fun CategoryScreen(
+    navController: NavController,
     categoryScreenViewModel: CategoryScreenViewModel = hiltViewModel()
 ) {
 
@@ -68,7 +69,10 @@ fun CategoryScreen(
 
             LazyColumn {
                 items(categories) {
-                    CategoryItem(it)
+                    CategoryItem(it,
+                        navigate = { id, name ->
+                            navController.navigate("CategoryDetailScreen/$id/$name")
+                        })
                 }
             }
 
@@ -92,7 +96,7 @@ fun CategoryScreen(
 }
 
 @Composable
-fun CategoryItem(category: CategoryDomainModel) {
+fun CategoryItem(category: CategoryDomainModel, navigate: (Long, String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,7 +119,7 @@ fun CategoryItem(category: CategoryDomainModel) {
                 containerColor = blueUi
             ),
             onClick = {
-
+                navigate.invoke(category.categoryId,category.categoryName)
             }
         ) {
             Text(

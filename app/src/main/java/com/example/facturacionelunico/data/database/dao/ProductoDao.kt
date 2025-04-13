@@ -50,5 +50,5 @@ interface ProductoDao {
     LEFT JOIN marca ON producto.idMarca = marca.id
     WHERE producto.id = :idProduct
 """)
-    suspend fun getDetailedByIdFlow(idProduct: Long): DetailedProductModel?
+    suspend fun getDetailedById(idProduct: Long): DetailedProductModel?
 }
