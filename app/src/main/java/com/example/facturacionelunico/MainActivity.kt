@@ -141,6 +141,7 @@ fun BottomNav(
             },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
+                selectedIconColor = Color.White
             )
         )
 
@@ -156,6 +157,7 @@ fun BottomNav(
             },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
+                selectedIconColor = Color.White
             )
         )
 
@@ -171,6 +173,7 @@ fun BottomNav(
             },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
+                selectedIconColor = Color.White
             )
         )
 
@@ -186,6 +189,7 @@ fun BottomNav(
             },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
+                selectedIconColor = Color.White
             )
         )
 
@@ -201,6 +205,7 @@ fun BottomNav(
             },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Blue,
+                selectedIconColor = Color.White
             )
         )
     }

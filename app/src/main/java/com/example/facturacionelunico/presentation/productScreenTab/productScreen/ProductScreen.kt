@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +52,7 @@ fun ProductScreen(
             var textValue by remember { mutableStateOf("") }
             SearchBarComponent(textValue, onChangeValue = { textValue = it })
 
-            Spacer(modifier = Modifier.size(25.dp))
+            Spacer(modifier = Modifier.size(15.dp))
 
             LazyColumn {
                 items(products) {
@@ -64,6 +65,9 @@ fun ProductScreen(
             functionClick = { navController.navigate("ProductCreateScreen") }
         )
     }
+
+    // No realizar navegación hacia atrás desde esta pantalla
+    BackHandler {}
 }
 
 @Composable

@@ -1,15 +1,9 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,13 +17,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
 
 @Composable
 fun ProductDetailScreen(
     productId: Long,
     navController: NavController,
     productDetailViewModel: ProductDetailViewModel = hiltViewModel()
-){
+) {
 
     LaunchedEffect(Unit) {
         productDetailViewModel.loadProduct(productId)
@@ -41,24 +36,11 @@ fun ProductDetailScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically) {
-            IconButton(
-                onClick = { navController.navigateUp() }
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "arrow back icon"
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                product?.name ?: "Producto", fontSize = 24.sp,
-                fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.weight(2f))
-        }
+        // Barra superior con título y flecha para navegar hacia atrás
+        TopAppBarCustom(
+            title = product?.name ?: "Producto",
+            onNavigationClick = { navController.navigateUp() }
+        )
 
         ProductDetailTexts(
             title = "Id del producto:",
@@ -92,7 +74,7 @@ fun ProductDetailScreen(
 
         ProductDetailTexts(
             title = "Descripción:",
-            info = if (product?.description.isNullOrEmpty()){
+            info = if (product?.description.isNullOrEmpty()) {
                 "Ninguna"
             } else product!!.description
         )
@@ -101,19 +83,23 @@ fun ProductDetailScreen(
 }
 
 @Composable
-fun ProductDetailTexts(title:String, info:String){
+fun ProductDetailTexts(title: String, info: String) {
     Column(
-        modifier = Modifier.fillMaxWidth(fraction = 0.95f)
+        modifier = Modifier
+            .fillMaxWidth(fraction = 0.95f)
             .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = title, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center)
+        Text(
+            text = title, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
 
-        Text(info,fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center)
+        Text(
+            info, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
     }
-
 
 
 }

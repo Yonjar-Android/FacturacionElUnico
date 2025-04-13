@@ -2,8 +2,7 @@
 
 package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
 
-import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,14 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
+import com.example.facturacionelunico.presentation.sharedComponents.DialogFormCreateUpdate
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.ui.theme.blueUi
 
@@ -78,14 +72,20 @@ fun BrandScreen(
             }
 
             if (showDialog) {
-                DialogCreateBrand(
+                DialogFormCreateUpdate(
+                    title = "Crear Marca",
+                    textButton = "Crear",
                     value = textValueBrand,
                     dismiss = {
                         textValueBrand = ""
                         showDialog = false
                     },
                     onValueChange = { textValueBrand = it },
-                    viewModel = brandScreenViewModel
+                    onConfirm = {name ->
+                        brandScreenViewModel.createBrand(
+                            name
+                        )
+                    }
                 )
             }
         }
@@ -94,6 +94,9 @@ fun BrandScreen(
             modifier = Modifier.align(Alignment.BottomEnd),
             functionClick = { showDialog = true })
     }
+
+    // No realizar navegación hacia atrás desde esta pantalla
+    BackHandler {}
 }
 
 @Composable
@@ -132,67 +135,6 @@ fun BrandItem(
                 textAlign = TextAlign.Center,
                 color = Color.White
             )
-        }
-    }
-}
-
-@Composable
-fun DialogCreateBrand(
-    value: String,
-    onValueChange: (String) -> Unit,
-    dismiss: () -> Unit,
-    viewModel: BrandScreenViewModel
-) {
-    val context = LocalContext.current
-
-    BasicAlertDialog(
-        onDismissRequest = dismiss
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(30.dp))
-                .background(Color.White)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Crear Marca", fontWeight = FontWeight.Bold, fontSize = 24.sp)
-
-            Column {
-                Text("Nombre de marca", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-
-                Spacer(modifier = Modifier.size(5.dp))
-
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = value, onValueChange = { onValueChange(it) },
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(30.dp),
-                    maxLines = 1,
-                    singleLine = true
-                )
-            }
-
-            Button(
-                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
-                onClick = {
-                    if (value.isEmpty()) {
-                        Toast.makeText(context, "Ingrese un nombre", Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
-                    dismiss.invoke()
-                    viewModel.createBrand(value)
-                }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
-            ) {
-                Text(
-                    "Guardar", fontWeight = FontWeight.Bold, fontSize = 24.sp,
-                    color = Color.White
-                )
-            }
         }
     }
 }

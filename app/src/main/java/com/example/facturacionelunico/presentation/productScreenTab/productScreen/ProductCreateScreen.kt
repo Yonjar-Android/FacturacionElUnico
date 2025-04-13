@@ -53,6 +53,7 @@ import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
+import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
@@ -155,9 +156,9 @@ fun ProductCreateScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
-        Button(
-            modifier = Modifier.fillMaxWidth(fraction = 0.9f),
-            onClick = {
+        GenericBlueUiButton(
+            buttonText = "Guardar",
+            onFunction = {
                 productScreenViewModel.createProduct(
                     ProductDomainModel(
                         name = productName,
@@ -172,13 +173,9 @@ fun ProductCreateScreen(
                 )
 
                 navController.navigateUp() // Navegar a la pantalla de productos una vez se ha creado
-            }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
-        ) {
-            Text(
-                "Guardar", fontWeight = FontWeight.Bold, fontSize = 24.sp,
-                color = Color.White
-            )
-        }
+            }
+        )
+
     }
 
     // Show modal to select a category
