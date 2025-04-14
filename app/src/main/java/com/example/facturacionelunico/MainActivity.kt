@@ -34,6 +34,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.brandScreen.
 import com.example.facturacionelunico.presentation.productScreenTab.categoryScreen.categoryDetailScreen.CategoryDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductCreateScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductDetailScreen
+import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductUpdateScreen
 import com.example.facturacionelunico.ui.theme.FacturacionElUnicoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -82,33 +83,38 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable(
-                            route = "CategoryDetailScreen/{categoryId}/{categoryName}",
+                        composable(route = "ProductUpdateScreen/{productId}",
                             arguments = listOf(
-                                navArgument("categoryId") { type = NavType.LongType },
-                                navArgument("categoryName") { type = NavType.StringType }
-                            )
+                                navArgument("productId") { type = NavType.LongType }
+                            )) {
+                                backStackEntry ->
+                            val productId = backStackEntry.arguments?.getLong("productId") ?: 0L
+
+                            ProductUpdateScreen(
+                                productId = productId,
+                                navController = controller)
+                        }
+
+                        composable(
+                            route = "CategoryDetailScreen/{categoryId}",
+                            arguments = listOf(
+                                navArgument("categoryId") { type = NavType.LongType })
                         ) { backStackEntry ->
                             val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: 0L
-                            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
                             CategoryDetailScreen(
                                 categoryId = categoryId,
-                                categoryName = categoryName,
                                 navController = controller
                             )
                         }
 
                         composable(
-                            route = "BrandDetailScreen/{brandId}/{brandName}",
+                            route = "BrandDetailScreen/{brandId}",
                             arguments = listOf(
-                                navArgument("brandId") { type = NavType.LongType },
-                                navArgument("brandName") { type = NavType.StringType }
+                                navArgument("brandId") { type = NavType.LongType }
                             )) { backStackEntry ->
                             val brandId = backStackEntry.arguments?.getLong("brandId") ?: 0L
-                            val brandName = backStackEntry.arguments?.getString("brandName") ?: ""
                             BrandDetailScreen(
                                 brandId = brandId,
-                                brandName = brandName,
                                 navController = controller
                             )
 

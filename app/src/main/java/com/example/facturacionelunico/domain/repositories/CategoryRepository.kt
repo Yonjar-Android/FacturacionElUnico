@@ -8,6 +8,8 @@ interface CategoryRepository {
 
     fun getCategories(): Flow<List<CategoryDomainModel>>
 
+    fun getCategoryById(categoryId:Long): Flow<CategoryDomainModel>
+
     suspend fun getProductsByCategory(categoryId: Long): List<DetailedProductModel>
 
     suspend fun createCategory(categoryName: String)

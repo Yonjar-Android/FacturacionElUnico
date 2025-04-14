@@ -58,7 +58,8 @@ fun BrandScreen(
                 .padding(top = 10.dp)
         ) {
             var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it })
+            SearchBarComponent(textValue, onChangeValue = { textValue = it },
+                doSearch = {})
 
             Spacer(modifier = Modifier.size(10.dp))
 
@@ -66,7 +67,7 @@ fun BrandScreen(
                 items(brands) {
                     BrandItem(it,
                         navigate = { id, name ->
-                            navController.navigate("BrandDetailScreen/$id/$name")
+                            navController.navigate("BrandDetailScreen/$id")
                         })
                 }
             }

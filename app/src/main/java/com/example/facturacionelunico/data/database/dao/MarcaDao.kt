@@ -19,6 +19,9 @@ interface MarcaDao {
     @Query("SELECT * FROM marca")
     fun getAll(): Flow<List<MarcaEntity>>
 
+    @Query("SELECT * FROM marca WHERE id = :brandId LIMIT 1")
+    fun getBrandById(brandId: Long): Flow<MarcaEntity>
+
     @Query("""
     SELECT producto.id, 
            producto.nombre as name,

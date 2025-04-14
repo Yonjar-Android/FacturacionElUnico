@@ -19,6 +19,16 @@ class CategoryDetailScreenViewModel @Inject constructor(
     private var _products = MutableStateFlow<List<DetailedProductModel>>(emptyList())
     val products = _products.asStateFlow()
 
+    private val _category = MutableStateFlow<CategoryDomainModel?>(null)
+    val category = _category.asStateFlow()
+
+    fun observeCategory(categoryId: Long) {
+        viewModelScope.launch {
+            repository.getCategoryById(categoryId).collect { categoryEntity ->
+                _category.value = categoryEntity
+            }
+        }
+    }
 
     fun getProductsByCategory(categoryId: Long) {
         viewModelScope.launch {

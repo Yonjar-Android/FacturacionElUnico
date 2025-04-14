@@ -50,7 +50,8 @@ fun ProductScreen(
         ) {
 
             var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it })
+            SearchBarComponent(textValue, onChangeValue = { textValue = it },
+                doSearch = {})
 
             Spacer(modifier = Modifier.size(15.dp))
 

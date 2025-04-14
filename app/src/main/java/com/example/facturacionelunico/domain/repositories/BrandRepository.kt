@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface BrandRepository {
     fun getBrands(): Flow<List<BrandDomainModel>>
 
+    fun getBrandById(brandId:Long):Flow<BrandDomainModel>
+
     suspend fun getProductsByBrand(brandId: Long): List<DetailedProductModel>
 
     suspend fun createBrand(brandName: String)

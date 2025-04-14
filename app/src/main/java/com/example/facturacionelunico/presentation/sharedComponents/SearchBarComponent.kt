@@ -18,7 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SearchBarComponent(value: String, onChangeValue: (String) -> Unit) {
+fun SearchBarComponent(
+    value: String,
+    onChangeValue: (String) -> Unit,
+    doSearch: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
@@ -39,7 +43,7 @@ fun SearchBarComponent(value: String, onChangeValue: (String) -> Unit) {
             trailingIcon = {
                 IconButton(
                     onClick = {
-
+                        doSearch.invoke()
                     }
                 ) {
                     Icon(

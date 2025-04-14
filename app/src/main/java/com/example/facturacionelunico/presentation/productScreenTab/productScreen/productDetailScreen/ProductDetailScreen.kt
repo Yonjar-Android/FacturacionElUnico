@@ -1,9 +1,12 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
 
 @Composable
@@ -33,7 +37,9 @@ fun ProductDetailScreen(
     val product by productDetailViewModel.product.collectAsStateWithLifecycle()
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Barra superior con título y flecha para navegar hacia atrás
@@ -77,6 +83,15 @@ fun ProductDetailScreen(
             info = if (product?.description.isNullOrEmpty()) {
                 "Ninguna"
             } else product!!.description
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        GenericBlueUiButton(
+            buttonText = "Editar Producto",
+            onFunction = {
+                navController.navigate("ProductUpdateScreen/$productId")
+            }
         )
 
     }

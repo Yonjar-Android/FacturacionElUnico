@@ -19,8 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductScreenViewModel @Inject constructor(
     private val repository: ProductRepository,
-    private val brandRepository: BrandRepository,
-    private val categoryRepository: CategoryRepository
+    brandRepository: BrandRepository,
+    categoryRepository: CategoryRepository
 ): ViewModel() {
 
     val products: StateFlow<List<DetailedProductModel>> = repository.getProducts()

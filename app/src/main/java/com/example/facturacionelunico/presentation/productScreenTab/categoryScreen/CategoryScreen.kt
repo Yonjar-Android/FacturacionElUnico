@@ -57,7 +57,8 @@ fun CategoryScreen(
                 .padding(top = 10.dp)
         ) {
             var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it })
+            SearchBarComponent(textValue, onChangeValue = { textValue = it },
+                doSearch = {})
 
             Spacer(modifier = Modifier.size(10.dp))
 
@@ -65,7 +66,7 @@ fun CategoryScreen(
                 items(categories) {
                     CategoryItem(it,
                         navigate = { id, name ->
-                            navController.navigate("CategoryDetailScreen/$id/$name")
+                            navController.navigate("CategoryDetailScreen/$id")
                         })
                 }
             }

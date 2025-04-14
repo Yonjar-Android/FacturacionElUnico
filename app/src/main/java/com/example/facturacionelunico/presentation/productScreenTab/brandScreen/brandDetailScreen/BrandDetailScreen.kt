@@ -30,17 +30,19 @@ import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCus
 @Composable
 fun BrandDetailScreen(
     brandId: Long,
-    brandName:String,
     navController: NavController,
     brandDetailScreenViewModel: BrandDetailScreenViewModel = hiltViewModel()
 ){
-    LaunchedEffect(Unit) {
+    LaunchedEffect(brandId) {
         brandDetailScreenViewModel.getProductsByBrand(brandId)
+        brandDetailScreenViewModel.observeBrand(brandId)
     }
+
+    val brand by brandDetailScreenViewModel.brand.collectAsStateWithLifecycle()
 
     val products by brandDetailScreenViewModel.products.collectAsStateWithLifecycle()
 
-    var textValue by remember { mutableStateOf("") }
+    var textValue by remember { mutableStateOf(brand?.brandName ?: "") }
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -50,7 +52,7 @@ fun BrandDetailScreen(
 
         // Barra superior con título y flecha para navegar hacia atrás
         TopAppBarCustom(
-            title = brandName,
+            title = brand?.brandName ?: "Marca",
             onNavigationClick = { navController.navigateUp() }
         )
 
@@ -94,6 +96,5 @@ fun BrandDetailScreen(
             }
         )
     }
-
 }
 

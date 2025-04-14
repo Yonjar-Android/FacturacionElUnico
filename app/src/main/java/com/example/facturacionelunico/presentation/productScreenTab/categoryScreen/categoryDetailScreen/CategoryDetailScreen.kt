@@ -30,17 +30,19 @@ import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCus
 @Composable
 fun CategoryDetailScreen(
     categoryId: Long,
-    categoryName: String,
     navController: NavController,
     categoryDetailScreenViewModel: CategoryDetailScreenViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         categoryDetailScreenViewModel.getProductsByCategory(categoryId)
+        categoryDetailScreenViewModel.observeCategory(categoryId)
     }
+
+    val category by categoryDetailScreenViewModel.category.collectAsStateWithLifecycle()
 
     val products by categoryDetailScreenViewModel.products.collectAsStateWithLifecycle()
 
-    var textValue by remember { mutableStateOf("") }
+    var textValue by remember { mutableStateOf(category?.categoryName ?: "") }
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -50,7 +52,7 @@ fun CategoryDetailScreen(
 
         // Barra superior con título y flecha para navegar hacia atrás
         TopAppBarCustom(
-            title = categoryName,
+            title = category?.categoryName ?: "",
             onNavigationClick = { navController.navigateUp() }
         )
 
