@@ -33,6 +33,8 @@ interface MarcaDao {
            producto.nombre as name,
            categoria.nombre as category,
            COALESCE(marca.nombre, 'Sin marca') as brand,
+           categoria.id as categoryId,
+           marca.id as brandid,
            producto.precioVenta as salePrice,
            producto.precioCompra as purchasePrice,
            producto.stock,

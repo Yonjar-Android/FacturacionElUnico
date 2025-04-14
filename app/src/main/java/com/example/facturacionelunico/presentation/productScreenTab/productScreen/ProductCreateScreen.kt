@@ -63,7 +63,10 @@ fun ProductCreateScreen(
 ) {
 
     val categories by productScreenViewModel.categories.collectAsStateWithLifecycle()
+    val searchQueryCat by productScreenViewModel.searchQueryCategory.collectAsStateWithLifecycle()
+
     val brands by productScreenViewModel.brands.collectAsStateWithLifecycle()
+    val searchQueryBrand by productScreenViewModel.searchQueryBrand.collectAsStateWithLifecycle()
 
     var productName by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
@@ -181,14 +184,16 @@ fun ProductCreateScreen(
     // Show modal to select a category
     if (showDialogCat) {
         SelectionDialog(
-            title = "Seleccionar Categoria",
+            query = searchQueryCat,
+            title = "Seleccionar Categoría",
             items = categories,
             onDismiss = { showDialogCat = false },
             onItemSelected = {
                 categoryId = it.categoryId
                 category = it.categoryName
                 showDialogCat = false
-            }
+            },
+            viewModel = productScreenViewModel
         )
     }
 
@@ -196,14 +201,16 @@ fun ProductCreateScreen(
 
     if (showDialogBrand) {
         SelectionDialogBrand(
-            title = "Seleccionar Categoria",
+            query = searchQueryBrand,
+            title = "Seleccionar Marca",
             items = brands,
             onDismiss = { showDialogBrand = false },
             onItemSelected = {
                 brand = it.brandName
                 brandId = it.brandId
                 showDialogBrand = false
-            }
+            },
+            viewModel = productScreenViewModel
         )
     }
 
@@ -230,7 +237,8 @@ fun TextFieldComponent(
         Spacer(modifier = Modifier.size(5.dp))
 
         TextField(
-            modifier = Modifier.fillMaxWidth(fraction = 0.9f)
+            modifier = Modifier
+                .fillMaxWidth(fraction = 0.9f)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
@@ -357,13 +365,13 @@ fun TextFieldDescription(
 
 @Composable
 fun SelectionDialog(
+    query: String,
     title: String,
     items: List<CategoryDomainModel>,
     onDismiss: () -> Unit,
-    onItemSelected: (CategoryDomainModel) -> Unit
+    onItemSelected: (CategoryDomainModel) -> Unit,
+    viewModel: ProductScreenViewModel
 ) {
-    var searchText by remember { mutableStateOf("") }
-    val filteredItems = items.filter { it.categoryName.contains(searchText, ignoreCase = true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -372,13 +380,16 @@ fun SelectionDialog(
             Column {
                 // Barra de búsqueda
                 TextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
+                    value = query,
+                    onValueChange = { newQuery ->
+                        viewModel.updateQueryCategory(newQuery) },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
-                        if (searchText.isNotEmpty()) {
-                            IconButton(onClick = { searchText = "" }) {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = {
+                                viewModel.updateQueryCategory("")
+                            }) {
                                 Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }
                         }
@@ -389,7 +400,7 @@ fun SelectionDialog(
 
                 // Lista de items
                 LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                    items(filteredItems) { item ->
+                    items(items) { item ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -418,13 +429,13 @@ fun SelectionDialog(
 
 @Composable
 fun SelectionDialogBrand(
+    query: String,
     title: String,
     items: List<BrandDomainModel>,
     onDismiss: () -> Unit,
-    onItemSelected: (BrandDomainModel) -> Unit
+    onItemSelected: (BrandDomainModel) -> Unit,
+    viewModel: ProductScreenViewModel
 ) {
-    var searchText by remember { mutableStateOf("") }
-    val filteredItems = items.filter { it.brandName.contains(searchText, ignoreCase = true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -433,13 +444,16 @@ fun SelectionDialogBrand(
             Column {
                 // Barra de búsqueda
                 TextField(
-                    value = searchText,
-                    onValueChange = { searchText = it },
+                    value = query,
+                    onValueChange = { newQuery ->
+                        viewModel.updateQueryBrand(newQuery) },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
-                        if (searchText.isNotEmpty()) {
-                            IconButton(onClick = { searchText = "" }) {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = {
+                                viewModel.updateQueryBrand("")
+                            }) {
                                 Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }
                         }
@@ -450,7 +464,7 @@ fun SelectionDialogBrand(
 
                 // Lista de items
                 LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                    items(filteredItems) { item ->
+                    items(items) { item ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

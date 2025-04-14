@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ProductScreenViewModel @Inject constructor(
     private val repository: ProductRepository,
@@ -53,14 +54,47 @@ class ProductScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val categories: StateFlow<List<CategoryDomainModel>> = categoryRepository.getCategories()
+
+    private val _searchQueryCategory = MutableStateFlow("")
+    val searchQueryCategory: StateFlow<String> = _searchQueryCategory.asStateFlow()
+
+    fun updateQueryCategory(newQuery: String) {
+        _searchQueryCategory.value = newQuery
+    }
+
+    val categories: StateFlow<List<CategoryDomainModel>> = _searchQueryCategory
+        .debounce(300)
+        .flatMapLatest { query ->
+            if (query.isBlank()) {
+                categoryRepository.getCategories()
+            } else {
+                categoryRepository.getCategoryByName(query)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val brands: StateFlow<List<BrandDomainModel>> = brandRepository.getBrands()
+    private val _searchQueryBrand = MutableStateFlow("")
+    val searchQueryBrand : StateFlow<String> = _searchQueryBrand.asStateFlow()
+
+    fun updateQueryBrand(newQuery: String) {
+        _searchQueryBrand.value = newQuery
+    }
+
+    // Con flatMapLatest, cada vez que cambia el query se ejecuta la consulta correspondiente.
+    val brands: StateFlow<List<BrandDomainModel>> = _searchQueryBrand
+        .debounce(300) // Para evitar llamadas excesivas mientras se escribe.
+        .flatMapLatest { query ->
+            // Si el query está vacío, podrías mostrar todas las marcas, o bien una lista vacía según la necesidad.
+            if (query.isBlank()) {
+                brandRepository.getBrands()
+            } else {
+                brandRepository.getBrandByName(query)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

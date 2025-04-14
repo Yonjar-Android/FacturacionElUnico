@@ -29,6 +29,8 @@ interface CategoriaDao {
     SELECT producto.id, 
            producto.nombre as name,
            categoria.nombre as category,
+           categoria.id as categoryId,
+           marca.id as brandid,
            COALESCE(marca.nombre, 'Sin marca') as brand,
            producto.precioVenta as salePrice,
            producto.precioCompra as purchasePrice,

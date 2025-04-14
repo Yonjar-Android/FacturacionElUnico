@@ -23,7 +23,9 @@ interface ProductoDao {
     SELECT producto.id, 
            producto.nombre as name,
            categoria.nombre as category,
+           categoria.id as categoryId,
            COALESCE(marca.nombre, 'Sin marca') as brand,
+           marca.id as brandId, 
            producto.precioVenta as salePrice,
            producto.precioCompra as purchasePrice,
            producto.stock,
@@ -31,7 +33,7 @@ interface ProductoDao {
            producto.foto as photo
     FROM producto
     INNER JOIN categoria ON producto.idCategoria = categoria.id
-    LEFT JOIN marca ON producto.idMarca = marca.id  -- Cambiado a LEFT JOIN
+    LEFT JOIN marca ON producto.idMarca = marca.id
 """)
     fun getAllDetailed(): Flow<List<DetailedProductModel>>
 
@@ -39,7 +41,9 @@ interface ProductoDao {
     SELECT producto.id, 
            producto.nombre as name,
            categoria.nombre as category,
+           categoria.id as categoryId,
            COALESCE(marca.nombre, 'Sin marca') as brand,
+           marca.id as brandId,  -- Añadido ID de marca
            producto.precioVenta as salePrice,
            producto.precioCompra as purchasePrice,
            producto.stock,
@@ -56,7 +60,9 @@ interface ProductoDao {
     SELECT producto.id, 
            producto.nombre as name,
            categoria.nombre as category,
+           categoria.id as categoryId,
            COALESCE(marca.nombre, 'Sin marca') as brand,
+           marca.id as brandId,  -- Añadido ID de marca
            producto.precioVenta as salePrice,
            producto.precioCompra as purchasePrice,
            producto.stock,
