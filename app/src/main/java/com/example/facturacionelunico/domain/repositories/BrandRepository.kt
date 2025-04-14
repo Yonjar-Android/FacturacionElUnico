@@ -9,6 +9,8 @@ interface BrandRepository {
 
     fun getBrandById(brandId:Long):Flow<BrandDomainModel>
 
+    fun getBrandByName(query: String): Flow<List<BrandDomainModel>>
+
     suspend fun getProductsByBrand(brandId: Long): List<DetailedProductModel>
 
     suspend fun createBrand(brandName: String)

@@ -22,6 +22,9 @@ interface CategoriaDao {
     @Query("SELECT * FROM categoria WHERE id = :categoryId LIMIT 1")
     fun getCategoryById(categoryId: Long): Flow<CategoriaEntity>
 
+    @Query("SELECT * FROM categoria WHERE nombre  LIKE '%' || :query || '%'")
+    fun getCategoryByName(query: String): Flow<List<CategoriaEntity>>
+
     @Query("""
     SELECT producto.id, 
            producto.nombre as name,

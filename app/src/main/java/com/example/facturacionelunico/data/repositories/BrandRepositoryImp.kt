@@ -33,6 +33,18 @@ class BrandRepositoryImp @Inject constructor(
         }
     }
 
+    override fun getBrandByName(query: String): Flow<List<BrandDomainModel>> {
+        return brandDao.getBrandByName(query)
+            .map {
+                it.map {
+                    BrandDomainModel(
+                        brandId = it.id,
+                        brandName = it.nombre
+                    )
+                }
+            }
+    }
+
     override suspend fun getProductsByBrand(brandId: Long): List<DetailedProductModel> {
         return brandDao.getDetailedByBrandId(brandId)
     }

@@ -31,6 +31,17 @@ class CategoryRepositoryImp @Inject constructor(
             ) }
     }
 
+    override fun getCategoryByName(query: String): Flow<List<CategoryDomainModel>> {
+        return categoryDao.getCategoryByName(query).map {
+            it.map {
+                CategoryDomainModel(
+                    categoryId = it.id,
+                    categoryName = it.nombre
+                )
+            }
+        }
+    }
+
     override suspend fun getProductsByCategory(categoryId: Long): List<DetailedProductModel> {
         return categoryDao.getDetailedByCategoryId(categoryId)
     }

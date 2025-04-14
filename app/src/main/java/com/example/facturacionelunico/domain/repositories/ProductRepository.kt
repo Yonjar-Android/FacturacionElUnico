@@ -9,6 +9,8 @@ interface ProductRepository {
 
     suspend fun getProductById(productId: Long): DetailedProductModel?
 
+    suspend fun getProductBySearch(query: String): Flow<List<DetailedProductModel>>
+
     suspend fun createProduct(productDomainModel: ProductDomainModel)
 
     suspend fun updateProduct(productDomainModel: ProductDomainModel)

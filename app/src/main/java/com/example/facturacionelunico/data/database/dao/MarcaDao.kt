@@ -23,6 +23,12 @@ interface MarcaDao {
     fun getBrandById(brandId: Long): Flow<MarcaEntity>
 
     @Query("""
+        SELECT * FROM marca
+        WHERE nombre LIKE '%' || :query || '%'
+    """)
+    fun getBrandByName(query:String): Flow<List<MarcaEntity>>
+
+    @Query("""
     SELECT producto.id, 
            producto.nombre as name,
            categoria.nombre as category,

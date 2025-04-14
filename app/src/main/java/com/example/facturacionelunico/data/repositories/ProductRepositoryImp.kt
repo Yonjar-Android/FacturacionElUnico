@@ -19,6 +19,10 @@ class ProductRepositoryImp @Inject constructor(
         return productDao.getDetailedById(productId)
     }
 
+    override suspend fun getProductBySearch(query: String): Flow<List<DetailedProductModel>> {
+        return productDao.getProductsBySearch(query)
+    }
+
     override suspend fun createProduct(productDomainModel: ProductDomainModel) {
         productDao.insert(ProductMapper.toEntity(productDomainModel))
     }

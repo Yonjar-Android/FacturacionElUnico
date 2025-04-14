@@ -42,6 +42,8 @@ fun ProductScreen(
 
     val products by productScreenViewModel.products.collectAsStateWithLifecycle()
 
+    val searchQuery by productScreenViewModel.searchQuery.collectAsStateWithLifecycle()
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -49,9 +51,9 @@ fun ProductScreen(
                 .padding(top = 10.dp)
         ) {
 
-            var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it },
-                doSearch = {})
+            SearchBarComponent(searchQuery, onChangeValue = { newQuery ->
+                productScreenViewModel.updateQuery(newQuery)
+            })
 
             Spacer(modifier = Modifier.size(15.dp))
 

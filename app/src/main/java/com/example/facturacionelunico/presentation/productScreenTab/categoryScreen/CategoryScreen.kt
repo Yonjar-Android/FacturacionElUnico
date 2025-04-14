@@ -47,6 +47,8 @@ fun CategoryScreen(
 
     val categories by categoryScreenViewModel.categories.collectAsStateWithLifecycle()
 
+    val searchQuery by categoryScreenViewModel.searchQuery.collectAsStateWithLifecycle()
+
     var showDialog by remember { mutableStateOf(false) }
     var textValueCategory by remember { mutableStateOf("") }
 
@@ -56,9 +58,9 @@ fun CategoryScreen(
                 .fillMaxSize()
                 .padding(top = 10.dp)
         ) {
-            var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it },
-                doSearch = {})
+            SearchBarComponent(searchQuery, onChangeValue = { newQuery ->
+                categoryScreenViewModel.updateQuery(newQuery)
+            })
 
             Spacer(modifier = Modifier.size(10.dp))
 

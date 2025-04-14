@@ -20,8 +20,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SearchBarComponent(
     value: String,
-    onChangeValue: (String) -> Unit,
-    doSearch: () -> Unit
+    onChangeValue: (String) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -42,9 +41,7 @@ fun SearchBarComponent(
             maxLines = 1,
             trailingIcon = {
                 IconButton(
-                    onClick = {
-                        doSearch.invoke()
-                    }
+                    onClick = {}
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,

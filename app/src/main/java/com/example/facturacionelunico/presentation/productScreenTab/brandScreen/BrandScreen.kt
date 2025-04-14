@@ -47,6 +47,8 @@ fun BrandScreen(
 
     val brands by brandScreenViewModel.brands.collectAsStateWithLifecycle()
 
+    val searchQuery by brandScreenViewModel.searchQuery.collectAsStateWithLifecycle()
+
     var showDialog by remember { mutableStateOf(false) }
     var textValueBrand by remember { mutableStateOf("") }
 
@@ -57,9 +59,10 @@ fun BrandScreen(
                 .fillMaxSize()
                 .padding(top = 10.dp)
         ) {
-            var textValue by remember { mutableStateOf("") }
-            SearchBarComponent(textValue, onChangeValue = { textValue = it },
-                doSearch = {})
+
+            SearchBarComponent(searchQuery, onChangeValue = { newQuery ->
+                brandScreenViewModel.updateQuery(newQuery)
+            })
 
             Spacer(modifier = Modifier.size(10.dp))
 

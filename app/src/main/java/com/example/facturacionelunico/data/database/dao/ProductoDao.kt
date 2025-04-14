@@ -51,4 +51,22 @@ interface ProductoDao {
     WHERE producto.id = :idProduct
 """)
     suspend fun getDetailedById(idProduct: Long): DetailedProductModel?
+
+    @Query("""
+    SELECT producto.id, 
+           producto.nombre as name,
+           categoria.nombre as category,
+           COALESCE(marca.nombre, 'Sin marca') as brand,
+           producto.precioVenta as salePrice,
+           producto.precioCompra as purchasePrice,
+           producto.stock,
+           producto.descripcion as description,
+           producto.foto as photo
+    FROM producto
+    INNER JOIN categoria ON producto.idCategoria = categoria.id
+    LEFT JOIN marca ON producto.idMarca = marca.id
+    WHERE producto.nombre LIKE '%' || :query || '%'
+""")
+    fun getProductsBySearch(query: String): Flow<List<DetailedProductModel>>
+
 }
