@@ -2,16 +2,17 @@ package com.example.facturacionelunico.domain.repositories
 
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
+import com.example.facturacionelunico.domain.models.ResultPattern
 import kotlinx.coroutines.flow.Flow
 
 interface ProductRepository {
-    fun getProducts(): Flow<List<DetailedProductModel>>
+    fun getProducts(): Flow<ResultPattern<List<DetailedProductModel>>>
 
-    suspend fun getProductById(productId: Long): DetailedProductModel?
+    suspend fun getProductById(productId: Long): ResultPattern<DetailedProductModel?>
 
-    suspend fun getProductBySearch(query: String): Flow<List<DetailedProductModel>>
+    suspend fun getProductBySearch(query: String): Flow<ResultPattern<List<DetailedProductModel>>>
 
-    suspend fun createProduct(productDomainModel: ProductDomainModel)
+    suspend fun createProduct(productDomainModel: ProductDomainModel): ResultPattern<String>
 
-    suspend fun updateProduct(productDomainModel: ProductDomainModel)
+    suspend fun updateProduct(productDomainModel: ProductDomainModel): ResultPattern<String>
 }

@@ -4,30 +4,67 @@ import com.example.facturacionelunico.data.database.dao.ProductoDao
 import com.example.facturacionelunico.data.mappers.ProductMapper
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
+import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.ProductRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ProductRepositoryImp @Inject constructor(
     private val productDao: ProductoDao
 ) : ProductRepository {
-    override fun getProducts(): Flow<List<DetailedProductModel>> {
+    // Función para obtener todos los productos mediante un flow
+    override fun getProducts(): Flow<ResultPattern<List<DetailedProductModel>>> {
         return productDao.getAllDetailed()
+            .map<List<DetailedProductModel>, ResultPattern<List<DetailedProductModel>>> { products ->
+                ResultPattern.Success(products)
+            }
+            .catch { e ->
+                emit(ResultPattern.Error(exception = e, message = e.message))
+            }
     }
 
-    override suspend fun getProductById(productId: Long): DetailedProductModel? {
-        return productDao.getDetailedById(productId)
+    // Función para obtener producto por su id
+    override suspend fun getProductById(productId: Long): ResultPattern<DetailedProductModel?> {
+        return runCatching {
+            productDao.getDetailedById(productId)
+        }.fold(
+            onSuccess = { ResultPattern.Success(it) },
+            onFailure = { ResultPattern.Error(it, message = it.message) }
+        )
     }
 
-    override suspend fun getProductBySearch(query: String): Flow<List<DetailedProductModel>> {
+    //función para obtener producto por búsqueda
+    override suspend fun getProductBySearch(query: String): Flow<ResultPattern<List<DetailedProductModel>>> {
         return productDao.getProductsBySearch(query)
+            .map<List<DetailedProductModel>, ResultPattern<List<DetailedProductModel>>> { products ->
+                ResultPattern.Success(products)
+            }
+            .catch { e ->
+                emit(ResultPattern.Error(exception = e, message = e.message))
+            }
     }
 
-    override suspend fun createProduct(productDomainModel: ProductDomainModel) {
-        productDao.insert(ProductMapper.toEntity(productDomainModel))
+    // Función crear producto
+    override suspend fun createProduct(productDomainModel: ProductDomainModel): ResultPattern<String> {
+        return runCatching{
+            productDao.insert(ProductMapper.toEntity(productDomainModel))
+            ResultPattern.Success("Se ha agregado un nuevo producto")
+        }.getOrElse {
+            ResultPattern.Error(it, message = it.message)
+        }
+
     }
 
-    override suspend fun updateProduct(productDomainModel: ProductDomainModel) {
-        productDao.update(ProductMapper.toEntity(productDomainModel))
+    //Función actualizar producto
+    override suspend fun updateProduct(productDomainModel: ProductDomainModel): ResultPattern<String> {
+        return runCatching {
+            productDao.update(ProductMapper.toEntity(productDomainModel))
+            ResultPattern.Success("Se ha actualizado el producto")
+        }.getOrElse {
+            ResultPattern.Error(it, message = it.message)
+        }
+
     }
 }

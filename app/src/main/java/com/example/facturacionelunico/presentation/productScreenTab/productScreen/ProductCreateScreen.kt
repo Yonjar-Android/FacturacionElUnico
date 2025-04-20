@@ -1,5 +1,7 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,7 +28,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -54,19 +58,21 @@ import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
-import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
 fun ProductCreateScreen(
     navController: NavController,
-    productScreenViewModel: ProductScreenViewModel = hiltViewModel()
+    context: Context,
+    viewModel: ProductCreateScreenViewModel = hiltViewModel()
 ) {
 
-    val categories by productScreenViewModel.categories.collectAsStateWithLifecycle()
-    val searchQueryCat by productScreenViewModel.searchQueryCategory.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val searchQueryCat by viewModel.searchQueryCategory.collectAsStateWithLifecycle()
 
-    val brands by productScreenViewModel.brands.collectAsStateWithLifecycle()
-    val searchQueryBrand by productScreenViewModel.searchQueryBrand.collectAsStateWithLifecycle()
+    val brands by viewModel.brands.collectAsStateWithLifecycle()
+    val searchQueryBrand by viewModel.searchQueryBrand.collectAsStateWithLifecycle()
+
+    val message by viewModel.message.collectAsState()
 
     var productName by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
@@ -82,6 +88,21 @@ fun ProductCreateScreen(
 
     var showDialogCat by remember { mutableStateOf(false) }
     var showDialogBrand by remember { mutableStateOf(false) }
+
+    if(message != null){
+        Toast.makeText(context, "Hola $message", Toast.LENGTH_SHORT).show()
+    }
+    // Muestra el mensaje ya sea error o éxito al cambiar desde el viewModel
+    LaunchedEffect(message) {
+        if (!message.isNullOrEmpty()){
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            viewModel.restartMessage()
+
+            message?.contains("Error")?.let {
+                if(!it){ navController.navigateUp() }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -162,13 +183,13 @@ fun ProductCreateScreen(
         GenericBlueUiButton(
             buttonText = "Guardar",
             onFunction = {
-                productScreenViewModel.createProduct(
+                viewModel.createProduct(
                     ProductDomainModel(
                         name = productName,
-                        priceBuy = priceBuy.toDouble(),
-                        priceSell = priceSell.toDouble(),
+                        priceBuy = priceBuy.toDoubleOrNull() ?: 0.0,
+                        priceSell = priceSell.toDoubleOrNull() ?: 0.0,
                         description = description,
-                        stock = stock.toInt(),
+                        stock = stock.toIntOrNull() ?: 0,
                         idCategory = categoryId,
                         idBrand = brandId,
                         photo = ""
@@ -193,7 +214,7 @@ fun ProductCreateScreen(
                 category = it.categoryName
                 showDialogCat = false
             },
-            viewModel = productScreenViewModel
+            updateQueryCat = {viewModel.updateQueryCategory(it)}
         )
     }
 
@@ -210,7 +231,7 @@ fun ProductCreateScreen(
                 brandId = it.brandId
                 showDialogBrand = false
             },
-            viewModel = productScreenViewModel
+            updateQueryBrand = {viewModel.updateQueryBrand(it)}
         )
     }
 
@@ -370,7 +391,7 @@ fun SelectionDialog(
     items: List<CategoryDomainModel>,
     onDismiss: () -> Unit,
     onItemSelected: (CategoryDomainModel) -> Unit,
-    viewModel: ProductScreenViewModel
+    updateQueryCat: (String) -> Unit
 ) {
 
     AlertDialog(
@@ -382,13 +403,14 @@ fun SelectionDialog(
                 TextField(
                     value = query,
                     onValueChange = { newQuery ->
-                        viewModel.updateQueryCategory(newQuery) },
+                        updateQueryCat.invoke(newQuery)
+                         },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = {
-                                viewModel.updateQueryCategory("")
+                                updateQueryCat.invoke("")
                             }) {
                                 Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }
@@ -434,7 +456,7 @@ fun SelectionDialogBrand(
     items: List<BrandDomainModel>,
     onDismiss: () -> Unit,
     onItemSelected: (BrandDomainModel) -> Unit,
-    viewModel: ProductScreenViewModel
+    updateQueryBrand: (String) -> Unit
 ) {
 
     AlertDialog(
@@ -446,13 +468,13 @@ fun SelectionDialogBrand(
                 TextField(
                     value = query,
                     onValueChange = { newQuery ->
-                        viewModel.updateQueryBrand(newQuery) },
+                        updateQueryBrand.invoke(newQuery) },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = {
-                                viewModel.updateQueryBrand("")
+                                updateQueryBrand.invoke("")
                             }) {
                                 Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }

@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,13 @@ fun ProductDetailScreen(
     }
 
     val product by productDetailViewModel.product.collectAsStateWithLifecycle()
+
+    val message by productDetailViewModel.message.collectAsStateWithLifecycle()
+
+    if (!message.isNullOrEmpty()){
+        Toast.makeText(LocalContext.current,message,Toast.LENGTH_SHORT).show()
+        productDetailViewModel.restartMessage()
+    }
 
     Column(
         modifier = Modifier
@@ -97,6 +106,8 @@ fun ProductDetailScreen(
     }
 }
 
+// Composable que muestra la información a detalle de los productos
+// Mostrando el atributo del producto y su valor respectivo
 @Composable
 fun ProductDetailTexts(title: String, info: String) {
     Column(

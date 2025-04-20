@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -46,6 +47,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             FacturacionElUnicoTheme {
 
+                val context = LocalContext.current
+
                 var selectedScreen by remember { mutableIntStateOf(0) }
                 val controller = rememberNavController()
 
@@ -68,7 +71,9 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = "ProductCreateScreen") {
-                            ProductCreateScreen(navController = controller)
+                            ProductCreateScreen(
+                                navController = controller,
+                                context = context)
                         }
 
                         composable(
@@ -92,7 +97,8 @@ class MainActivity : ComponentActivity() {
 
                             ProductUpdateScreen(
                                 productId = productId,
-                                navController = controller)
+                                navController = controller,
+                                context = context)
                         }
 
                         composable(

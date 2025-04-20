@@ -22,7 +22,7 @@ interface ProductoDao {
     @Query("""
     SELECT producto.id, 
            producto.nombre as name,
-           categoria.nombre as category,
+           COALESCE(Categoria.nombre, 'Sin categoria') as category,
            categoria.id as categoryId,
            COALESCE(marca.nombre, 'Sin marca') as brand,
            marca.id as brandId, 
@@ -32,7 +32,7 @@ interface ProductoDao {
            producto.descripcion as description,
            producto.foto as photo
     FROM producto
-    INNER JOIN categoria ON producto.idCategoria = categoria.id
+    LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
 """)
     fun getAllDetailed(): Flow<List<DetailedProductModel>>
@@ -40,7 +40,7 @@ interface ProductoDao {
     @Query("""
     SELECT producto.id, 
            producto.nombre as name,
-           categoria.nombre as category,
+           COALESCE(Categoria.nombre, 'Sin categoria') as category,
            categoria.id as categoryId,
            COALESCE(marca.nombre, 'Sin marca') as brand,
            marca.id as brandId,  -- Añadido ID de marca
@@ -50,7 +50,7 @@ interface ProductoDao {
            producto.descripcion as description,
            producto.foto as photo
     FROM producto
-    INNER JOIN categoria ON producto.idCategoria = categoria.id
+    LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
     WHERE producto.id = :idProduct
 """)
@@ -59,7 +59,7 @@ interface ProductoDao {
     @Query("""
     SELECT producto.id, 
            producto.nombre as name,
-           categoria.nombre as category,
+           COALESCE(Categoria.nombre, 'Sin categoria') as category,
            categoria.id as categoryId,
            COALESCE(marca.nombre, 'Sin marca') as brand,
            marca.id as brandId,  -- Añadido ID de marca
@@ -69,7 +69,7 @@ interface ProductoDao {
            producto.descripcion as description,
            producto.foto as photo
     FROM producto
-    INNER JOIN categoria ON producto.idCategoria = categoria.id
+    LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
     WHERE producto.nombre LIKE '%' || :query || '%'
 """)

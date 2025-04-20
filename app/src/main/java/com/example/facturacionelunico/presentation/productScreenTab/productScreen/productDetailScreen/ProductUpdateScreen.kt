@@ -1,5 +1,7 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen
 
+import android.content.Context
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,19 +58,24 @@ import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueU
 fun ProductUpdateScreen(
     productId: Long,
     navController: NavController,
-    productDetailViewModel: ProductDetailViewModel = hiltViewModel()
+    context: Context,
+    viewModel: ProductUpdateViewModel = hiltViewModel()
 ) {
+
+    // Función para cargar los datos del producto a actualizar
     LaunchedEffect(Unit) {
-        productDetailViewModel.loadProduct(productId)
+        viewModel.loadProduct(productId)
     }
 
-    val product by productDetailViewModel.product.collectAsStateWithLifecycle()
+    val product by viewModel.product.collectAsStateWithLifecycle()
 
-    val categories by productDetailViewModel.categories.collectAsStateWithLifecycle()
-    val searchQueryCat by productDetailViewModel.searchQueryCategory.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsState()
 
-    val brands by productDetailViewModel.brands.collectAsStateWithLifecycle()
-    val searchQueryBrand by productDetailViewModel.searchQueryBrand.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val searchQueryCat by viewModel.searchQueryCategory.collectAsStateWithLifecycle()
+
+    val brands by viewModel.brands.collectAsStateWithLifecycle()
+    val searchQueryBrand by viewModel.searchQueryBrand.collectAsStateWithLifecycle()
 
     var productName by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
@@ -84,6 +92,9 @@ fun ProductUpdateScreen(
     var showDialogCat by remember { mutableStateOf(false) }
     var showDialogBrand by remember { mutableStateOf(false) }
 
+    /* Actualizar el valor de los diferentes campos para que salgan los del valor a actualizar,
+    si es que contienen*/
+
     LaunchedEffect(product) {
         product?.let { p ->
             productName = p.name
@@ -93,10 +104,24 @@ fun ProductUpdateScreen(
             description = p.description
             category = p.category
             brand = p.brand
-            brandId = p.id
-            categoryId = p.id
+            brandId = p.brandId ?: 0
+            categoryId = p.categoryId ?: 0
         }
     }
+
+    // Muestra el mensaje ya sea error o éxito al cambiar desde el viewModel
+
+    LaunchedEffect(message) {
+        if (!message.isNullOrEmpty()){
+            Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
+            viewModel.restartMessage()
+
+            message?.contains("Error")?.let {
+                if(!it){ navController.navigateUp() }
+            }
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -176,16 +201,16 @@ fun ProductUpdateScreen(
 
         GenericBlueUiButton(buttonText = "Actualizar",
             onFunction = {
-                productDetailViewModel.updateProduct(
+                viewModel.updateProduct(
                     ProductDomainModel(
                         id = product?.id!!,
                         name = productName,
                         idBrand = brandId,
                         idCategory = categoryId,
                         description = description,
-                        priceSell = priceSell.toDouble(),
-                        priceBuy = priceBuy.toDouble(),
-                        stock = stock.toInt(),
+                        priceSell = priceSell.toDoubleOrNull() ?: 0.0,
+                        priceBuy = priceBuy.toDoubleOrNull() ?: 0.0,
+                        stock = stock.toIntOrNull() ?: 0,
                         photo = ""
                     )
                 )
@@ -203,7 +228,7 @@ fun ProductUpdateScreen(
                     category = it.categoryName
                     showDialogCat = false
                 },
-                viewModel = productDetailViewModel
+                updateQueryCat = {viewModel.updateQueryCategory(it)}
             )
         }
 
@@ -220,7 +245,7 @@ fun ProductUpdateScreen(
                     brandId = it.brandId
                     showDialogBrand = false
                 },
-                viewModel = productDetailViewModel
+                updateQueryBrand = {viewModel.updateQueryBrand(it)}
             )
         }
 
@@ -228,6 +253,7 @@ fun ProductUpdateScreen(
     }
 }
 
+// Modal para la selección de categoría para el producto
 @Composable
 fun ModalSelectionDialogCar(
     query: String,
@@ -235,7 +261,7 @@ fun ModalSelectionDialogCar(
     items: List<CategoryDomainModel>,
     onDismiss: () -> Unit,
     onItemSelected: (CategoryDomainModel) -> Unit,
-    viewModel: ProductDetailViewModel
+    updateQueryCat: (String) -> Unit
 ) {
 
     AlertDialog(
@@ -247,13 +273,13 @@ fun ModalSelectionDialogCar(
                 TextField(
                     value = query,
                     onValueChange = { newQuery ->
-                        viewModel.updateQueryCategory(newQuery) },
+                        updateQueryCat.invoke(newQuery) },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = {
-                                viewModel.updateQueryCategory("")
+                                updateQueryCat.invoke("")
                             }) {
                                 Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }
@@ -292,6 +318,7 @@ fun ModalSelectionDialogCar(
     )
 }
 
+// Modal para la selección de marca para el producto
 @Composable
 fun ModalSelectionDialogBrand(
     query: String,
@@ -299,7 +326,7 @@ fun ModalSelectionDialogBrand(
     items: List<BrandDomainModel>,
     onDismiss: () -> Unit,
     onItemSelected: (BrandDomainModel) -> Unit,
-    viewModel: ProductDetailViewModel
+    updateQueryBrand: (String) -> Unit
 ) {
 
     AlertDialog(
@@ -311,13 +338,13 @@ fun ModalSelectionDialogBrand(
                 TextField(
                     value = query,
                     onValueChange = { newQuery ->
-                        viewModel.updateQueryBrand(newQuery) },
+                        updateQueryBrand.invoke(newQuery) },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = {
-                                viewModel.updateQueryBrand("")
+                                updateQueryBrand.invoke("")
                             }) {
                                 Icon(Icons.Default.Close, contentDescription = "Limpiar")
                             }
