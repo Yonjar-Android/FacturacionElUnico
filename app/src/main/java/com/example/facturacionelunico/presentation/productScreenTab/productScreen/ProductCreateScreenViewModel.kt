@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facturacionelunico.domain.models.BrandDomainModel
@@ -9,6 +10,7 @@ import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.BrandRepository
 import com.example.facturacionelunico.domain.repositories.CategoryRepository
 import com.example.facturacionelunico.domain.repositories.ProductRepository
+import com.example.facturacionelunico.utils.validations.ValidationFunctions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -37,6 +39,9 @@ class ProductCreateScreenViewModel @Inject constructor(
 
     private val _searchQueryCategory = MutableStateFlow("")
     val searchQueryCategory: StateFlow<String> = _searchQueryCategory.asStateFlow()
+
+    private val _back = MutableStateFlow<Boolean>(false)
+    val back: StateFlow<Boolean> = _back
 
     fun updateQueryCategory(newQuery: String) {
         _searchQueryCategory.value = newQuery
@@ -107,9 +112,40 @@ class ProductCreateScreenViewModel @Inject constructor(
 
     fun createProduct(product: ProductDomainModel){
         viewModelScope.launch {
-            val response = repository.createProduct(product)
-            _message.value = response
+            if(validations(product)){
+                val response = repository.createProduct(product)
+                _message.value = response
+
+                if (!response.contains("Error")){
+                    _back.value = true
+                }
+            }
         }
+    }
+
+    // Validaciones para crear producto
+    private fun validations(product: ProductDomainModel): Boolean {
+        if (product.name.isEmpty()){
+            _message.value = "El campo nombre no puede estar vacío"
+            return false
+        }
+        if (product.stock.toString().isEmpty()){
+            _message.value = "El campo stock no puede estar vacío"
+            return false
+        }
+        if (!ValidationFunctions.isValidInt(product.stock.toString()) || product.stock.toInt() <= 0){
+            _message.value = "El valor ingresado en stock no es válido"
+            return false
+        }
+        if (!ValidationFunctions.isValidDouble(product.priceSell.toString()) || product.priceSell.toDouble() <= 0.0){
+            _message.value = "El valor ingresado en precio venta no es válido"
+            return false
+        }
+        if (!ValidationFunctions.isValidDouble(product.priceBuy.toString()) || product.priceBuy.toDouble() <= 0.0){
+            _message.value = "El valor ingresado en precio compra no es válido"
+            return false
+        }
+        return true
     }
 
     fun restartMessage(){

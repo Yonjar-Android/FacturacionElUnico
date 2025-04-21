@@ -70,6 +70,7 @@ fun ProductUpdateScreen(
     val product by viewModel.product.collectAsStateWithLifecycle()
 
     val message by viewModel.message.collectAsState()
+    val navigateBack by viewModel.back.collectAsStateWithLifecycle()
 
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val searchQueryCat by viewModel.searchQueryCategory.collectAsStateWithLifecycle()
@@ -116,8 +117,8 @@ fun ProductUpdateScreen(
             Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
             viewModel.restartMessage()
 
-            message?.contains("Error")?.let {
-                if(!it){ navController.navigateUp() }
+            if (navigateBack){
+                navController.navigateUp()
             }
         }
     }

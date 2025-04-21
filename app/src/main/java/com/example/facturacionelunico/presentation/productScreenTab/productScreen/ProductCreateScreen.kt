@@ -73,6 +73,7 @@ fun ProductCreateScreen(
     val searchQueryBrand by viewModel.searchQueryBrand.collectAsStateWithLifecycle()
 
     val message by viewModel.message.collectAsState()
+    val navigateBack by viewModel.back.collectAsStateWithLifecycle()
 
     var productName by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
@@ -95,8 +96,8 @@ fun ProductCreateScreen(
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.restartMessage()
 
-            message?.contains("Error")?.let {
-                if(!it){ navController.navigateUp() }
+            if (navigateBack){
+                navController.navigateUp()
             }
         }
     }
@@ -192,8 +193,6 @@ fun ProductCreateScreen(
                         photo = ""
                     )
                 )
-
-                navController.navigateUp() // Navegar a la pantalla de productos una vez se ha creado
             }
         )
 

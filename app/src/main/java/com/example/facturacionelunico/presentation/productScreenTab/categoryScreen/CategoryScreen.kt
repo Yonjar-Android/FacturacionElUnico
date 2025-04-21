@@ -101,9 +101,7 @@ fun CategoryScreen(
                     },
                     onValueChange = { textValueCategory = it },
                     onConfirm = { name ->
-                        categoryScreenViewModel.createCategory(
-                            name
-                        )
+                        categoryScreenViewModel.createCategory(name)
                     }
                 )
             }
