@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,6 +51,18 @@ class ProductCreateScreenViewModel @Inject constructor(
                 categoryRepository.getCategoryByName(query)
             }
         }
+        .map { result ->
+            when (result) {
+                is ResultPattern.Success -> {
+                    _message.value = null
+                    result.data
+                }
+                is ResultPattern.Error -> {
+                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    emptyList()
+                }
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -74,6 +87,18 @@ class ProductCreateScreenViewModel @Inject constructor(
                 brandRepository.getBrandByName(query)
             }
         }
+        .map { result ->
+            when(result){
+                is ResultPattern.Success -> {
+                    restartMessage()
+                    result.data
+                }
+                is ResultPattern.Error -> {
+                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    emptyList()
+                }
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -82,14 +107,8 @@ class ProductCreateScreenViewModel @Inject constructor(
 
     fun createProduct(product: ProductDomainModel){
         viewModelScope.launch {
-            when(val response = repository.createProduct(product)){
-                is ResultPattern.Error -> {
-                    _message.value = response.message
-                }
-                is ResultPattern.Success -> {
-                    _message.value = response.data
-                }
-            }
+            val response = repository.createProduct(product)
+            _message.value = response
         }
     }
 

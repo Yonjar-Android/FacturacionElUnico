@@ -89,9 +89,6 @@ fun ProductCreateScreen(
     var showDialogCat by remember { mutableStateOf(false) }
     var showDialogBrand by remember { mutableStateOf(false) }
 
-    if(message != null){
-        Toast.makeText(context, "Hola $message", Toast.LENGTH_SHORT).show()
-    }
     // Muestra el mensaje ya sea error o éxito al cambiar desde el viewModel
     LaunchedEffect(message) {
         if (!message.isNullOrEmpty()){

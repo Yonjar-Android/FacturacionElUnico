@@ -23,6 +23,9 @@ class BrandDetailScreenViewModel @Inject constructor(
     private val _brand = MutableStateFlow<BrandDomainModel?>(null)
     val brand = _brand.asStateFlow()
 
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message
+
     fun observeBrand(brandId: Long) {
         viewModelScope.launch {
             repository.getBrandById(brandId).collect { brandEntity ->
@@ -40,8 +43,13 @@ class BrandDetailScreenViewModel @Inject constructor(
 
     fun updateBrand(brand: BrandDomainModel) {
         viewModelScope.launch {
-            repository.updateBrand(brand)
+            val response = repository.updateBrand(brand)
+            _message.value = response
         }
+    }
+
+    fun restartMessage(){
+        _message.value = null
     }
 
 }

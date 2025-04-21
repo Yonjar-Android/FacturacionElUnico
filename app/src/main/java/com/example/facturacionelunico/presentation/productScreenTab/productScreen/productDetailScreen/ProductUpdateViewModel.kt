@@ -1,3 +1,5 @@
+@file:OptIn(FlowPreview::class)
+
 package com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen
 
 import androidx.lifecycle.ViewModel
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,17 +59,10 @@ class ProductUpdateViewModel @Inject constructor
     // Función para la actualización del producto
     fun updateProduct(product: ProductDomainModel) {
         viewModelScope.launch {
-            when (val response = repository.updateProduct(product)) {
-                is ResultPattern.Error -> {
-                    _message.value = response.message
-                }
-
-                is ResultPattern.Success -> {
-                    _message.value = response.data
-                }
+            val response = repository.updateProduct(product)
+                    _message.value = response
             }
         }
-    }
 
     /*StateFlow usado para la función de búsqueda, que se actualice
      al momento que se está escribiendo y realizando la búsqueda*/
@@ -85,6 +81,17 @@ class ProductUpdateViewModel @Inject constructor
                 categoryRepository.getCategories()
             } else {
                 categoryRepository.getCategoryByName(query)
+            }
+        }.map { result ->
+            when(result){
+                is ResultPattern.Success -> {
+                    restartMessage()
+                    result.data
+                }
+                is ResultPattern.Error -> {
+                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    emptyList()
+                }
             }
         }
         .stateIn(
@@ -111,6 +118,17 @@ class ProductUpdateViewModel @Inject constructor
                 brandRepository.getBrands()
             } else {
                 brandRepository.getBrandByName(query)
+            }
+        }.map { result ->
+            when(result){
+                is ResultPattern.Success -> {
+                    restartMessage()
+                    result.data
+                }
+                is ResultPattern.Error -> {
+                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    emptyList()
+                }
             }
         }
         .stateIn(

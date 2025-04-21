@@ -3,6 +3,7 @@ package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facturacionelunico.domain.models.BrandDomainModel
+import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.BrandRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +26,10 @@ class BrandScreenViewModel @Inject constructor(
 ): ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message
 
     fun updateQuery(newQuery: String) {
         _searchQuery.value = newQuery
@@ -41,6 +46,18 @@ class BrandScreenViewModel @Inject constructor(
                 repository.getBrandByName(query)
             }
         }
+        .map { result ->
+            when(result){
+                is ResultPattern.Success -> {
+                    restartMessage()
+                    result.data
+                }
+                is ResultPattern.Error -> {
+                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    emptyList()
+                }
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -49,8 +66,14 @@ class BrandScreenViewModel @Inject constructor(
 
     fun createBrand(name: String){
         viewModelScope.launch {
-            repository.createBrand(name)
+            val response = repository.createBrand(name)
+            _message.value = response
+            println("Mensaje marcaviewModel: $response")
+
         }
     }
 
+    fun restartMessage(){
+        _message.value = null
+    }
 }

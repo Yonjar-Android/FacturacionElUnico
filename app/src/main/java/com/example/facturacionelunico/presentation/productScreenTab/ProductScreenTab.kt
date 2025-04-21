@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.presentation.productScreenTab
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Tab
@@ -17,7 +18,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.categoryScre
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductScreen
 
 @Composable
-fun ProductScreenTab(navController: NavController){
+fun ProductScreenTab(navController: NavController, context: Context){
     Column(modifier = Modifier.fillMaxSize()) {
         var tabIndex by rememberSaveable { mutableIntStateOf(0) }
         val tabs = listOf("Productos", "Categorías", "Marcas")
@@ -36,10 +37,12 @@ fun ProductScreenTab(navController: NavController){
                 ProductScreen(navController = navController)
             }
             1 -> {
-                CategoryScreen(navController = navController)
+                CategoryScreen(
+                    navController = navController)
             }
             2 -> {
-                BrandScreen(navController = navController)
+                BrandScreen(
+                    navController = navController)
             }
         }
     }

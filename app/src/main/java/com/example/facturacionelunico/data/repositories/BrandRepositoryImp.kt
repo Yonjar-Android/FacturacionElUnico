@@ -3,16 +3,19 @@ package com.example.facturacionelunico.data.repositories
 import com.example.facturacionelunico.data.database.dao.MarcaDao
 import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.domain.models.BrandDomainModel
+import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
+import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.BrandRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class BrandRepositoryImp @Inject constructor(
     private val brandDao: MarcaDao
 ) : BrandRepository {
-    override fun getBrands(): Flow<List<BrandDomainModel>> {
+    override fun getBrands(): Flow<ResultPattern<List<BrandDomainModel>>> {
         return brandDao.getAll().map {
             it.map {
                 BrandDomainModel(
@@ -20,6 +23,10 @@ class BrandRepositoryImp @Inject constructor(
                     brandName = it.nombre
                 )
             }
+        }.map<List<BrandDomainModel>, ResultPattern<List<BrandDomainModel>>> { brands ->
+            ResultPattern.Success(brands)
+        }.catch { e ->
+            emit(ResultPattern.Error(exception = e, message = e.message))
         }
 
     }
@@ -33,7 +40,7 @@ class BrandRepositoryImp @Inject constructor(
         }
     }
 
-    override fun getBrandByName(query: String): Flow<List<BrandDomainModel>> {
+    override fun getBrandByName(query: String): Flow<ResultPattern<List<BrandDomainModel>>> {
         return brandDao.getBrandByName(query)
             .map {
                 it.map {
@@ -42,6 +49,10 @@ class BrandRepositoryImp @Inject constructor(
                         brandName = it.nombre
                     )
                 }
+            }.map<List<BrandDomainModel>, ResultPattern<List<BrandDomainModel>>> { brands ->
+                ResultPattern.Success(brands)
+            }.catch { e ->
+                emit(ResultPattern.Error(exception = e, message = e.message))
             }
     }
 
@@ -49,20 +60,32 @@ class BrandRepositoryImp @Inject constructor(
         return brandDao.getDetailedByBrandId(brandId)
     }
 
-    override suspend fun createBrand(brandName: String) {
-        brandDao.insert(
-            MarcaEntity(
-                nombre = brandName
+    override suspend fun createBrand(brandName: String): String {
+        return runCatching {
+            brandDao.insert(
+                MarcaEntity(
+                    nombre = brandName
+                )
             )
-        )
+            "Marca creada exitosamente"
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+
     }
 
-    override suspend fun updateBrand(brand: BrandDomainModel) {
-        brandDao.update(
-            MarcaEntity(
-                id = brand.brandId,
-                nombre = brand.brandName
+    override suspend fun updateBrand(brand: BrandDomainModel): String {
+        return runCatching {
+            brandDao.update(
+                MarcaEntity(
+                    id = brand.brandId,
+                    nombre = brand.brandName
+                )
             )
-        )
+            "Marca actualizada correctamente"
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+
     }
 }

@@ -47,23 +47,23 @@ class ProductRepositoryImp @Inject constructor(
     }
 
     // Función crear producto
-    override suspend fun createProduct(productDomainModel: ProductDomainModel): ResultPattern<String> {
+    override suspend fun createProduct(productDomainModel: ProductDomainModel): String {
         return runCatching{
             productDao.insert(ProductMapper.toEntity(productDomainModel))
-            ResultPattern.Success("Se ha agregado un nuevo producto")
+            "Se ha agregado un nuevo producto"
         }.getOrElse {
-            ResultPattern.Error(it, message = it.message)
+            "Error: ${it.message}"
         }
 
     }
 
     //Función actualizar producto
-    override suspend fun updateProduct(productDomainModel: ProductDomainModel): ResultPattern<String> {
+    override suspend fun updateProduct(productDomainModel: ProductDomainModel): String {
         return runCatching {
             productDao.update(ProductMapper.toEntity(productDomainModel))
-            ResultPattern.Success("Se ha actualizado el producto")
+            "Se ha actualizado el producto"
         }.getOrElse {
-            ResultPattern.Error(it, message = it.message)
+            "Error: ${it.message}"
         }
 
     }

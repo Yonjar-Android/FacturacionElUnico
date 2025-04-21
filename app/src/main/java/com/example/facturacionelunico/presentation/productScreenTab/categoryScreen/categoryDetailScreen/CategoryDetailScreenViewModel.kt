@@ -7,6 +7,7 @@ import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.repositories.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,6 +22,9 @@ class CategoryDetailScreenViewModel @Inject constructor(
 
     private val _category = MutableStateFlow<CategoryDomainModel?>(null)
     val category = _category.asStateFlow()
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message
 
     fun observeCategory(categoryId: Long) {
         viewModelScope.launch {
@@ -39,7 +43,13 @@ class CategoryDetailScreenViewModel @Inject constructor(
 
     fun updateCategory(categoryDomainModel: CategoryDomainModel) {
         viewModelScope.launch {
-            repository.updateCategory(categoryDomainModel)
+            val response = repository.updateCategory(categoryDomainModel)
+            _message.value = response
+
         }
+    }
+
+    fun restartMessage(){
+        _message.value = null
     }
 }

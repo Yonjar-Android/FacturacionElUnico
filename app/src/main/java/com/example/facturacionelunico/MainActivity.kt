@@ -67,13 +67,17 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(it)
                     ) {
                         composable(route = "ProductScreen") {
-                            ProductScreenTab(navController = controller)
+                            ProductScreenTab(
+                                navController = controller,
+                                context = context
+                            )
                         }
 
                         composable(route = "ProductCreateScreen") {
                             ProductCreateScreen(
                                 navController = controller,
-                                context = context)
+                                context = context
+                            )
                         }
 
                         composable(
@@ -88,17 +92,18 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable(route = "ProductUpdateScreen/{productId}",
+                        composable(
+                            route = "ProductUpdateScreen/{productId}",
                             arguments = listOf(
                                 navArgument("productId") { type = NavType.LongType }
-                            )) {
-                                backStackEntry ->
+                            )) { backStackEntry ->
                             val productId = backStackEntry.arguments?.getLong("productId") ?: 0L
 
                             ProductUpdateScreen(
                                 productId = productId,
                                 navController = controller,
-                                context = context)
+                                context = context
+                            )
                         }
 
                         composable(

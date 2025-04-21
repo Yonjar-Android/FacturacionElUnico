@@ -2,6 +2,7 @@
 
 package com.example.facturacionelunico.presentation.productScreenTab.categoryScreen
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,21 +46,34 @@ import com.example.facturacionelunico.ui.theme.blueUi
 @Composable
 fun CategoryScreen(
     navController: NavController,
-    categoryScreenViewModel: CategoryScreenViewModel = hiltViewModel()
-) {
+    categoryScreenViewModel: CategoryScreenViewModel = hiltViewModel()) {
+
+    val contextHere = LocalContext.current
 
     val categories by categoryScreenViewModel.categories.collectAsStateWithLifecycle()
 
     val searchQuery by categoryScreenViewModel.searchQuery.collectAsStateWithLifecycle()
 
+    val message by categoryScreenViewModel.message.collectAsState()
+
     var showDialog by remember { mutableStateOf(false) }
     var textValueCategory by remember { mutableStateOf("") }
+
+    println(message)
+
+    LaunchedEffect(message) {
+        if (!message.isNullOrEmpty()){
+            Toast.makeText(contextHere, message, Toast.LENGTH_SHORT).show()
+            categoryScreenViewModel.restartMessage()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 10.dp)
+                .padding(top = 10.dp, bottom = 20.dp)
+
         ) {
             SearchBarComponent(searchQuery, onChangeValue = { newQuery ->
                 categoryScreenViewModel.updateQuery(newQuery)

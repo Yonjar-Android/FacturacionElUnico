@@ -12,7 +12,7 @@ interface ProductRepository {
 
     suspend fun getProductBySearch(query: String): Flow<ResultPattern<List<DetailedProductModel>>>
 
-    suspend fun createProduct(productDomainModel: ProductDomainModel): ResultPattern<String>
+    suspend fun createProduct(productDomainModel: ProductDomainModel): String
 
-    suspend fun updateProduct(productDomainModel: ProductDomainModel): ResultPattern<String>
+    suspend fun updateProduct(productDomainModel: ProductDomainModel): String
 }

@@ -2,13 +2,19 @@
 
 package com.example.facturacionelunico.presentation.productScreenTab.categoryScreen.categoryDetailScreen
 
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,26 +45,50 @@ fun CategoryDetailScreen(
         categoryDetailScreenViewModel.observeCategory(categoryId)
     }
 
+    val context = LocalContext.current
+
     val category by categoryDetailScreenViewModel.category.collectAsStateWithLifecycle()
 
     val products by categoryDetailScreenViewModel.products.collectAsStateWithLifecycle()
 
+    val message by categoryDetailScreenViewModel.message.collectAsStateWithLifecycle()
+
     var textValue by remember { mutableStateOf(category?.categoryName ?: "") }
     var showDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    LaunchedEffect(category) {
+        textValue = category?.categoryName ?: ""
+    }
 
-        // Barra superior con título y flecha para navegar hacia atrás
-        TopAppBarCustom(
-            title = category?.categoryName ?: "",
-            onNavigationClick = { navController.navigateUp() }
-        )
+    LaunchedEffect(message) {
+        if (!message.isNullOrEmpty()) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            categoryDetailScreenViewModel.restartMessage()
+        }
+    }
 
+    Scaffold(
+        topBar = {
+            TopAppBarCustom(
+                title = category?.categoryName ?: "",
+                onNavigationClick = { navController.navigateUp() }
+            )
+        },
+        bottomBar = {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                GenericBlueUiButton(
+                    buttonText = "Editar Categoría",
+                    onFunction = { showDialog = true }
+                )
+            }
+        }
+    ) { paddingValues ->
         if (products.isNotEmpty()) {
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+            ) {
                 items(products) {
                     ProductItem(
                         it,
@@ -66,26 +97,15 @@ fun CategoryDetailScreen(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        GenericBlueUiButton(
-            buttonText = "Editar Categoría",
-            onFunction = {
-                showDialog = true
-            }
-        )
-
-        Spacer(modifier = Modifier.size(10.dp))
     }
 
-    if (showDialog){
+    if (showDialog) {
         DialogFormCreateUpdate(
             title = "Editar Categoría",
             textButton = "Actualizar",
             value = textValue,
-            onValueChange = {textValue = it},
-            dismiss = { showDialog = false},
+            onValueChange = { textValue = it },
+            dismiss = { showDialog = false },
             onConfirm = { name ->
                 categoryDetailScreenViewModel.updateCategory(
                     CategoryDomainModel(
