@@ -26,7 +26,7 @@ class BrandRepositoryImp @Inject constructor(
         }.map<List<BrandDomainModel>, ResultPattern<List<BrandDomainModel>>> { brands ->
             ResultPattern.Success(brands)
         }.catch { e ->
-            emit(ResultPattern.Error(exception = e, message = e.message))
+            emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
         }
 
     }
@@ -52,7 +52,7 @@ class BrandRepositoryImp @Inject constructor(
             }.map<List<BrandDomainModel>, ResultPattern<List<BrandDomainModel>>> { brands ->
                 ResultPattern.Success(brands)
             }.catch { e ->
-                emit(ResultPattern.Error(exception = e, message = e.message))
+                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
             }
     }
 
@@ -82,7 +82,7 @@ class BrandRepositoryImp @Inject constructor(
                     nombre = brand.brandName
                 )
             )
-            "Marca actualizada correctamente"
+            "Marca actualizada exitosamente"
         }.getOrElse {
             "Error: ${it.message}"
         }
