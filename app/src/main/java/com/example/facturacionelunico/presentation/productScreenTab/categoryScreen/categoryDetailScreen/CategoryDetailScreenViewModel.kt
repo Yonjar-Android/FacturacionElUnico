@@ -45,7 +45,6 @@ class CategoryDetailScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val response = repository.updateCategory(categoryDomainModel)
             _message.value = response
-
         }
     }
 

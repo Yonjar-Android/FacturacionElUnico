@@ -45,12 +45,11 @@ class CategoryScreenViewModel @Inject constructor(
         }.map { result ->
             when (result) {
                 is ResultPattern.Success -> {
-                    restartMessage()
                     result.data
                 }
 
                 is ResultPattern.Error -> {
-                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
                     emptyList()
                 }
             }

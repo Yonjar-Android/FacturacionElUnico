@@ -49,11 +49,10 @@ class BrandScreenViewModel @Inject constructor(
         .map { result ->
             when(result){
                 is ResultPattern.Success -> {
-                    restartMessage()
                     result.data
                 }
                 is ResultPattern.Error -> {
-                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
                     emptyList()
                 }
             }
@@ -68,8 +67,6 @@ class BrandScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val response = repository.createBrand(name)
             _message.value = response
-            println("Mensaje marcaviewModel: $response")
-
         }
     }
 
