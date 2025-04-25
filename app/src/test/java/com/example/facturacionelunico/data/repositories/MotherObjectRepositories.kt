@@ -2,12 +2,15 @@ package com.example.facturacionelunico.data.repositories
 
 import com.example.facturacionelunico.data.database.entities.CategoriaEntity
 import com.example.facturacionelunico.data.database.entities.MarcaEntity
+import com.example.facturacionelunico.data.database.entities.ProductoEntity
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 object MotherObjectRepositories {
+
+    /*******************************************  DATOS PARA REPOSITORIO DE MARCAS  *******************************************************************/
 
     private val brandsEntities = listOf<MarcaEntity>(
         MarcaEntity(id = 1L, nombre = "Nike"),
@@ -27,20 +30,26 @@ object MotherObjectRepositories {
 
     val flowBrandDomainModel: Flow<BrandDomainModel> = flow { emit(brandDomainModel) }
 
-        val products = listOf<DetailedProductModel>(
-            DetailedProductModel(
-                id = 201,
-                name = "Kenda Kaiser KR20 - Llanta 205/55R16",
-                category = "Llantas para Autos",
-                categoryId = 1,
-                brand = "Kenda",
-                brandId = 10,
-                salePrice = 320.00,
-                purchasePrice = 210.50,
-                stock = 18,
-                description = "Llanta radial premium con banda de rodadura silenciosa y eficiente en combustible. Índice de velocidad V (240 km/h)",
-                photo = "https://cdn.ejemplo.com/llantas/kenda_kaiser_kr20.jpg"
-            ),
+    /*******************************************  DATOS PARA REPOSITORIO DE PRODUCTOS  *******************************************************************/
+
+    val productDetailed = DetailedProductModel(
+        id = 201,
+        name = "Kenda Kaiser KR20 - Llanta 205/55R16",
+        category = "Llantas para Autos",
+        categoryId = 1,
+        brand = "Kenda",
+        brandId = 10,
+        salePrice = 320.00,
+        purchasePrice = 210.50,
+        stock = 18,
+        description = "Llanta radial premium con banda de rodadura silenciosa y eficiente en combustible. Índice de velocidad V (240 km/h)",
+        photo = "https://cdn.ejemplo.com/llantas/kenda_kaiser_kr20.jpg"
+    )
+
+    val flowOneProduct = flow { emit(productDetailed) }
+
+    val products = listOf<DetailedProductModel>(
+        productDetailed,
             DetailedProductModel(
                 id = 202,
                 name = "Kenda All-Terrain - Llanta 265/70R17",
@@ -55,6 +64,39 @@ object MotherObjectRepositories {
                 photo = "https://cdn.ejemplo.com/llantas/kenda_yebram_at.jpg"
             )
         )
+
+    val flowProductDetailed = flow { emit(products) }
+
+    val oneProductEntity =  ProductoEntity(
+        id = 201,
+        nombre = "Kenda Kaiser KR20 - Llanta 205/55R16",
+        idCategoria = 1,
+        idMarca = 10,
+        precioVenta = 320.00,
+        precioCompra = 210.50,
+        stock = 18,
+        descripcion = "Llanta radial premium con banda de rodadura silenciosa y eficiente en combustible. Índice de velocidad V (240 km/h)",
+        foto = "https://cdn.ejemplo.com/llantas/kenda_kaiser_kr20.jpg"
+    )
+
+    val productsEntity = listOf<ProductoEntity>(
+        oneProductEntity,
+        ProductoEntity(
+            id = 202,
+            nombre = "Kenda All-Terrain - Llanta 265/70R17",
+            idCategoria = 2,
+            idMarca = 10,
+            precioVenta = 480.00,
+            precioCompra = 310.00,
+            stock = 12,
+            descripcion = "Llanta todoterreno co-desarrollada por Kenda. Resistente a cortes con tecnología Kevlar® y diseño auto-limpiante",
+            foto = "https://cdn.ejemplo.com/llantas/kenda_yebram_at.jpg"
+        )
+    )
+
+    val flowEntityProducts = flow { emit(productsEntity) }
+
+/*******************************************  DATOS PARA REPOSITORIO DE CATEGORIAS  *******************************************************************/
 
     val categoriaLLantas =CategoriaEntity(id = 1L, nombre = "Llantas")
 

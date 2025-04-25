@@ -59,13 +59,13 @@ class CategoryRepositoryImpTest {
 
         assertTrue(result is ResultPattern.Success)
 
-        val expectedBrands = response.first() // Lista de marcas esperadas
+        val expectedCategories = response.first() // Lista de categorías esperadas
 
         if (result is ResultPattern.Success) {
             val data = result.data
-            assertEquals(expectedBrands.size, data.size)
-            assertEquals(expectedBrands.first().id, data[0].categoryId)
-            assertEquals(expectedBrands.first().nombre, data[0].categoryName)
+            assertEquals(expectedCategories.size, data.size)
+            assertEquals(expectedCategories.first().id, data[0].categoryId)
+            assertEquals(expectedCategories.first().nombre, data[0].categoryName)
         }
     }
 
@@ -93,11 +93,11 @@ class CategoryRepositoryImpTest {
 
         assertTrue(result is ResultPattern.Success)
 
-        val expectedBrands = response.first() // Lista de marcas esperadas
+        val expectedCategories = response.first() // Lista de Categorías esperadas
 
         if (result is ResultPattern.Success) {
             val data = result.data
-            assertEquals(expectedBrands.size, data.size)
+            assertEquals(expectedCategories.size, data.size)
         }
     }
 
@@ -155,13 +155,13 @@ class CategoryRepositoryImpTest {
 
         assertTrue(result is ResultPattern.Success)
 
-        val expectedBrands = response.first() // Lista de marcas esperadas
+        val expectedCategories = response.first() // Lista de Categorías esperadas
 
         if (result is ResultPattern.Success) {
             val data = result.data
-            assertEquals(expectedBrands.size, data.size)
-            assertEquals(expectedBrands.first().id, data[0].categoryId)
-            assertEquals(expectedBrands.first().nombre, data[0].categoryName)
+            assertEquals(expectedCategories.size, data.size)
+            assertEquals(expectedCategories.first().id, data[0].categoryId)
+            assertEquals(expectedCategories.first().nombre, data[0].categoryName)
             assertTrue(data[0].categoryName.contains(search))
         }
     }
@@ -191,11 +191,11 @@ class CategoryRepositoryImpTest {
 
         assertTrue(result is ResultPattern.Success)
 
-        val expectedBrands = response.first() // Lista de marcas esperadas
+        val expectedCategories = response.first() // Lista de Categorías esperadas
 
         if (result is ResultPattern.Success) {
             val data = result.data
-            assertEquals(expectedBrands.size, data.size)
+            assertEquals(expectedCategories.size, data.size)
         }
     }
 
@@ -306,7 +306,7 @@ class CategoryRepositoryImpTest {
     }
 
     @Test
-    fun `updateCategory should return success message when brand is updated successfully`() = runTest {
+    fun `updateCategory should return success message when category is updated successfully`() = runTest {
 
         // Given
         val categoryModel = CategoryDomainModel(categoryId = 1L, categoryName = "Neumaticos")

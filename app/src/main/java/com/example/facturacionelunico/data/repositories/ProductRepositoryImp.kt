@@ -30,8 +30,15 @@ class ProductRepositoryImp @Inject constructor(
         return runCatching {
             productDao.getDetailedById(productId)
         }.fold(
-            onSuccess = { ResultPattern.Success(it) },
-            onFailure = { ResultPattern.Error(it, message = it.message) }
+            onSuccess = {
+                if (it != null) {
+                    ResultPattern.Success(it)
+                } else {
+                    ResultPattern.Error(
+                        exception = Throwable("Producto no encontrado"),
+                        message = "Error: Producto no encontrado")
+                }},
+            onFailure = { ResultPattern.Error(it, message = "Error: ${it.message}") }
         )
     }
 
@@ -42,7 +49,7 @@ class ProductRepositoryImp @Inject constructor(
                 ResultPattern.Success(products)
             }
             .catch { e ->
-                emit(ResultPattern.Error(exception = e, message = e.message))
+                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
             }
     }
 
@@ -54,7 +61,6 @@ class ProductRepositoryImp @Inject constructor(
         }.getOrElse {
             "Error: ${it.message}"
         }
-
     }
 
     //Función actualizar producto
