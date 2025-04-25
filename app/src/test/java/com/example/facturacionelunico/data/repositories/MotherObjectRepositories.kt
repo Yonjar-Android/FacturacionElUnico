@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.data.repositories
 
+import com.example.facturacionelunico.data.database.entities.CategoriaEntity
 import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 object MotherObjectRepositories {
+
     private val brandsEntities = listOf<MarcaEntity>(
         MarcaEntity(id = 1L, nombre = "Nike"),
         MarcaEntity(id = 2L, nombre = "Adidas")
@@ -30,7 +32,7 @@ object MotherObjectRepositories {
                 id = 201,
                 name = "Kenda Kaiser KR20 - Llanta 205/55R16",
                 category = "Llantas para Autos",
-                categoryId = 7,
+                categoryId = 1,
                 brand = "Kenda",
                 brandId = 10,
                 salePrice = 320.00,
@@ -43,7 +45,7 @@ object MotherObjectRepositories {
                 id = 202,
                 name = "Kenda All-Terrain - Llanta 265/70R17",
                 category = "Llantas para Camionetas",
-                categoryId = 8,
+                categoryId = 2,
                 brand = "Kenda", // Marca conjunta
                 brandId = 10, // ID hipotético para alianza de marcas
                 salePrice = 480.00,
@@ -53,4 +55,16 @@ object MotherObjectRepositories {
                 photo = "https://cdn.ejemplo.com/llantas/kenda_yebram_at.jpg"
             )
         )
+
+    val categoriaLLantas =CategoriaEntity(id = 1L, nombre = "Llantas")
+
+    val flowOneCategory = flow { emit(categoriaLLantas) }
+
+    val listCategoryEntities = listOf<CategoriaEntity>(
+        categoriaLLantas,
+        CategoriaEntity(id = 2L, nombre = "Aceites")
+    )
+
+    val flowCategoryEntities: Flow<List<CategoriaEntity>> = flow { emit(listCategoryEntities) }
+
     }

@@ -6,10 +6,11 @@ import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.BrandRepository
+import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.impl.annotations.MockK
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.Flow
@@ -21,16 +22,16 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 
-//import org.junit.jupiter.api.Assertions.*
-
 class BrandRepositoryImpTest {
 
+    @MockK
     lateinit var brandDao: MarcaDao
+
     lateinit var repository: BrandRepository
 
     @Before
     fun setUp(){
-        brandDao = mockk()
+        MockKAnnotations.init(this)
         repository = BrandRepositoryImp(brandDao)
     }
 
