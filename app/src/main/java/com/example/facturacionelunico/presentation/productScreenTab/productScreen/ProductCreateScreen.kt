@@ -45,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +57,7 @@ import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
+import com.example.facturacionelunico.utils.transform.FormatNames
 
 @Composable
 fun ProductCreateScreen(
@@ -183,7 +183,7 @@ fun ProductCreateScreen(
             onFunction = {
                 viewModel.createProduct(
                     ProductDomainModel(
-                        name = productName,
+                        name = FormatNames.firstLetterUpperCase(productName),
                         priceBuy = priceBuy.toDoubleOrNull() ?: 0.0,
                         priceSell = priceSell.toDoubleOrNull() ?: 0.0,
                         description = description,

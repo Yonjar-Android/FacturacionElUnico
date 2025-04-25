@@ -61,12 +61,18 @@ class BrandRepositoryImp @Inject constructor(
 
     override suspend fun createBrand(brandName: String): String {
         return runCatching {
-            brandDao.insert(
-                MarcaEntity(
-                    nombre = brandName
+
+            val brandExist = brandDao.existBrandName(brandName)
+            if (brandExist != null) {
+                return "Error: La marca ya existe"
+            }else{
+                brandDao.insert(
+                    MarcaEntity(
+                        nombre = brandName
+                    )
                 )
-            )
-            "Marca creada exitosamente"
+                "Marca creada exitosamente"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }
@@ -75,16 +81,21 @@ class BrandRepositoryImp @Inject constructor(
 
     override suspend fun updateBrand(brand: BrandDomainModel): String {
         return runCatching {
-            brandDao.update(
-                MarcaEntity(
-                    id = brand.brandId,
-                    nombre = brand.brandName
+
+            val conflictingBrand = brandDao.getOtherBrandByName(brand.brandName, brand.brandId)
+            if (conflictingBrand != null){
+                "Error: Ya existe otra marca con ese nombre"
+            } else{
+                brandDao.update(
+                    MarcaEntity(
+                        id = brand.brandId,
+                        nombre = brand.brandName
+                    )
                 )
-            )
-            "Marca actualizada exitosamente"
+                "Marca actualizada exitosamente"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }
-
     }
 }

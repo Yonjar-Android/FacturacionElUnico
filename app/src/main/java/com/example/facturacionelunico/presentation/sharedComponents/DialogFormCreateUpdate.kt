@@ -80,7 +80,6 @@ fun DialogFormCreateUpdate(
                         Toast.makeText(context, "Ingrese un nombre", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-                    dismiss.invoke()
                     onConfirm(value)  // Llama a la función proporcionada
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = blueUi)

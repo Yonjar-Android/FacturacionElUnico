@@ -53,6 +53,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.productScree
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.TextFieldDescription
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.TextFieldDrawer
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
+import com.example.facturacionelunico.utils.transform.FormatNames
 
 @Composable
 fun ProductUpdateScreen(
@@ -205,7 +206,7 @@ fun ProductUpdateScreen(
                 viewModel.updateProduct(
                     ProductDomainModel(
                         id = product?.id!!,
-                        name = productName,
+                        name = FormatNames.firstLetterUpperCase(productName),
                         idBrand = brandId,
                         idCategory = categoryId,
                         description = description,

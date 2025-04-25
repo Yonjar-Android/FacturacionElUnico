@@ -61,12 +61,19 @@ class CategoryRepositoryImp @Inject constructor(
 
     override suspend fun createCategory(categoryName: String): String {
         return runCatching {
-            categoryDao.insert(
-                CategoriaEntity(
-                    nombre = categoryName
+
+            val existCategory = categoryDao.existCategoryName(categoryName)
+
+            if (existCategory != null){
+                "Error: La categoría ya existe"
+            } else{
+                categoryDao.insert(
+                    CategoriaEntity(
+                        nombre = categoryName
+                    )
                 )
-            )
-            "Categoría creada exitosamente"
+                "Categoría creada exitosamente"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }
@@ -74,13 +81,21 @@ class CategoryRepositoryImp @Inject constructor(
 
     override suspend fun updateCategory(category: CategoryDomainModel): String {
         return runCatching {
-            categoryDao.update(
-                CategoriaEntity(
-                    id = category.categoryId,
-                    nombre = category.categoryName
+
+            val conflictingCategory = categoryDao.getOtherCategoryByName(category.categoryName, category.categoryId)
+
+            if (conflictingCategory != null){
+                "Error: Ya existe otra categoría con ese nombre"
+            }else{
+
+                categoryDao.update(
+                    CategoriaEntity(
+                        id = category.categoryId,
+                        nombre = category.categoryName
+                    )
                 )
-            )
-            "Categoría actualizada exitosamente"
+                "Categoría actualizada exitosamente"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }

@@ -28,6 +28,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.productScree
 import com.example.facturacionelunico.presentation.sharedComponents.DialogFormCreateUpdate
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
+import com.example.facturacionelunico.utils.transform.FormatNames
 
 @Composable
 fun CategoryDetailScreen(
@@ -59,6 +60,10 @@ fun CategoryDetailScreen(
         if (!message.isNullOrEmpty()) {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             categoryDetailScreenViewModel.restartMessage()
+
+            if (!message!!.contains("Error")){
+                showDialog = false
+            }
         }
     }
 
@@ -105,7 +110,7 @@ fun CategoryDetailScreen(
                 categoryDetailScreenViewModel.updateCategory(
                     CategoryDomainModel(
                         categoryId = categoryId,
-                        categoryName = name
+                        categoryName = FormatNames.firstLetterUpperCase(name)
                     )
                 )
             },

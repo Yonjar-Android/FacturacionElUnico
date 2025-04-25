@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.CategoriaEntity
+import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import kotlinx.coroutines.flow.Flow
 
@@ -13,8 +14,16 @@ interface CategoriaDao {
     @Insert
     suspend fun insert(categoria: CategoriaEntity)
 
+    // Verificar si una categoría con el mismo nombre ya existe
+    @Query("SELECT * FROM categoria WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1")
+    suspend fun existCategoryName(nombre: String): CategoriaEntity?
+
     @Update
     suspend fun update(categoria: CategoriaEntity)
+
+    // Verificar si una categoría con el mismo nombre ya existe, excluyendo la categoría actual
+    @Query("SELECT * FROM categoria WHERE LOWER(nombre) = LOWER(:nombre) AND id != :id LIMIT 1")
+    suspend fun getOtherCategoryByName(nombre: String, id: Long): MarcaEntity?
 
     @Query("SELECT * FROM categoria")
     fun getAll(): Flow<List<CategoriaEntity>>

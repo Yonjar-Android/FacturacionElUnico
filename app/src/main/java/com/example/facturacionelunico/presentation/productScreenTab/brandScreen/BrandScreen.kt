@@ -2,7 +2,6 @@
 
 package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
 
-import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +41,7 @@ import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.DialogFormCreateUpdate
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.ui.theme.blueUi
+import com.example.facturacionelunico.utils.transform.FormatNames
 
 @Composable
 fun BrandScreen(
@@ -63,6 +63,10 @@ fun BrandScreen(
         if (!message.isNullOrEmpty()){
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             brandScreenViewModel.restartMessage()
+
+            if (!message!!.contains("Error")){
+                showDialog = false
+            }
         }
     }
 
@@ -100,7 +104,7 @@ fun BrandScreen(
                     },
                     onValueChange = { textValueBrand = it },
                     onConfirm = {name ->
-                        brandScreenViewModel.createBrand(name)
+                        brandScreenViewModel.createBrand(FormatNames.firstLetterUpperCase(name))
                     }
                 )
             }

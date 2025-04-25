@@ -42,6 +42,7 @@ import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.DialogFormCreateUpdate
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.ui.theme.blueUi
+import com.example.facturacionelunico.utils.transform.FormatNames
 
 @Composable
 fun CategoryScreen(
@@ -65,6 +66,10 @@ fun CategoryScreen(
         if (!message.isNullOrEmpty()){
             Toast.makeText(contextHere, message, Toast.LENGTH_SHORT).show()
             categoryScreenViewModel.restartMessage()
+
+            if (!message!!.contains("Error")){
+                showDialog = false
+            }
         }
     }
 
@@ -101,7 +106,7 @@ fun CategoryScreen(
                     },
                     onValueChange = { textValueCategory = it },
                     onConfirm = { name ->
-                        categoryScreenViewModel.createCategory(name)
+                        categoryScreenViewModel.createCategory(FormatNames.firstLetterUpperCase(name))
                     }
                 )
             }

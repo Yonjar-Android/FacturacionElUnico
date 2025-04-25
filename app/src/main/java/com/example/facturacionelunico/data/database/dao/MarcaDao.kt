@@ -13,8 +13,16 @@ interface MarcaDao {
     @Insert
     suspend fun insert(marca: MarcaEntity)
 
+    // Verificar si una marca con el mismo nombre ya existe
+    @Query("SELECT * FROM marca WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1")
+    suspend fun existBrandName(nombre: String): MarcaEntity?
+
     @Update
     suspend fun update(marca: MarcaEntity)
+
+    // Verificar si una marca con el mismo nombre ya existe, excluyendo la marca actual
+    @Query("SELECT * FROM marca WHERE LOWER(nombre) = LOWER(:nombre) AND id != :id LIMIT 1")
+    suspend fun getOtherBrandByName(nombre: String, id: Long): MarcaEntity?
 
     @Query("SELECT * FROM marca")
     fun getAll(): Flow<List<MarcaEntity>>
@@ -28,6 +36,7 @@ interface MarcaDao {
     """)
     fun getBrandByName(query:String): Flow<List<MarcaEntity>>
 
+    // Obtener productos con detalles de marca
     @Query("""
     SELECT producto.id, 
            producto.nombre as name,
