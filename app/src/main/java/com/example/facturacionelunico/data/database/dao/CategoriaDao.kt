@@ -23,7 +23,7 @@ interface CategoriaDao {
 
     // Verificar si una categoría con el mismo nombre ya existe, excluyendo la categoría actual
     @Query("SELECT * FROM categoria WHERE LOWER(nombre) = LOWER(:nombre) AND id != :id LIMIT 1")
-    suspend fun getOtherCategoryByName(nombre: String, id: Long): MarcaEntity?
+    suspend fun getOtherCategoryByName(nombre: String, id: Long): CategoriaEntity?
 
     @Query("SELECT * FROM categoria")
     fun getAll(): Flow<List<CategoriaEntity>>

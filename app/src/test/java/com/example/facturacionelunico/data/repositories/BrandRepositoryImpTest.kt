@@ -272,6 +272,7 @@ class BrandRepositoryImpTest {
         val brandName = "Kenda"
         val entity = MarcaEntity(nombre = brandName)
         coEvery { brandDao.insert(entity) } returns Unit
+        coEvery { brandDao.existBrandName(brandName) } returns null
 
         // When
 
@@ -280,6 +281,24 @@ class BrandRepositoryImpTest {
         // Then
         assertEquals("Marca creada exitosamente", result)
         coVerify(exactly = 1) { brandDao.insert(entity) }
+        coVerify(exactly = 1) { brandDao.existBrandName(brandName) }
+    }
+
+    @Test
+    fun `createBrand should return error message when brandName already exists`() = runTest {
+
+        // Given
+        val brandName = "Kenda"
+        val entity = MarcaEntity(nombre = brandName)
+        coEvery { brandDao.existBrandName(brandName) } returns entity
+
+        // When
+
+        val result: String = repository.createBrand(brandName)
+
+        // Then
+        assertEquals("Error: La marca ya existe", result)
+        coVerify(exactly = 1) { brandDao.existBrandName(brandName) }
     }
 
     @Test
@@ -289,6 +308,7 @@ class BrandRepositoryImpTest {
         val brandName = "Kenda"
         val entity = MarcaEntity(nombre = brandName)
         coEvery { brandDao.insert(entity) } throws RuntimeException("Simulated error")
+        coEvery { brandDao.existBrandName(brandName) } returns null
 
         // When
 
@@ -297,6 +317,7 @@ class BrandRepositoryImpTest {
         // Then
         assertEquals("Error: Simulated error", result)
         coVerify(exactly = 1) { brandDao.insert(entity) }
+        coVerify(exactly = 1) { brandDao.existBrandName(brandName) }
     }
 
     @Test
@@ -307,6 +328,7 @@ class BrandRepositoryImpTest {
         val entity = MarcaEntity(id = 1L, nombre = "Yebram")
 
         coEvery { brandDao.update(entity) } returns Unit
+        coEvery { brandDao.getOtherBrandByName("Yebram",1L) } returns null
 
         // When
 
@@ -315,6 +337,25 @@ class BrandRepositoryImpTest {
         // Then
         assertEquals("Marca actualizada exitosamente", result)
         coVerify(exactly = 1) { brandDao.update(entity) }
+        coVerify(exactly = 1) { brandDao.getOtherBrandByName("Yebram",1L) }
+    }
+
+    @Test
+    fun `updateBrand should return error message when brandName already exists in other brand`() = runTest {
+
+        // Given
+        val brandModel = BrandDomainModel(brandId = 1L, brandName = "Yebram")
+        val entity = MarcaEntity(id = 1L, nombre = "Yebram")
+
+        coEvery { brandDao.getOtherBrandByName("Yebram",1L) } returns entity
+
+        // When
+
+        val result: String = repository.updateBrand(brandModel)
+
+        // Then
+        assertEquals("Error: Ya existe otra marca con ese nombre", result)
+        coVerify(exactly = 1) { brandDao.getOtherBrandByName("Yebram",1L) }
     }
 
     @Test
@@ -325,6 +366,7 @@ class BrandRepositoryImpTest {
         val entity = MarcaEntity(id = 1L, nombre = "Yebram")
 
         coEvery { brandDao.update(entity) } throws RuntimeException("Simulated error")
+        coEvery { brandDao.getOtherBrandByName("Yebram",1L) } returns null
 
         // When
 
@@ -333,6 +375,7 @@ class BrandRepositoryImpTest {
         // Then
         assertEquals("Error: Simulated error", result)
         coVerify(exactly = 1) { brandDao.update(entity) }
+        coVerify(exactly = 1) { brandDao.getOtherBrandByName("Yebram",1L) }
     }
 
 }

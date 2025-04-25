@@ -277,6 +277,7 @@ class CategoryRepositoryImpTest {
         val name = "Neumaticos"
         val entity = CategoriaEntity(nombre = name)
         coEvery { categoryDao.insert(entity) } returns Unit
+        coEvery { categoryDao.existCategoryName("Neumaticos") } returns null
 
         // When
 
@@ -285,6 +286,24 @@ class CategoryRepositoryImpTest {
         // Then
         assertEquals("Categoría creada exitosamente", result)
         coVerify(exactly = 1) { categoryDao.insert(entity) }
+        coVerify(exactly = 1) { categoryDao.existCategoryName("Neumaticos") }
+    }
+
+    @Test
+    fun `createCategory should return error message when categoryName already exists`() = runTest {
+
+        // Given
+        val name = "Neumaticos"
+        val entity = CategoriaEntity(nombre = name)
+        coEvery { categoryDao.existCategoryName("Neumaticos") } returns entity
+
+        // When
+
+        val result: String = repository.createCategory(name)
+
+        // Then
+        assertEquals("Error: La categoría ya existe", result)
+        coVerify(exactly = 1) { categoryDao.existCategoryName("Neumaticos") }
     }
 
     @Test
@@ -295,6 +314,7 @@ class CategoryRepositoryImpTest {
         val entity = CategoriaEntity(nombre = name)
 
         coEvery { categoryDao.insert(entity) } throws RuntimeException("Simulated error")
+        coEvery { categoryDao.existCategoryName("Neumaticos") } returns null
 
         // When
 
@@ -303,6 +323,7 @@ class CategoryRepositoryImpTest {
         // Then
         assertEquals("Error: Simulated error", result)
         coVerify(exactly = 1) { categoryDao.insert(entity) }
+        coVerify(exactly = 1) { categoryDao.existCategoryName("Neumaticos") }
     }
 
     @Test
@@ -313,6 +334,7 @@ class CategoryRepositoryImpTest {
         val entity = CategoriaEntity(id = 1L, nombre = "Neumaticos")
 
         coEvery { categoryDao.update(entity) } returns Unit
+        coEvery { categoryDao.getOtherCategoryByName("Neumaticos",1L) } returns null
 
         // When
 
@@ -321,6 +343,25 @@ class CategoryRepositoryImpTest {
         // Then
         assertEquals("Categoría actualizada exitosamente", result)
         coVerify(exactly = 1) { categoryDao.update(entity) }
+        coVerify(exactly = 1) { categoryDao.getOtherCategoryByName("Neumaticos",1L) }
+    }
+
+    @Test
+    fun `updateCategory should return success error when categoryName already exists in other category`() = runTest {
+
+        // Given
+        val categoryModel = CategoryDomainModel(categoryId = 1L, categoryName = "Neumaticos")
+        val entity = CategoriaEntity(id = 1L, nombre = "Neumaticos")
+
+        coEvery { categoryDao.getOtherCategoryByName("Neumaticos",1L) } returns entity
+
+        // When
+
+        val result: String = repository.updateCategory(categoryModel)
+
+        // Then
+        assertEquals("Error: Ya existe otra categoría con ese nombre", result)
+        coVerify(exactly = 1) { categoryDao.getOtherCategoryByName("Neumaticos",1L) }
     }
 
     @Test
@@ -331,6 +372,7 @@ class CategoryRepositoryImpTest {
         val entity = CategoriaEntity(id = 1L, nombre = "Neumaticos")
 
         coEvery { categoryDao.update(entity) } throws RuntimeException("Simulated error")
+        coEvery { categoryDao.getOtherCategoryByName("Neumaticos",1L) } returns null
 
         // When
 
@@ -339,6 +381,7 @@ class CategoryRepositoryImpTest {
         // Then
         assertEquals("Error: Simulated error", result)
         coVerify(exactly = 1) { categoryDao.update(entity) }
+        coVerify(exactly = 1) { categoryDao.getOtherCategoryByName("Neumaticos",1L) }
     }
 
 }
