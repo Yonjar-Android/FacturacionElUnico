@@ -36,8 +36,10 @@ class ProductRepositoryImp @Inject constructor(
                 } else {
                     ResultPattern.Error(
                         exception = Throwable("Producto no encontrado"),
-                        message = "Error: Producto no encontrado")
-                }},
+                        message = "Error: Producto no encontrado"
+                    )
+                }
+            },
             onFailure = { ResultPattern.Error(it, message = "Error: ${it.message}") }
         )
     }
@@ -55,9 +57,16 @@ class ProductRepositoryImp @Inject constructor(
 
     // Función crear producto
     override suspend fun createProduct(productDomainModel: ProductDomainModel): String {
-        return runCatching{
-            productDao.insert(ProductMapper.toEntity(productDomainModel))
-            "Se ha agregado un nuevo producto"
+        return runCatching {
+
+
+            val productExist = productDao.existProductName(productDomainModel.name)
+            if (productExist != null) {
+                "Error: El producto ya existe"
+            } else {
+                productDao.insert(ProductMapper.toEntity(productDomainModel))
+                "Se ha agregado un nuevo producto"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }
@@ -66,8 +75,16 @@ class ProductRepositoryImp @Inject constructor(
     //Función actualizar producto
     override suspend fun updateProduct(productDomainModel: ProductDomainModel): String {
         return runCatching {
-            productDao.update(ProductMapper.toEntity(productDomainModel))
-            "Se ha actualizado el producto"
+
+            val productExist =
+                productDao.getOtherProductByName(productDomainModel.name, productDomainModel.id)
+
+            if (productExist != null) {
+                "Error: Ya existe un producto con ese nombre"
+            } else {
+                productDao.update(ProductMapper.toEntity(productDomainModel))
+                "Se ha actualizado el producto"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }

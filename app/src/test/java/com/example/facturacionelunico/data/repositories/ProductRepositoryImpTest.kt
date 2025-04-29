@@ -267,6 +267,7 @@ class ProductRepositoryImpTest {
         val domainModel = ProductMapper.toDomain(entity)
 
         coEvery { productDao.insert(entity) } returns Unit
+        coEvery { productDao.existProductName(domainModel.name) } returns null
 
         // When
 
@@ -275,6 +276,25 @@ class ProductRepositoryImpTest {
         // Then
         assertEquals("Se ha agregado un nuevo producto", result)
         coVerify(exactly = 1) { productDao.insert(entity) }
+        coVerify(exactly = 1) { productDao.existProductName(domainModel.name) }
+    }
+
+    @Test
+    fun `createProduct should return error message when product already exists`() = runTest {
+
+        // Given
+        val entity = MotherObjectRepositories.oneProductEntity
+        val domainModel = ProductMapper.toDomain(entity)
+
+        coEvery { productDao.existProductName(domainModel.name) } returns entity
+
+        // When
+
+        val result: String = repository.createProduct(domainModel)
+
+        // Then
+        assertEquals("Error: El producto ya existe", result)
+        coVerify(exactly = 1) { productDao.existProductName(domainModel.name) }
     }
 
     @Test
@@ -285,6 +305,7 @@ class ProductRepositoryImpTest {
         val domainModel = ProductMapper.toDomain(entity)
 
         coEvery { productDao.insert(entity) } throws RuntimeException("Simulated error")
+        coEvery { productDao.existProductName(domainModel.name) } returns null
 
         // When
 
@@ -293,6 +314,7 @@ class ProductRepositoryImpTest {
         // Then
         assertEquals("Error: Simulated error", result)
         coVerify(exactly = 1) { productDao.insert(entity) }
+        coVerify(exactly = 1) { productDao.existProductName(domainModel.name) }
     }
 
     @Test
@@ -303,7 +325,7 @@ class ProductRepositoryImpTest {
         val domainModel = ProductMapper.toDomain(entity)
 
         coEvery { productDao.update(entity) } returns Unit
-
+        coEvery { productDao.getOtherProductByName(domainModel.name, domainModel.id) } returns null
         // When
 
         val result: String = repository.updateProduct(domainModel)
@@ -311,6 +333,24 @@ class ProductRepositoryImpTest {
         // Then
         assertEquals("Se ha actualizado el producto", result)
         coVerify(exactly = 1) { productDao.update(entity) }
+        coVerify(exactly = 1) { productDao.getOtherProductByName(domainModel.name, domainModel.id) }
+    }
+
+    @Test
+    fun `updateProduct should return error message when product's name already exists in other product`() = runTest {
+
+        // Given
+        val entity = MotherObjectRepositories.oneProductEntity
+        val domainModel = ProductMapper.toDomain(entity)
+
+        coEvery { productDao.getOtherProductByName(domainModel.name, domainModel.id) } returns entity
+        // When
+
+        val result: String = repository.updateProduct(domainModel)
+
+        // Then
+        assertEquals("Error: Ya existe un producto con ese nombre", result)
+        coVerify(exactly = 1) { productDao.getOtherProductByName(domainModel.name, domainModel.id) }
     }
 
     @Test
@@ -321,6 +361,7 @@ class ProductRepositoryImpTest {
         val domainModel = ProductMapper.toDomain(entity)
 
         coEvery { productDao.update(entity) } throws RuntimeException("Simulated error")
+        coEvery { productDao.getOtherProductByName(domainModel.name, domainModel.id) } returns null
 
         // When
 
@@ -329,6 +370,7 @@ class ProductRepositoryImpTest {
         // Then
         assertEquals("Error: Simulated error", result)
         coVerify(exactly = 1) { productDao.update(entity) }
+        coVerify(exactly = 1) { productDao.getOtherProductByName(domainModel.name, domainModel.id) }
     }
 
 }

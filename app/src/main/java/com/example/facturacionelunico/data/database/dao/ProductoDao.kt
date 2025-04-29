@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.data.database.entities.ProductoEntity
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import kotlinx.coroutines.flow.Flow
@@ -13,8 +14,16 @@ interface ProductoDao {
     @Insert
     suspend fun insert(product: ProductoEntity)
 
+    // Verificar si un producto con el mismo nombre ya existe
+    @Query("SELECT * FROM producto WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1")
+    suspend fun existProductName(nombre: String): ProductoEntity?
+
     @Update
     suspend fun update(product: ProductoEntity)
+
+    // Verificar si un producto con el mismo nombre ya existe, excluyendo el producto actual
+    @Query("SELECT * FROM producto WHERE LOWER(nombre) = LOWER(:nombre) AND id != :id LIMIT 1")
+    suspend fun getOtherProductByName(nombre: String, id: Long): ProductoEntity?
 
     @Query("SELECT * FROM producto")
     fun getAll(): Flow<List<ProductoEntity>>
