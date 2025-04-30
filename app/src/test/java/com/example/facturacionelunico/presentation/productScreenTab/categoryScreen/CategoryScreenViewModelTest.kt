@@ -1,7 +1,6 @@
 package com.example.facturacionelunico.presentation.productScreenTab.categoryScreen
 
 import app.cash.turbine.turbineScope
-import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.CategoryRepository
@@ -64,7 +63,7 @@ class CategoryScreenViewModelTest {
             assertTrue(turbineMessage.awaitItem() == null)
 
 
-            // Call the function to create the brand
+            // Call the function to create the category
             viewModel.createCategory(category)
 
             // Second State
@@ -86,13 +85,13 @@ class CategoryScreenViewModelTest {
             val turbineCategories = viewModel.categories.testIn(backgroundScope)
 
             // Initial empty list
-            assertEquals(emptyList<BrandDomainModel>(), turbineCategories.awaitItem())
+            assertEquals(emptyList<CategoryDomainModel>(), turbineCategories.awaitItem())
 
             // Update query to empty string
             viewModel.updateQuery("")
             testDispatcher.scheduler.advanceUntilIdle()
 
-            // Should return all brands
+            // Should return all categories
             assertEquals(mockCategories, turbineCategories.awaitItem())
 
             turbineCategories.cancel()
@@ -111,13 +110,13 @@ class CategoryScreenViewModelTest {
             val turbineCategories = viewModel.categories.testIn(backgroundScope)
 
             // Initial empty list
-            assertEquals(emptyList<BrandDomainModel>(), turbineCategories.awaitItem())
+            assertEquals(emptyList<CategoryDomainModel>(), turbineCategories.awaitItem())
 
             // Update query
             viewModel.updateQuery(query)
             testDispatcher.scheduler.advanceUntilIdle() // Wait for debounce
 
-            // Should return filtered brands
+            // Should return filtered categories
             val result = turbineCategories.awaitItem()
             assertEquals(mockCategories, result)
             assertTrue(result.first().categoryName.contains(query))
@@ -132,7 +131,7 @@ class CategoryScreenViewModelTest {
     fun `categories should handle error and update message`() = runTest {
         // Given
         val query = "Invalid"
-        val errorMessage = "Error fetching brands"
+        val errorMessage = "Error fetching categories"
         coEvery { repository.getCategoryByName(query) } returns flow { emit(ResultPattern.Error(message = errorMessage)) }
 
         turbineScope {
@@ -140,7 +139,7 @@ class CategoryScreenViewModelTest {
             val turbineMessage = viewModel.message.testIn(backgroundScope)
 
             // Initial states
-            assertEquals(emptyList<BrandDomainModel>(), turbineCategories.awaitItem())
+            assertEquals(emptyList<CategoryDomainModel>(), turbineCategories.awaitItem())
             assertEquals(null, turbineMessage.awaitItem())
 
             // Update query
@@ -168,7 +167,7 @@ class CategoryScreenViewModelTest {
             // Initial state
             assertEquals(null, turbineMessage.awaitItem())
 
-            // Create brand to set message
+            // Create category to set message
             viewModel.createCategory(category)
             assertEquals("Success message", turbineMessage.awaitItem())
 
@@ -185,29 +184,29 @@ class CategoryScreenViewModelTest {
     fun `categories should debounce queries`() = runTest(testDispatcher) {
         // Given
         val mockCategories = listOf(CategoryDomainModel(1, "Category"))
-        coEvery { repository.getCategoryByName("Brand1") } returns flow { emit(ResultPattern.Success(mockCategories)) }
+        coEvery { repository.getCategoryByName("Category") } returns flow { emit(ResultPattern.Success(mockCategories)) }
 
         turbineScope {
-            val turbineBrands = viewModel.categories.testIn(backgroundScope)
+            val turbineCategories = viewModel.categories.testIn(backgroundScope)
 
             // Initial empty list
-            assertEquals(emptyList<BrandDomainModel>(), turbineBrands.awaitItem())
+            assertEquals(emptyList<CategoryDomainModel>(), turbineCategories.awaitItem())
 
             // Rapid successive queries
-            viewModel.updateQuery("B")
-            viewModel.updateQuery("Br")
+            viewModel.updateQuery("C")
+            viewModel.updateQuery("Ca")
             // ... más updates
-            viewModel.updateQuery("Brand1")
+            viewModel.updateQuery("Category")
 
             // Avanzar menos que el debounce
             testDispatcher.scheduler.advanceTimeBy(200)
-            turbineBrands.expectNoEvents()
+            turbineCategories.expectNoEvents()
 
             // Avanzar pasado el debounce
             testDispatcher.scheduler.advanceTimeBy(200)
-            assertEquals(mockCategories, turbineBrands.awaitItem())
+            assertEquals(mockCategories, turbineCategories.awaitItem())
 
-            turbineBrands.cancel()
+            turbineCategories.cancel()
         }
     }
 
