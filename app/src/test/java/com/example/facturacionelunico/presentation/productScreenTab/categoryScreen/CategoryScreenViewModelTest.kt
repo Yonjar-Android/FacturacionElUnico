@@ -1,9 +1,10 @@
-package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
+package com.example.facturacionelunico.presentation.productScreenTab.categoryScreen
 
 import app.cash.turbine.turbineScope
 import com.example.facturacionelunico.domain.models.BrandDomainModel
+import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.repositories.BrandRepository
+import com.example.facturacionelunico.domain.repositories.CategoryRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -19,29 +20,27 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BrandScreenViewModelTest {
+class CategoryScreenViewModelTest {
 
     @MockK
-    lateinit var repository: BrandRepository
+    lateinit var repository: CategoryRepository
 
-    lateinit var viewModel: BrandScreenViewModel
+    lateinit var viewModel: CategoryScreenViewModel
 
-    @get:Rule
-    private val testDispatcher = StandardTestDispatcher()
+    val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        viewModel = BrandScreenViewModel(repository)
+        viewModel = CategoryScreenViewModel(repository)
     }
 
     @After
-    fun tearDown() {
+    fun tearDown(){
         Dispatchers.resetMain()
     }
 
@@ -53,95 +52,95 @@ class BrandScreenViewModelTest {
     }
 
     @Test
-    fun `createBrand should update message`() = runTest {
+    fun `createCategory should update message`() = runTest {
         // Given
-        val marca = "Golden Boy"
-        coEvery { repository.createBrand(marca) } returns "Marca creada exitosamente"
+        val category = "Llantas"
+        coEvery { repository.createCategory(category) } returns "Categoría creada exitosamente"
 
         turbineScope {
-         val turbineMessage = viewModel.message.testIn(backgroundScope)
+            val turbineMessage = viewModel.message.testIn(backgroundScope)
 
             // Initial State
             assertTrue(turbineMessage.awaitItem() == null)
 
 
             // Call the function to create the brand
-            viewModel.createBrand(marca)
+            viewModel.createCategory(category)
 
             // Second State
-            assertTrue(turbineMessage.awaitItem() == "Marca creada exitosamente")
+            assertTrue(turbineMessage.awaitItem() == "Categoría creada exitosamente")
 
             turbineMessage.cancel()
         }
 
-        coVerify(exactly = 1) { repository.createBrand(marca) }
+        coVerify(exactly = 1) { repository.createCategory(category) }
     }
 
     @Test
-    fun `brands should return all brands when query is empty`() = runTest {
+    fun `getCategories should return all categories when query is empty`() = runTest {
         // Given
-        val mockBrands = listOf(BrandDomainModel(1, "Brand1"), BrandDomainModel(2, "Brand2"))
-        coEvery { repository.getBrands() } returns flow { emit(ResultPattern.Success(mockBrands)) }
+        val mockCategories = listOf(CategoryDomainModel(1, "Category1"), CategoryDomainModel(2, "Category2"))
+        coEvery { repository.getCategories() } returns flow { emit(ResultPattern.Success(mockCategories)) }
 
         turbineScope {
-            val turbineBrands = viewModel.brands.testIn(backgroundScope)
+            val turbineCategories = viewModel.categories.testIn(backgroundScope)
 
             // Initial empty list
-            assertEquals(emptyList<BrandDomainModel>(), turbineBrands.awaitItem())
+            assertEquals(emptyList<BrandDomainModel>(), turbineCategories.awaitItem())
 
             // Update query to empty string
             viewModel.updateQuery("")
             testDispatcher.scheduler.advanceUntilIdle()
 
             // Should return all brands
-            assertEquals(mockBrands, turbineBrands.awaitItem())
+            assertEquals(mockCategories, turbineCategories.awaitItem())
 
-            turbineBrands.cancel()
+            turbineCategories.cancel()
         }
-        coVerify(exactly = 1) { repository.getBrands() }
+        coVerify(exactly = 1) { repository.getCategories() }
     }
 
     @Test
-    fun `brands should return filtered brands when query is not empty`() = runTest {
+    fun `getCategories should return filtered categories when query is not empty`() = runTest {
         // Given
-        val query = "Brand1"
-        val mockBrand = listOf(BrandDomainModel(1, "Brand1"))
-        coEvery { repository.getBrandByName(query) } returns flow { emit(ResultPattern.Success(mockBrand)) }
+        val query = "Category1"
+        val mockCategories = listOf(CategoryDomainModel(1, "Category1"))
+        coEvery { repository.getCategoryByName(query) } returns flow { emit(ResultPattern.Success(mockCategories)) }
 
         turbineScope {
-            val turbineBrands = viewModel.brands.testIn(backgroundScope)
+            val turbineCategories = viewModel.categories.testIn(backgroundScope)
 
             // Initial empty list
-            assertEquals(emptyList<BrandDomainModel>(), turbineBrands.awaitItem())
+            assertEquals(emptyList<BrandDomainModel>(), turbineCategories.awaitItem())
 
             // Update query
             viewModel.updateQuery(query)
             testDispatcher.scheduler.advanceUntilIdle() // Wait for debounce
 
             // Should return filtered brands
-            val result = turbineBrands.awaitItem()
-            assertEquals(mockBrand, result)
-            assertTrue(result.first().brandName.contains(query))
+            val result = turbineCategories.awaitItem()
+            assertEquals(mockCategories, result)
+            assertTrue(result.first().categoryName.contains(query))
 
-            turbineBrands.cancel()
+            turbineCategories.cancel()
         }
 
-        coVerify(exactly = 1) { repository.getBrandByName(query) }
+        coVerify(exactly = 1) { repository.getCategoryByName(query) }
     }
 
     @Test
-    fun `brands should handle error and update message`() = runTest {
+    fun `categories should handle error and update message`() = runTest {
         // Given
         val query = "Invalid"
         val errorMessage = "Error fetching brands"
-        coEvery { repository.getBrandByName(query) } returns flow { emit(ResultPattern.Error(message = errorMessage)) }
+        coEvery { repository.getCategoryByName(query) } returns flow { emit(ResultPattern.Error(message = errorMessage)) }
 
         turbineScope {
-            val turbineBrands = viewModel.brands.testIn(backgroundScope)
+            val turbineCategories= viewModel.categories.testIn(backgroundScope)
             val turbineMessage = viewModel.message.testIn(backgroundScope)
 
             // Initial states
-            assertEquals(emptyList<BrandDomainModel>(), turbineBrands.awaitItem())
+            assertEquals(emptyList<BrandDomainModel>(), turbineCategories.awaitItem())
             assertEquals(null, turbineMessage.awaitItem())
 
             // Update query
@@ -151,17 +150,17 @@ class BrandScreenViewModelTest {
             // Should return empty list and update message
             assertEquals(errorMessage, turbineMessage.awaitItem())
 
-            turbineBrands.cancel()
+            turbineCategories.cancel()
             turbineMessage.cancel()
         }
-        coVerify(exactly = 1) { repository.getBrandByName(query) }
+        coVerify(exactly = 1) { repository.getCategoryByName(query) }
     }
 
     @Test
     fun `restartMessage should reset message to null`() = runTest {
         // Given
-        val marca = "Test Brand"
-        coEvery { repository.createBrand(marca) } returns "Success message"
+        val category = "Test Category"
+        coEvery { repository.createCategory(category) } returns "Success message"
 
         turbineScope {
             val turbineMessage = viewModel.message.testIn(backgroundScope)
@@ -170,7 +169,7 @@ class BrandScreenViewModelTest {
             assertEquals(null, turbineMessage.awaitItem())
 
             // Create brand to set message
-            viewModel.createBrand(marca)
+            viewModel.createCategory(category)
             assertEquals("Success message", turbineMessage.awaitItem())
 
             // Restart message
@@ -179,17 +178,17 @@ class BrandScreenViewModelTest {
 
             turbineMessage.cancel()
         }
-        coVerify(exactly = 1) { repository.createBrand(marca) }
+        coVerify(exactly = 1) { repository.createCategory(category) }
     }
 
     @Test
-    fun `brands should debounce queries`() = runTest {
+    fun `categories should debounce queries`() = runTest(testDispatcher) {
         // Given
-        val mockBrands = listOf(BrandDomainModel(1, "Brand1"))
-        coEvery { repository.getBrandByName("Brand1") } returns flow { emit(ResultPattern.Success(mockBrands)) }
+        val mockCategories = listOf(CategoryDomainModel(1, "Category"))
+        coEvery { repository.getCategoryByName("Brand1") } returns flow { emit(ResultPattern.Success(mockCategories)) }
 
         turbineScope {
-            val turbineBrands = viewModel.brands.testIn(backgroundScope)
+            val turbineBrands = viewModel.categories.testIn(backgroundScope)
 
             // Initial empty list
             assertEquals(emptyList<BrandDomainModel>(), turbineBrands.awaitItem())
@@ -206,7 +205,7 @@ class BrandScreenViewModelTest {
 
             // Avanzar pasado el debounce
             testDispatcher.scheduler.advanceTimeBy(200)
-            assertEquals(mockBrands, turbineBrands.awaitItem())
+            assertEquals(mockCategories, turbineBrands.awaitItem())
 
             turbineBrands.cancel()
         }
