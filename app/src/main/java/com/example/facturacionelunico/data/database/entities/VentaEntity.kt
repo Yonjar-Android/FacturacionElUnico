@@ -10,7 +10,7 @@ data class VentaEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val fechaVenta: Long,
     val total: Double,
-    val idCliente: Long,
+    val idCliente: Long?,
     val estado: String // PENDIENTE, COMPLETADO, CANCELADO
 )
 

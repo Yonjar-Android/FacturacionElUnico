@@ -8,8 +8,8 @@ data class ProveedorEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val nombreEmpresa: String,
     val nombreContacto: String,
-    val telefono: String,
-    val correo: String,
-    val direccion: String
+    val telefono: String?,
+    val correo: String?,
+    val direccion: String?
 )
 
