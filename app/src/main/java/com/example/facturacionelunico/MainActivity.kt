@@ -30,6 +30,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.facturacionelunico.presentation.clientAndSupplierTab.ClientSupplierTab
+import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientDetailScreen
+import com.example.facturacionelunico.presentation.clientAndSupplierTab.supplierScreen.SupplierDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.ProductScreenTab
 import com.example.facturacionelunico.presentation.productScreenTab.brandScreen.brandDetailScreen.BrandDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.categoryScreen.categoryDetailScreen.CategoryDetailScreen
@@ -66,6 +69,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = "ProductScreen",
                         modifier = Modifier.padding(it)
                     ) {
+                        /*Pantalla de productos*/
                         composable(route = "ProductScreen") {
                             ProductScreenTab(
                                 navController = controller,
@@ -73,6 +77,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        /*Pantalla para crear productos*/
                         composable(route = "ProductCreateScreen") {
                             ProductCreateScreen(
                                 navController = controller,
@@ -80,6 +85,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        /*Pantalla de detalle de producto*/
                         composable(
                             route = "ProductDetailScreen/{productId}",
                             arguments = listOf(
@@ -92,6 +98,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        /*Pantalla para actualizar productos*/
                         composable(
                             route = "ProductUpdateScreen/{productId}",
                             arguments = listOf(
@@ -106,6 +113,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        /*Pantalla detalle de categoría*/
                         composable(
                             route = "CategoryDetailScreen/{categoryId}",
                             arguments = listOf(
@@ -118,6 +126,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        /*Pantalla detalle de marca*/
                         composable(
                             route = "BrandDetailScreen/{brandId}",
                             arguments = listOf(
@@ -128,9 +137,34 @@ class MainActivity : ComponentActivity() {
                                 brandId = brandId,
                                 navController = controller
                             )
-
                         }
 
+                        /*Pantalla de clientes y proveedores*/
+                        composable(
+                            route = "ClientSupplierScreen"
+                        ) {
+                            ClientSupplierTab(
+                                navController = controller
+                            )
+                        }
+
+                        /*Pantalla detalle de cliente*/
+                        composable(
+                            route = "ClientDetailScreen"
+                        ) {
+                            ClientDetailScreen(
+                                navController = controller
+                            )
+                        }
+
+                        /*Pantalla detalle de proveedor*/
+                        composable(
+                            route = "SupplierDetailScreen"
+                        ) {
+                            SupplierDetailScreen(
+                                navController = controller
+                            )
+                        }
                     }
                 }
             }
@@ -165,7 +199,7 @@ fun BottomNav(
         NavigationBarItem(
             selected = selectedScreen == 1, onClick = {
                 onChangeScreen.invoke(1)
-                navController.navigate("ProductScreen")
+                navController.navigate("ClientSupplierScreen")
             }, icon = {
                 NavIcon(
                     icon = R.drawable.client,
