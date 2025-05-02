@@ -5,9 +5,11 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.clientS
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,11 +37,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductItem
+import com.example.facturacionelunico.domain.models.ClientDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.ui.theme.blueUi
@@ -46,7 +50,9 @@ import com.example.facturacionelunico.ui.theme.blueUi
 @Composable
 fun ClientScreen(
     viewModel: ClientScreenViewModel = hiltViewModel()
-){
+) {
+
+    val clients by viewModel.clients.collectAsStateWithLifecycle()
 
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -54,11 +60,11 @@ fun ClientScreen(
 
     var showDialog by remember { mutableStateOf(false) }
 
-    if (!message.isNullOrEmpty()){
-        Toast.makeText(LocalContext.current,message,Toast.LENGTH_SHORT).show()
+    if (!message.isNullOrEmpty()) {
+        Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
 
-        if(!message!!.contains("Error")){
-          showDialog = false
+        if (!message!!.contains("Error")) {
+            showDialog = false
         }
 
         viewModel.restartMessage()
@@ -74,10 +80,12 @@ fun ClientScreen(
                 viewModel.updateQuery(newQuery)
             })
 
-            Spacer(modifier = Modifier.size(15.dp))
+            Spacer(modifier = Modifier.size(25.dp))
 
             LazyColumn {
-
+                items(clients) { client ->
+                    ClientItem(client)
+                }
             }
         }
         AddButton(
@@ -86,12 +94,14 @@ fun ClientScreen(
         )
     }
 
-    if (showDialog){
+    if (showDialog) {
         ClientDialog(
             title = "Añadir cliente",
             textButton = "Añadir",
             dismiss = { showDialog = false },
-            onConfirm = {  }
+            onConfirm = { client ->
+                viewModel.createClient(client)
+            }
         )
     }
 
@@ -100,12 +110,44 @@ fun ClientScreen(
 }
 
 @Composable
+fun ClientItem(client: ClientDomainModel) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(15.dp)
+            .clickable{
+
+            },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.Start
+        ) {
+            val fullName = "${client.name} ${client.lastName}"
+            Text(fullName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(
+                text = if (client.phone.isNullOrBlank()) "Ninguno" else client.phone,
+                fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Gray
+            )
+
+        }
+
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+            Text("C$ Dinero", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("Deuda", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
 fun ClientDialog(
     title: String,
     textButton: String,
     dismiss: () -> Unit,
-    onConfirm: () -> Unit
-){
+    onConfirm: (ClientDomainModel) -> Unit
+) {
 
     var code by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -131,13 +173,14 @@ fun ClientDialog(
             TextFieldClient(
                 title = "Código o Número",
                 value = code,
-                onValueChange = { code = it}
+                onValueChange = { code = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             TextFieldClient(
                 title = "Nombre",
                 value = name,
-                onValueChange = {name = it}
+                onValueChange = { name = it }
             )
 
             TextFieldClient(
@@ -149,13 +192,20 @@ fun ClientDialog(
             TextFieldClient(
                 title = "Teléfono",
                 value = phoneNumber,
-                onValueChange = {phoneNumber = it}
+                onValueChange = { phoneNumber = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             Button(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 onClick = {
-                    onConfirm.invoke()
+                    val client = ClientDomainModel(
+                        id = if (code.isEmpty()) 0L else code.toLong(),
+                        name = name,
+                        lastName = lastname,
+                        phone = phoneNumber
+                    )
+                    onConfirm.invoke(client)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = blueUi)
             ) {
@@ -174,8 +224,9 @@ fun ClientDialog(
 fun TextFieldClient(
     title: String,
     value: String,
-    onValueChange: (String) -> Unit
-){
+    onValueChange: (String) -> Unit,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+) {
     Column {
         Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
 
@@ -191,7 +242,8 @@ fun TextFieldClient(
             ),
             shape = RoundedCornerShape(30.dp),
             maxLines = 1,
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = keyboardOptions
         )
 
         Spacer(modifier = Modifier.size(5.dp))

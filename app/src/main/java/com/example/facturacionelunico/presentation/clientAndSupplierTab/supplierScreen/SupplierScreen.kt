@@ -5,16 +5,20 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.supplie
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,10 +35,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.facturacionelunico.domain.models.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.TextFieldClient
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
@@ -44,6 +50,9 @@ import com.example.facturacionelunico.ui.theme.blueUi
 fun SupplierScreen(
     viewModel: SupplierScreenViewModel = hiltViewModel()
 ) {
+
+    val suppliers by viewModel.suppliers.collectAsStateWithLifecycle()
+
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -73,7 +82,9 @@ fun SupplierScreen(
             Spacer(modifier = Modifier.size(15.dp))
 
             LazyColumn {
-
+                items(suppliers) { supplier ->
+                    SupplierItem(supplier)
+                }
             }
         }
         AddButton(
@@ -87,7 +98,9 @@ fun SupplierScreen(
             title = "Añadir proveedor",
             textButton = "Añadir",
             dismiss = { showDialog = false },
-            onConfirm = {  }
+            onConfirm = { supplier ->
+                viewModel.createSupplier(supplier)
+            }
         )
     }
 
@@ -96,11 +109,45 @@ fun SupplierScreen(
 }
 
 @Composable
+fun SupplierItem(supplier: SupplierDomainModel){
+    Row(
+        modifier = Modifier
+            .clickable{
+
+            }
+            .fillMaxWidth()
+            .padding(15.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(supplier.contactName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(
+                text = supplier.company,
+                fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Gray
+            )
+
+        }
+
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+            Text("C$ Dinero", fontWeight = FontWeight.Bold,
+                fontSize = 20.sp)
+
+            Text("Deuda", fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
 fun SupplierDialog(
     title: String,
     textButton: String,
     dismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: (SupplierDomainModel) -> Unit
 ){
 
     var company by remember { mutableStateOf("") }
@@ -139,13 +186,15 @@ fun SupplierDialog(
             TextFieldClient(
                 title = "Teléfono",
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it }
+                onValueChange = { phoneNumber = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             TextFieldClient(
                 title = "Correo electrónico",
                 value = email,
-                onValueChange = { email = it }
+                onValueChange = { email = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
 
             TextFieldClient(
@@ -157,7 +206,14 @@ fun SupplierDialog(
             Button(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 onClick = {
-                    onConfirm.invoke()
+                    val supplier = SupplierDomainModel(
+                        company = company,
+                        contactName = contactName,
+                        phone = phoneNumber,
+                        email = email,
+                        address = address,
+                    )
+                    onConfirm.invoke(supplier)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = blueUi)
             ) {

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ClienteDao {
@@ -12,6 +13,9 @@ interface ClienteDao {
     suspend fun insert(cliente: ClienteEntity)
 
     @Query("SELECT * FROM cliente")
-    suspend fun getAll(): List<ClienteEntity>
+    fun getAll(): Flow<List<ClienteEntity>>
+
+    @Query("SELECT * FROM cliente WHERE id = :id")
+    fun getClientById(id: Long): Flow<ClienteEntity>
 }
 
