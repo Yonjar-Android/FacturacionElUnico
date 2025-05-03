@@ -108,6 +108,7 @@ fun SupplierScreen(
     BackHandler {}
 }
 
+// Función para mostrar información de un proveedor
 @Composable
 fun SupplierItem(supplier: SupplierDomainModel){
     Row(
@@ -142,6 +143,7 @@ fun SupplierItem(supplier: SupplierDomainModel){
     }
 }
 
+// Dialog que muestra todos los campos necesarios para crear un proveedor
 @Composable
 fun SupplierDialog(
     title: String,
@@ -213,6 +215,8 @@ fun SupplierDialog(
                         email = email,
                         address = address,
                     )
+
+                    // Llamada a la función para crear un proveedor
                     onConfirm.invoke(supplier)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = blueUi)

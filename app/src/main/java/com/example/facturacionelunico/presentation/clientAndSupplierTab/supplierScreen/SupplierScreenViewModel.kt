@@ -6,6 +6,7 @@ import com.example.facturacionelunico.domain.models.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository
+import com.example.facturacionelunico.utils.transform.FormatNames
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -41,7 +42,7 @@ class SupplierScreenViewModel @Inject constructor(
             if (query.isBlank()) {
                 repository.getSuppliers()
             } else {
-                repository.getSuppliers()
+                repository.getSuppliersBySearch(query)
             }
         }.map { result ->
             when (result) {
@@ -61,28 +62,34 @@ class SupplierScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    // Función para crear proveedor y actualizar el mensaje
     fun createSupplier(supplier: SupplierDomainModel) {
         viewModelScope.launch {
             if (supplierValidations(supplier)) {
-                _message.value = repository.createSupplier(supplier)
+                val newSupplier =
+                    supplier.copy(company = FormatNames
+                        .firstLetterUpperCase(supplier.company)) // Función para formatear el nombre de la empresa y que empiece con mayúscula
+
+                _message.value = repository.createSupplier(newSupplier)
             }
         }
     }
 
+    // Función para validar datos anes de enviarlos al repositorio
     private fun supplierValidations(supplier: SupplierDomainModel): Boolean {
 
-        if (supplier.company.isEmpty()){
+        if (supplier.company.isEmpty()) {
             _message.value = "Error: Rellene el campo empresa"
             return false
         }
 
-        if (supplier.contactName.isEmpty()){
+        if (supplier.contactName.isEmpty()) {
             _message.value = "Error: Rellene el campo contacto"
             return false
         }
 
-        if (supplier.email?.isNotEmpty() == true){
-            if (!isValidEmail(supplier.email)){
+        if (supplier.email?.isNotEmpty() == true) {
+            if (!isValidEmail(supplier.email)) {
                 _message.value = "Error: El email no es valido"
                 return false
             }
@@ -90,8 +97,10 @@ class SupplierScreenViewModel @Inject constructor(
         return true
     }
 
+    // Función para verificar si un email es válido
     private fun isValidEmail(email: String?): Boolean {
-        return !email.isNullOrBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+        return !email.isNullOrBlank() && android.util.Patterns.EMAIL_ADDRESS.matcher(email)
+            .matches()
     }
 
 

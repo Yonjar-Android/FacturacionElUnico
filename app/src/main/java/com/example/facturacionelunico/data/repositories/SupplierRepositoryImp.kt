@@ -13,6 +13,7 @@ import javax.inject.Inject
 class SupplierRepositoryImp @Inject constructor(
     private val supplierDao: ProveedorDao
 ): SupplierRepository {
+    // Función para obtener todos los proveedores mediante un flow
     override fun getSuppliers(): Flow<ResultPattern<List<SupplierDomainModel>>> {
         return supplierDao.getAll()
             .map {
@@ -29,17 +30,58 @@ class SupplierRepositoryImp @Inject constructor(
     }
             }
 
+    override suspend fun getSuppliersBySearch(query: String): Flow<ResultPattern<List<SupplierDomainModel>>> {
+        return supplierDao.getSuppliersBySearch(query)
+            .map<List<SupplierDomainModel>, ResultPattern<List<SupplierDomainModel>>> { products ->
+                ResultPattern.Success(products)
+            }
+            .catch { e ->
+                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
+            }
+    }
+
+    // Función para crear un proveedor
     override suspend fun createSupplier(supplier: SupplierDomainModel): String {
         return runCatching {
-            val newSupplier = ProveedorEntity(
-                nombreEmpresa = supplier.company,
-                nombreContacto = supplier.contactName,
-                telefono = supplier.phone ?: "",
-                correo = supplier.email ?: "",
-                direccion = supplier.address ?: ""
-            )
-            supplierDao.insert(newSupplier)
-            "Se ha creado un nuevo cliente"
+
+            val existingSupplier = supplierDao.getSupplierByCompany(supplier.company, supplier.id)
+
+            if (existingSupplier != null){
+                return "Error: Ya existe un proveedor con ese nombre de empresa"
+            } else{
+                val newSupplier = ProveedorEntity(
+                    nombreEmpresa = supplier.company,
+                    nombreContacto = supplier.contactName,
+                    telefono = supplier.phone ?: "",
+                    correo = supplier.email ?: "",
+                    direccion = supplier.address ?: ""
+                )
+                supplierDao.insert(newSupplier)
+                "Se ha creado un nuevo proveedor"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun updateSupplier(supplier: SupplierDomainModel): String {
+        return runCatching {
+
+            val existingSupplier = supplierDao.getSupplierByCompany(supplier.company, supplier.id)
+
+            if (existingSupplier != null){
+                return "Error: Ya existe un proveedor con ese nombre de empresa"
+            } else{
+                val newSupplier = ProveedorEntity(
+                    nombreEmpresa = supplier.company,
+                    nombreContacto = supplier.contactName,
+                    telefono = supplier.phone ?: "",
+                    correo = supplier.email ?: "",
+                    direccion = supplier.address ?: ""
+                )
+                supplierDao.update(newSupplier)
+                "Se ha actualizado el proveedor"
+            }
         }.getOrElse {
             "Error: ${it.message}"
         }

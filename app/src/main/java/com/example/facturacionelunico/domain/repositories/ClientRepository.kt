@@ -8,8 +8,12 @@ interface ClientRepository {
 
     fun getClients(): Flow<ResultPattern<List<ClientDomainModel>>>
 
+    suspend fun getClientBySearch(query: String): Flow<ResultPattern<List<ClientDomainModel>>>
+
     //fun getClientById(id: Long): Flow<ResultPattern<ClientDomainModel>>
 
     suspend fun createClient(client: ClientDomainModel): String
+
+    suspend fun updateClient(client: ClientDomainModel): String
 
 }

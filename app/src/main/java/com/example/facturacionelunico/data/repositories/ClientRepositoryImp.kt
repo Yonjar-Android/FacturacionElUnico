@@ -14,6 +14,7 @@ import javax.inject.Inject
 class ClientRepositoryImp @Inject constructor(
     private val clientDao: ClienteDao
 ): ClientRepository {
+    // Función para obtener a todos los clientes mediante un flow
     override fun getClients(): Flow<ResultPattern<List<ClientDomainModel>>> {
         return clientDao.getAll()
             .map {
@@ -31,14 +32,26 @@ class ClientRepositoryImp @Inject constructor(
             }
     }
 
+    override suspend fun getClientBySearch(query: String): Flow<ResultPattern<List<ClientDomainModel>>> {
+        return clientDao.getClientByName(query)
+            .map<List<ClientDomainModel>, ResultPattern<List<ClientDomainModel>>> { products ->
+                ResultPattern.Success(products)
+            }
+            .catch { e ->
+                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
+            }
+    }
+
+    // Función para crear un cliente
     override suspend fun createClient(client: ClientDomainModel): String {
         return runCatching {
 
+            // Función para verificar si ya existe un cliente con el mismo código proporcionado
             val existingClient = clientDao.getClientById(client.id).firstOrNull()
 
             if (existingClient != null){
-                return "Ya existe un cliente con ese código"
-            }else{
+                return "Error: Ya existe un cliente con ese código"
+            } else{
                 val newClient = ClienteEntity(
                     id = client.id,
                     nombre = client.name,
@@ -50,6 +63,29 @@ class ClientRepositoryImp @Inject constructor(
             }
         }.getOrElse {
            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun updateClient(client: ClientDomainModel): String {
+        return runCatching {
+
+            // Función para verificar si ya existe un cliente con el mismo código proporcionado
+            val existingClient = clientDao.getClientById(client.id).firstOrNull()
+
+            if (existingClient != null){
+                return "Error: Ya existe un cliente con ese código"
+            } else{
+                val newClient = ClienteEntity(
+                    id = client.id,
+                    nombre = client.name,
+                    apellido = client.lastName,
+                    telefono = client.phone ?: ""
+                )
+                clientDao.insert(newClient)
+                "Se ha actualizado el cliente"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
         }
     }
 }

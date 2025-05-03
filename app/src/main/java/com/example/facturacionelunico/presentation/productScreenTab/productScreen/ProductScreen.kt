@@ -83,11 +83,11 @@ fun ProductScreen(
 fun ProductItem(product: DetailedProductModel, controller: NavController) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp)
             .clickable {
                 controller.navigate("ProductDetailScreen/${product.id}")
-            },
+            }
+            .fillMaxWidth()
+            .padding(15.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 

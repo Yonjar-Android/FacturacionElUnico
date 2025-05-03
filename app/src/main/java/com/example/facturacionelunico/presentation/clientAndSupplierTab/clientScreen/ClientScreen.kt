@@ -109,15 +109,16 @@ fun ClientScreen(
     BackHandler {}
 }
 
+// Función para mostrar información de un cliente
 @Composable
 fun ClientItem(client: ClientDomainModel) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp)
             .clickable{
 
-            },
+            }
+            .fillMaxWidth()
+            .padding(15.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -141,6 +142,7 @@ fun ClientItem(client: ClientDomainModel) {
     }
 }
 
+// Dialog que muestra todos los campos necesarios para crear un cliente
 @Composable
 fun ClientDialog(
     title: String,
@@ -205,6 +207,8 @@ fun ClientDialog(
                         lastName = lastname,
                         phone = phoneNumber
                     )
+
+                    // Llamada a la función para crear un cliente
                     onConfirm.invoke(client)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = blueUi)

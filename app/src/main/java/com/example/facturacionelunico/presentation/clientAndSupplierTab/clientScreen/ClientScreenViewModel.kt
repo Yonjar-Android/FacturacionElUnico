@@ -31,13 +31,17 @@ class ClientScreenViewModel @Inject constructor(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
+    fun updateQuery(newQuery: String) {
+        _searchQuery.value = newQuery
+    }
+
     val clients: StateFlow<List<ClientDomainModel>> = _searchQuery
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {
                 repository.getClients()
             } else {
-                repository.getClients()
+                repository.getClientBySearch(query)
             }
         }.map { result ->
             when (result) {
@@ -58,6 +62,7 @@ class ClientScreenViewModel @Inject constructor(
         )
 
 
+    // Función para crear cliente
     fun createClient(client: ClientDomainModel){
         viewModelScope.launch {
             if (clientValidations(client)){
@@ -66,10 +71,7 @@ class ClientScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateQuery(newQuery: String) {
-        _searchQuery.value = newQuery
-    }
-
+    // Validaciones antes de enviar los datos al repositorio
     fun clientValidations(client: ClientDomainModel): Boolean{
 
         if (client.id == 0L){
