@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
 
                         /*Pantalla de clientes y proveedores*/
                         composable(
-                            route = "ClientSupplierScreen"
+                            route = "ClientSupplierScreen",
                         ) {
                             ClientSupplierTab(
                                 navController = controller
@@ -150,18 +150,30 @@ class MainActivity : ComponentActivity() {
 
                         /*Pantalla detalle de cliente*/
                         composable(
-                            route = "ClientDetailScreen"
-                        ) {
+                            route = "ClientDetailScreen/{clientId}",
+                            arguments = listOf(
+                                navArgument("clientId") { type = NavType.LongType }
+                            )
+                        ) { backStackEntry ->
+                            val clientId = backStackEntry.arguments?.getLong("clientId") ?: 0
+
                             ClientDetailScreen(
+                                clientId = clientId,
                                 navController = controller
                             )
                         }
 
                         /*Pantalla detalle de proveedor*/
                         composable(
-                            route = "SupplierDetailScreen"
-                        ) {
+                            route = "SupplierDetailScreen/{supplierId}",
+                            arguments = listOf(
+                                navArgument("supplierId") { type = NavType.LongType }
+                            )
+                        ) { backStackEntry ->
+                            val supplierId = backStackEntry.arguments?.getLong("supplierId") ?: 0L
+
                             SupplierDetailScreen(
+                                supplierId = supplierId,
                                 navController = controller
                             )
                         }

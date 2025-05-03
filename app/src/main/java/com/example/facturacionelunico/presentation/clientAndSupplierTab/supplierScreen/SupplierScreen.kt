@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.TextFieldClient
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
@@ -48,6 +49,7 @@ import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
 fun SupplierScreen(
+    navController: NavController,
     viewModel: SupplierScreenViewModel = hiltViewModel()
 ) {
 
@@ -83,7 +85,9 @@ fun SupplierScreen(
 
             LazyColumn {
                 items(suppliers) { supplier ->
-                    SupplierItem(supplier)
+                    SupplierItem(supplier, goToDetail = {
+                        navController.navigate("SupplierDetailScreen/${supplier.id}")
+                    })
                 }
             }
         }
@@ -110,11 +114,12 @@ fun SupplierScreen(
 
 // Función para mostrar información de un proveedor
 @Composable
-fun SupplierItem(supplier: SupplierDomainModel){
+fun SupplierItem(supplier: SupplierDomainModel, goToDetail: () -> Unit){
     Row(
         modifier = Modifier
             .clickable{
-
+                // Función para navegar al detalle del proveedor
+                goToDetail.invoke()
             }
             .fillMaxWidth()
             .padding(15.dp),

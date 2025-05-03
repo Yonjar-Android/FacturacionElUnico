@@ -34,10 +34,10 @@ fun ClientSupplierTab(
 
         when(tabIndex){
             0 -> {
-                ClientScreen()
+                ClientScreen(navController = navController)
             }
             1 -> {
-                SupplierScreen()
+                SupplierScreen(navController = navController)
             }
         }
     }

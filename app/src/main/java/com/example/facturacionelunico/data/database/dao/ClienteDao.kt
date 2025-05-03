@@ -22,11 +22,15 @@ interface ClienteDao {
     @Query("SELECT * FROM cliente WHERE id = :id")
     fun getClientById(id: Long): Flow<ClienteEntity>
 
+    @Query("SELECT * FROM cliente WHERE identificadorCliente = :identificador AND id != :currentId")
+    suspend fun getClienteByIdentificadorExcludingId(identificador: Int, currentId: Long): ClienteEntity?
+
     @Query("""
         SELECT cliente.id as id,
         cliente.nombre as name,
         cliente.apellido as lastName,
-        cliente.telefono as phone
+        cliente.telefono as phone,
+        cliente.identificadorCliente as numberIdentifier
         FROM cliente
         WHERE (nombre || ' ' || apellido) LIKE '%' || :query || '%'
     """)

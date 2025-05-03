@@ -23,7 +23,8 @@ class ClientRepositoryImp @Inject constructor(
                         id = it.id,
                         name = it.nombre,
                         lastName = it.apellido,
-                        phone = it.telefono)
+                        phone = it.telefono,
+                        numberIdentifier = it.identificadorCliente)
                 }
             }.map<List<ClientDomainModel>, ResultPattern<List<ClientDomainModel>>> { suppliers ->
                 ResultPattern.Success(suppliers)
@@ -42,21 +43,32 @@ class ClientRepositoryImp @Inject constructor(
             }
     }
 
+    override fun getClientById(id: Long): Flow<ClientDomainModel> {
+        return clientDao.getClientById(id).map {
+            ClientDomainModel(
+                id = it.id,
+                name = it.nombre,
+                lastName = it.apellido,
+                phone = it.telefono,
+                numberIdentifier = it.identificadorCliente)
+        }
+    }
+
     // Función para crear un cliente
     override suspend fun createClient(client: ClientDomainModel): String {
         return runCatching {
 
             // Función para verificar si ya existe un cliente con el mismo código proporcionado
-            val existingClient = clientDao.getClientById(client.id).firstOrNull()
+            val existingClient = clientDao.getClienteByIdentificadorExcludingId(client.numberIdentifier,client.id)
 
             if (existingClient != null){
                 return "Error: Ya existe un cliente con ese código"
             } else{
                 val newClient = ClienteEntity(
-                    id = client.id,
                     nombre = client.name,
                     apellido = client.lastName,
-                    telefono = client.phone ?: ""
+                    telefono = client.phone ?: "",
+                    identificadorCliente = client.numberIdentifier
                 )
                 clientDao.insert(newClient)
                 "Se ha creado un nuevo cliente"
@@ -70,7 +82,7 @@ class ClientRepositoryImp @Inject constructor(
         return runCatching {
 
             // Función para verificar si ya existe un cliente con el mismo código proporcionado
-            val existingClient = clientDao.getClientById(client.id).firstOrNull()
+            val existingClient = clientDao.getClienteByIdentificadorExcludingId(client.numberIdentifier, client.id)
 
             if (existingClient != null){
                 return "Error: Ya existe un cliente con ese código"
@@ -79,9 +91,10 @@ class ClientRepositoryImp @Inject constructor(
                     id = client.id,
                     nombre = client.name,
                     apellido = client.lastName,
-                    telefono = client.phone ?: ""
+                    telefono = client.phone ?: "",
+                    identificadorCliente = client.numberIdentifier
                 )
-                clientDao.insert(newClient)
+                clientDao.update(newClient)
                 "Se ha actualizado el cliente"
             }
         }.getOrElse {

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.ClientDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
@@ -49,7 +50,8 @@ import com.example.facturacionelunico.ui.theme.blueUi
 
 @Composable
 fun ClientScreen(
-    viewModel: ClientScreenViewModel = hiltViewModel()
+    viewModel: ClientScreenViewModel = hiltViewModel(),
+    navController: NavController
 ) {
 
     val clients by viewModel.clients.collectAsStateWithLifecycle()
@@ -84,7 +86,9 @@ fun ClientScreen(
 
             LazyColumn {
                 items(clients) { client ->
-                    ClientItem(client)
+                    ClientItem(client, goToDetail = {
+                        navController.navigate("ClientDetailScreen/${client.id}")
+                    })
                 }
             }
         }
@@ -111,11 +115,12 @@ fun ClientScreen(
 
 // Función para mostrar información de un cliente
 @Composable
-fun ClientItem(client: ClientDomainModel) {
+fun ClientItem(client: ClientDomainModel, goToDetail:() -> Unit) {
     Row(
         modifier = Modifier
             .clickable{
-
+                // LLamado a la función para navegar al detalle del cliente
+                goToDetail.invoke()
             }
             .fillMaxWidth()
             .padding(15.dp),
@@ -202,10 +207,10 @@ fun ClientDialog(
                 modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                 onClick = {
                     val client = ClientDomainModel(
-                        id = if (code.isEmpty()) 0L else code.toLong(),
                         name = name,
                         lastName = lastname,
-                        phone = phoneNumber
+                        phone = phoneNumber,
+                        numberIdentifier = if (code.isEmpty()) 0 else code.toInt()
                     )
 
                     // Llamada a la función para crear un cliente

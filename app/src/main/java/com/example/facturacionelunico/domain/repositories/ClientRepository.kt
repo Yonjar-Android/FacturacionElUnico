@@ -10,7 +10,7 @@ interface ClientRepository {
 
     suspend fun getClientBySearch(query: String): Flow<ResultPattern<List<ClientDomainModel>>>
 
-    //fun getClientById(id: Long): Flow<ResultPattern<ClientDomainModel>>
+    fun getClientById(id: Long): Flow<ClientDomainModel>
 
     suspend fun createClient(client: ClientDomainModel): String
 

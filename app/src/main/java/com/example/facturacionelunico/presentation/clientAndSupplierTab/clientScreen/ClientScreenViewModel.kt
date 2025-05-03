@@ -74,7 +74,7 @@ class ClientScreenViewModel @Inject constructor(
     // Validaciones antes de enviar los datos al repositorio
     fun clientValidations(client: ClientDomainModel): Boolean{
 
-        if (client.id == 0L){
+        if (client.numberIdentifier == 0){
             _message.value = "Error: Rellene el campo número de cliente"
             return false
         }

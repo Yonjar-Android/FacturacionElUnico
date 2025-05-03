@@ -16,7 +16,9 @@ import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCus
 
 @Composable
 fun SupplierDetailScreen(
+    supplierId: Long,
     navController: NavController
+
 ){
     var showDialog by remember { mutableStateOf(false) }
 
