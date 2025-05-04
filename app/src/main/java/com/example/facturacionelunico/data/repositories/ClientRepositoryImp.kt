@@ -7,7 +7,6 @@ import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.ClientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
