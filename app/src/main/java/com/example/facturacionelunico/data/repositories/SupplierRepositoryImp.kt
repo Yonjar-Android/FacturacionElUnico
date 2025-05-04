@@ -30,6 +30,18 @@ class SupplierRepositoryImp @Inject constructor(
     }
             }
 
+    override fun getSupplierById(id: Long): Flow<SupplierDomainModel?> {
+        return supplierDao.getSupplierById(id).map {
+            SupplierDomainModel(
+                id = it.id,
+                company = it.nombreEmpresa,
+                contactName = it.nombreContacto,
+                phone = it.telefono,
+                email = it.correo,
+                address = it.direccion)
+        }
+    }
+
     override suspend fun getSuppliersBySearch(query: String): Flow<ResultPattern<List<SupplierDomainModel>>> {
         return supplierDao.getSuppliersBySearch(query)
             .map<List<SupplierDomainModel>, ResultPattern<List<SupplierDomainModel>>> { products ->
@@ -73,12 +85,14 @@ class SupplierRepositoryImp @Inject constructor(
                 return "Error: Ya existe un proveedor con ese nombre de empresa"
             } else{
                 val newSupplier = ProveedorEntity(
+                    id = supplier.id,
                     nombreEmpresa = supplier.company,
                     nombreContacto = supplier.contactName,
                     telefono = supplier.phone ?: "",
                     correo = supplier.email ?: "",
                     direccion = supplier.address ?: ""
                 )
+                println(newSupplier)
                 supplierDao.update(newSupplier)
                 "Se ha actualizado el proveedor"
             }
