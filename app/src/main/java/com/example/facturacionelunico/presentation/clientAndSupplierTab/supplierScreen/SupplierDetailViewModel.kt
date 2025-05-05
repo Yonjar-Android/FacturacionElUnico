@@ -31,7 +31,7 @@ class SupplierDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateClient(supplier: SupplierDomainModel){
+    fun updateSupplier(supplier: SupplierDomainModel){
         viewModelScope.launch {
             if (clientValidations(supplier)){
                 _message.value = repository.updateSupplier(supplier)

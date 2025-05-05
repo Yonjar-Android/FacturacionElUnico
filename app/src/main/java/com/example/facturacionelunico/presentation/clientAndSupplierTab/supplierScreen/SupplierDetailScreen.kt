@@ -140,7 +140,7 @@ fun SupplierDetailScreen(
             textButton = "Actualizar",
             dismiss = { showDialog = false },
             onConfirm = { supplier ->
-                viewModel.updateClient(supplier
+                viewModel.updateSupplier(supplier
                     .copy(id = supplierId)
                 )
             },
