@@ -39,6 +39,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.categoryScre
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductCreateScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductUpdateScreen
+import com.example.facturacionelunico.presentation.sellScreen.SellScreenTab
 import com.example.facturacionelunico.ui.theme.FacturacionElUnicoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -72,8 +73,7 @@ class MainActivity : ComponentActivity() {
                         /*Pantalla de productos*/
                         composable(route = "ProductScreen") {
                             ProductScreenTab(
-                                navController = controller,
-                                context = context
+                                navController = controller
                             )
                         }
 
@@ -177,109 +177,116 @@ class MainActivity : ComponentActivity() {
                                 navController = controller
                             )
                         }
+
+                        /*Pantalla de facturación*/
+                        composable(route = "SellScreenTab") {
+                            SellScreenTab(
+                                navController = controller
+                            )
+                        }
                     }
                 }
             }
         }
     }
-}
 
-@Composable
-fun BottomNav(
-    selectedScreen: Int,
-    navController: NavController,
-    onChangeScreen: (Int) -> Unit
-) {
-    NavigationBar {
+    @Composable
+    fun BottomNav(
+        selectedScreen: Int,
+        navController: NavController,
+        onChangeScreen: (Int) -> Unit
+    ) {
+        NavigationBar {
 
-        NavigationBarItem(
-            selected = selectedScreen == 0, onClick = {
-                onChangeScreen.invoke(0)
-                navController.navigate("ProductScreen")
-            }, icon = {
-                NavIcon(
-                    icon = R.drawable.helmet,
-                    description = "Product icon interface"
+            NavigationBarItem(
+                selected = selectedScreen == 0, onClick = {
+                    onChangeScreen.invoke(0)
+                    navController.navigate("ProductScreen")
+                }, icon = {
+                    NavIcon(
+                        icon = R.drawable.helmet,
+                        description = "Product icon interface"
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Blue,
+                    selectedIconColor = Color.White
                 )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Blue,
-                selectedIconColor = Color.White
             )
-        )
 
-        NavigationBarItem(
-            selected = selectedScreen == 1, onClick = {
-                onChangeScreen.invoke(1)
-                navController.navigate("ClientSupplierScreen")
-            }, icon = {
-                NavIcon(
-                    icon = R.drawable.client,
-                    description = "Client icon interface"
+            NavigationBarItem(
+                selected = selectedScreen == 1, onClick = {
+                    onChangeScreen.invoke(1)
+                    navController.navigate("ClientSupplierScreen")
+                }, icon = {
+                    NavIcon(
+                        icon = R.drawable.client,
+                        description = "Client icon interface"
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Blue,
+                    selectedIconColor = Color.White
                 )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Blue,
-                selectedIconColor = Color.White
             )
-        )
 
-        NavigationBarItem(
-            selected = selectedScreen == 2, onClick = {
-                onChangeScreen.invoke(2)
-                navController.navigate("ProductScreen")
-            }, icon = {
-                NavIcon(
-                    icon = R.drawable.cart,
-                    description = "Sell icon interface"
+            NavigationBarItem(
+                selected = selectedScreen == 2, onClick = {
+                    onChangeScreen.invoke(2)
+                    navController.navigate("SellScreenTab")
+                }, icon = {
+                    NavIcon(
+                        icon = R.drawable.cart,
+                        description = "Sell icon interface"
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Blue,
+                    selectedIconColor = Color.White
                 )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Blue,
-                selectedIconColor = Color.White
             )
-        )
 
-        NavigationBarItem(
-            selected = selectedScreen == 3, onClick = {
-                onChangeScreen.invoke(3)
-                navController.navigate("ProductScreen")
-            }, icon = {
-                NavIcon(
-                    icon = R.drawable.shopping_bag,
-                    description = "Buy icon interface"
+            NavigationBarItem(
+                selected = selectedScreen == 3, onClick = {
+                    onChangeScreen.invoke(3)
+                    navController.navigate("ProductScreen")
+                }, icon = {
+                    NavIcon(
+                        icon = R.drawable.shopping_bag,
+                        description = "Buy icon interface"
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Blue,
+                    selectedIconColor = Color.White
                 )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Blue,
-                selectedIconColor = Color.White
             )
-        )
 
-        NavigationBarItem(
-            selected = selectedScreen == 4, onClick = {
-                onChangeScreen.invoke(4)
-                navController.navigate("ProductScreen")
-            }, icon = {
-                NavIcon(
-                    icon = R.drawable.report,
-                    description = "Reports icon interface"
+            NavigationBarItem(
+                selected = selectedScreen == 4, onClick = {
+                    onChangeScreen.invoke(4)
+                    navController.navigate("ProductScreen")
+                }, icon = {
+                    NavIcon(
+                        icon = R.drawable.report,
+                        description = "Reports icon interface"
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Blue,
+                    selectedIconColor = Color.White
                 )
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Blue,
-                selectedIconColor = Color.White
             )
+        }
+    }
+
+    @Composable
+    fun NavIcon(icon: Int, description: String) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = description,
+            modifier = Modifier.size(30.dp)
         )
     }
-}
-
-@Composable
-fun NavIcon(icon: Int, description: String) {
-    Icon(
-        painter = painterResource(icon),
-        contentDescription = description,
-        modifier = Modifier.size(30.dp)
-    )
 }
 

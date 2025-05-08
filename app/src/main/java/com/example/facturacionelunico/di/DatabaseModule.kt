@@ -2,6 +2,8 @@ package com.example.facturacionelunico.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.facturacionelunico.data.database.AppDatabase
 import com.example.facturacionelunico.data.database.dao.AbonoCompraDao
 import com.example.facturacionelunico.data.database.dao.AbonoVentaDao
@@ -38,7 +40,8 @@ object DatabaseModule {
             AppDatabase::class.java,
             "elunico_db" // Nombre de la base de datos
         )
-            .fallbackToDestructiveMigration() // Para manejar migraciones si es necesario
+            .addMigrations(DatabaseMigrations.MIGRATION_7_8)
+            //.addCallback(DatabaseMigrations.dbCallback)
             .build()
     }
 
