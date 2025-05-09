@@ -2,7 +2,9 @@ package com.example.facturacionelunico.presentation.sellScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
@@ -87,7 +89,7 @@ class SellScreenViewModel @Inject constructor(
         _searchQueryClient.value = newQuery
     }
 
-    val clients: StateFlow<List<ClientDomainModel>> = _searchQueryClient
+    val clients: StateFlow<List<DetailedClientLocalModel>> = _searchQueryClient
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {

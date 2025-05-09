@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
 import com.example.facturacionelunico.ui.theme.blueUi
@@ -79,6 +81,7 @@ fun ClientDetailScreen(
         phoneNumber = client?.phone.toString()
     }
 
+    println(client?.invoices)
 
     if (!message.isNullOrEmpty()) {
         Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
@@ -123,17 +126,20 @@ fun ClientDetailScreen(
                 value = if (client?.phone.isNullOrEmpty()) "Ninguno" else client?.phone.toString()
             )
 
-            ClientText(title = "Deuda", value = "C$ 1200")
+            ClientText(title = "Deuda", value = "C$ ${client?.deptTotal}")
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            Text(text = "Factura deuda", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(text = "Facturas", fontWeight = FontWeight.Bold, fontSize = 20.sp)
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(10) {
-                    FacturaItem("Factura #123456789")
+            // Cargar facturas
+            if (client?.invoices?.isNotEmpty() == true){
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(client!!.invoices){
+                        FacturaItem("Factura #${it.id}", it.state)
+                    }
                 }
             }
         }
@@ -173,7 +179,7 @@ fun ClientText(title: String, value: String) {
 }
 
 @Composable
-fun FacturaItem(title: String) {
+fun FacturaItem(title: String, state:String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -184,13 +190,15 @@ fun FacturaItem(title: String) {
         horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = title, fontWeight = FontWeight.Bold, fontSize = 20.sp,
-            color = Color.Red
+            color = if (state == "PENDIENTE") Color.Red else Color(0XFF338822)
         )
         Text(
             text = "Ver detalles >>", fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
-            color = Color.Red
+            color = if (state == "PENDIENTE") Color.Red else Color(0XFF338822)
         )
+
     }
+    HorizontalDivider()
 }
 
 @Composable

@@ -12,4 +12,13 @@ interface VentaDao {
 
     @Query("SELECT * FROM venta")
     suspend fun getAll(): List<VentaEntity>
+
+    @Query("""
+    SELECT * FROM venta
+    WHERE idCliente = :id
+    ORDER BY 
+        CASE WHEN estado = 'PENDIENTE' THEN 0 ELSE 1 END,
+        fechaVenta DESC
+""")
+    suspend fun getInvoicesByClientId(id: Long): List<VentaEntity>
 }

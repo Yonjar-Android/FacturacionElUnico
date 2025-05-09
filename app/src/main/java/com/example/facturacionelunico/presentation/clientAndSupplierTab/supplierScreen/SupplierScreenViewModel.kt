@@ -2,7 +2,7 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.supplie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository

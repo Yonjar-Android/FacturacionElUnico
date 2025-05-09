@@ -1,9 +1,13 @@
 package com.example.facturacionelunico.data.repositories
 
 import com.example.facturacionelunico.data.database.dao.ClienteDao
+import com.example.facturacionelunico.data.database.dao.VentaDao
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.domain.models.ResultPattern
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.domain.repositories.ClientRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -11,30 +15,32 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ClientRepositoryImp @Inject constructor(
-    private val clientDao: ClienteDao
+    private val clientDao: ClienteDao,
+    private val invoiceDao: VentaDao
 ): ClientRepository {
     // Función para obtener a todos los clientes mediante un flow
-    override fun getClients(): Flow<ResultPattern<List<ClientDomainModel>>> {
-        return clientDao.getAll()
+    override fun getClients(): Flow<ResultPattern<List<DetailedClientLocalModel>>> {
+        return clientDao.getClientsWithDebt()
             .map {
                 it.map {
-                    ClientDomainModel(
+                    DetailedClientLocalModel(
                         id = it.id,
-                        name = it.nombre,
-                        lastName = it.apellido,
-                        phone = it.telefono,
-                        numberIdentifier = it.identificadorCliente)
+                        name = it.name,
+                        lastName = it.lastName,
+                        phone = it.phone,
+                        numberIdentifier = it.numberIdentifier,
+                        deptTotal = it.deptTotal)
                 }
-            }.map<List<ClientDomainModel>, ResultPattern<List<ClientDomainModel>>> { suppliers ->
+            }.map<List<DetailedClientLocalModel>, ResultPattern<List<DetailedClientLocalModel>>> { suppliers ->
                 ResultPattern.Success(suppliers)
             }.catch { e ->
                 emit(ResultPattern.Error(exception = e, message = e.message))
             }
     }
 
-    override suspend fun getClientBySearch(query: String): Flow<ResultPattern<List<ClientDomainModel>>> {
+    override suspend fun getClientBySearch(query: String): Flow<ResultPattern<List<DetailedClientLocalModel>>> {
         return clientDao.getClientByName(query)
-            .map<List<ClientDomainModel>, ResultPattern<List<ClientDomainModel>>> { products ->
+            .map<List<DetailedClientLocalModel>, ResultPattern<List<DetailedClientLocalModel>>> { products ->
                 ResultPattern.Success(products)
             }
             .catch { e ->
@@ -42,14 +48,26 @@ class ClientRepositoryImp @Inject constructor(
             }
     }
 
-    override fun getClientById(id: Long): Flow<ClientDomainModel> {
+    override suspend fun getClientById(id: Long): Flow<DetailedClientDomainModel> {
+
+        val invoices = invoiceDao.getInvoicesByClientId(id)
+
         return clientDao.getClientById(id).map {
-            ClientDomainModel(
+            DetailedClientDomainModel(
                 id = it.id,
-                name = it.nombre,
-                lastName = it.apellido,
-                phone = it.telefono,
-                numberIdentifier = it.identificadorCliente)
+                name = it.name,
+                lastName = it.lastName,
+                phone = it.phone,
+                numberIdentifier = it.numberIdentifier,
+                deptTotal = it.deptTotal,
+                invoices = invoices.map {
+                    InvoiceDomainModel(
+                        id = it.id,
+                        sellDate = it.fechaVenta,
+                        state = it.estado,
+                        total = it.total,
+                        clientId = it.idCliente)
+                })
         }
     }
 

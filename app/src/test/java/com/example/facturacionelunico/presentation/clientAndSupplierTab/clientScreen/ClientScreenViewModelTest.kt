@@ -3,7 +3,7 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.clientS
 import app.cash.turbine.turbineScope
 import com.example.facturacionelunico.data.repositories.motherObjects.MotherObjectClientSuppliers
 import com.example.facturacionelunico.domain.models.BrandDomainModel
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.ClientRepository

@@ -1,4 +1,4 @@
-package com.example.facturacionelunico.domain.models
+package com.example.facturacionelunico.domain.models.client
 
 data class ClientDomainModel(
     val id: Long = 0,

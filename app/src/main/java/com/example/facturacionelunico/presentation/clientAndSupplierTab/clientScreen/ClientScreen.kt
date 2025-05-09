@@ -43,7 +43,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.ui.theme.blueUi
@@ -115,7 +117,7 @@ fun ClientScreen(
 
 // Función para mostrar información de un cliente
 @Composable
-fun ClientItem(client: ClientDomainModel, goToDetail:() -> Unit) {
+fun ClientItem(client: DetailedClientLocalModel, goToDetail:() -> Unit) {
     Row(
         modifier = Modifier
             .clickable{
@@ -134,14 +136,14 @@ fun ClientItem(client: ClientDomainModel, goToDetail:() -> Unit) {
             val fullName = "${client.name} ${client.lastName}"
             Text(fullName, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Text(
-                text = if (client.phone.isNullOrBlank()) "Ninguno" else client.phone,
+                text = if (client.phone.isBlank()) "Ninguno" else client.phone,
                 fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Gray
             )
 
         }
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-            Text("C$ Dinero", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("C$ ${client.deptTotal}", fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Text("Deuda", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color.Gray)
         }
     }

@@ -57,7 +57,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
 import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
@@ -501,7 +503,7 @@ data class ProductItem(
 /*Tabla de clientes para seleccionar*/
 @Composable
 fun SelectClientTable(
-    clients: List<ClientDomainModel>,
+    clients: List<DetailedClientLocalModel>,
     closeTable: () -> Unit,
     getValues: (String, Long) -> Unit,
     searchProduct: (String) -> Unit
@@ -562,7 +564,7 @@ fun SelectClientTable(
 
 @Composable
 fun ClientItemTable(
-    client: ClientDomainModel,
+    client: DetailedClientLocalModel,
     getValues: (String, Long) -> Unit
 ) {
     Row(

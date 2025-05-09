@@ -3,7 +3,7 @@ package com.example.facturacionelunico.data.repositories
 import com.example.facturacionelunico.data.database.dao.ClienteDao
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
 import com.example.facturacionelunico.data.repositories.motherObjects.MotherObjectClientSuppliers
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery

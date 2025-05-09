@@ -3,7 +3,9 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.clientS
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.ClientRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +37,7 @@ class ClientScreenViewModel @Inject constructor(
         _searchQuery.value = newQuery
     }
 
-    val clients: StateFlow<List<ClientDomainModel>> = _searchQuery
+    val clients: StateFlow<List<DetailedClientLocalModel>> = _searchQuery
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {

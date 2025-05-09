@@ -58,9 +58,10 @@ object RepositoriesModule {
     @Provides
     @Singleton
     fun provideClientRepository(
-        clientDao: ClienteDao
+        clientDao: ClienteDao,
+        invoiceDao: VentaDao
     ): ClientRepository {
-        return ClientRepositoryImp(clientDao)
+        return ClientRepositoryImp(clientDao,invoiceDao)
     }
 
     @Provides

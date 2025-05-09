@@ -128,7 +128,7 @@ fun SupplierDetailScreen(
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(10) {
-                    FacturaItem("Factura #123456789")
+                    FacturaItem("Factura #123456789","PENDIENTE")
                 }
             }
         }

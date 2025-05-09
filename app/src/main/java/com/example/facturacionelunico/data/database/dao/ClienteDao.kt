@@ -5,7 +5,9 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
-import com.example.facturacionelunico.domain.models.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,21 +21,63 @@ interface ClienteDao {
     @Query("SELECT * FROM cliente")
     fun getAll(): Flow<List<ClienteEntity>>
 
-    @Query("SELECT * FROM cliente WHERE id = :id")
-    fun getClientById(id: Long): Flow<ClienteEntity>
-
-    @Query("SELECT * FROM cliente WHERE identificadorCliente = :identificador AND id != :currentId")
-    suspend fun getClienteByIdentificadorExcludingId(identificador: Int, currentId: Long): ClienteEntity?
+    @Query(
+        """
+    SELECT 
+        c.id AS id,
+        c.nombre AS name,
+        c.apellido AS lastName,
+        c.telefono AS phone,
+        c.identificadorCliente AS numberIdentifier,
+        IFNULL(SUM(a.totalPendiente), 0.0) AS deptTotal
+    FROM cliente c
+    LEFT JOIN venta v ON c.id = v.idCliente
+    LEFT JOIN abono_venta a ON v.id = a.idVenta
+    WHERE v.estado = 'PENDIENTE'
+    GROUP BY c.id
+"""
+    )
+    fun getClientsWithDebt(): Flow<List<DetailedClientLocalModel>>
 
     @Query("""
-        SELECT cliente.id as id,
-        cliente.nombre as name,
-        cliente.apellido as lastName,
-        cliente.telefono as phone,
-        cliente.identificadorCliente as numberIdentifier
-        FROM cliente
-        WHERE (nombre || ' ' || apellido) LIKE '%' || :query || '%'
-    """)
-    fun getClientByName(query:String): Flow<List<ClientDomainModel>>
+    SELECT 
+        c.id as id,
+        c.nombre as name,
+        c.apellido as lastName,
+        c.telefono as phone,
+        c.identificadorCliente as numberIdentifier,
+        IFNULL(SUM(a.totalPendiente), 0.0) as deptTotal
+    FROM cliente c
+    LEFT JOIN venta v ON c.id = v.idCliente
+    LEFT JOIN abono_venta a ON v.id = a.idVenta
+    WHERE c.id = :id AND v.estado = 'PENDIENTE'
+    GROUP BY c.id
+""")
+    fun getClientById(id: Long): Flow<DetailedClientLocalModel>
+
+    @Query("SELECT * FROM cliente WHERE identificadorCliente = :identificador AND id != :currentId")
+    suspend fun getClienteByIdentificadorExcludingId(
+        identificador: Int,
+        currentId: Long
+    ): ClienteEntity?
+
+    @Query(
+        """
+    SELECT 
+        c.id as id,
+        c.nombre as name,
+        c.apellido as lastName,
+        c.telefono as phone,
+        c.identificadorCliente as numberIdentifier,
+        IFNULL(SUM(a.totalPendiente), 0.0) as deptTotal
+    FROM cliente c
+    LEFT JOIN venta v ON c.id = v.idCliente
+    LEFT JOIN abono_venta a ON v.id = a.idVenta
+    WHERE (c.nombre || ' ' || c.apellido) LIKE '%' || :query || '%'
+      AND v.estado = 'PENDIENTE'
+    GROUP BY c.id
+"""
+    )
+    fun getClientByName(query: String): Flow<List<DetailedClientLocalModel>>
 }
 
