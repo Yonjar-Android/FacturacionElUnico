@@ -33,8 +33,8 @@ interface ClienteDao {
     FROM cliente c
     LEFT JOIN venta v ON c.id = v.idCliente
     LEFT JOIN abono_venta a ON v.id = a.idVenta
-    WHERE v.estado = 'PENDIENTE'
     GROUP BY c.id
+    ORDER BY deptTotal DESC
 """
     )
     fun getClientsWithDebt(): Flow<List<DetailedClientLocalModel>>
@@ -50,10 +50,12 @@ interface ClienteDao {
     FROM cliente c
     LEFT JOIN venta v ON c.id = v.idCliente
     LEFT JOIN abono_venta a ON v.id = a.idVenta
-    WHERE c.id = :id AND v.estado = 'PENDIENTE'
+    WHERE c.id = :id 
     GROUP BY c.id
+    ORDER BY deptTotal DESC
 """)
     fun getClientById(id: Long): Flow<DetailedClientLocalModel>
+
 
     @Query("SELECT * FROM cliente WHERE identificadorCliente = :identificador AND id != :currentId")
     suspend fun getClienteByIdentificadorExcludingId(
@@ -74,8 +76,8 @@ interface ClienteDao {
     LEFT JOIN venta v ON c.id = v.idCliente
     LEFT JOIN abono_venta a ON v.id = a.idVenta
     WHERE (c.nombre || ' ' || c.apellido) LIKE '%' || :query || '%'
-      AND v.estado = 'PENDIENTE'
     GROUP BY c.id
+    ORDER BY deptTotal DESC
 """
     )
     fun getClientByName(query: String): Flow<List<DetailedClientLocalModel>>

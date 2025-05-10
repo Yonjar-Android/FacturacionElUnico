@@ -4,13 +4,17 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.facturacionelunico.data.database.entities.VentaEntity
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailLocalModel
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface VentaDao {
     @Insert
     suspend fun insert(venta: VentaEntity): Long
 
-    @Query("SELECT * FROM venta")
+    @Query("""SELECT * FROM venta
+        ORDER BY estado DESC
+        """)
     suspend fun getAll(): List<VentaEntity>
 
     @Query("""
@@ -21,4 +25,18 @@ interface VentaDao {
         fechaVenta DESC
 """)
     suspend fun getInvoicesByClientId(id: Long): List<VentaEntity>
+
+    @Query("""
+    SELECT 
+    v.id AS idFactura,
+    c.nombre AS nombreCliente,
+    c.apellido AS apellidoCliente,
+    v.total AS totalFactura,
+    IFNULL(SUM(a.totalPendiente), 0.0) AS totalPendiente
+FROM venta v
+LEFT JOIN cliente c ON v.idCliente = c.id
+LEFT JOIN abono_venta a ON v.id = a.idVenta
+WHERE v.id = :id
+GROUP BY v.id, c.nombre, c.apellido, v.total
+""") fun getInvoiceDetailById(id: Long): Flow<InvoiceDetailLocalModel>
 }

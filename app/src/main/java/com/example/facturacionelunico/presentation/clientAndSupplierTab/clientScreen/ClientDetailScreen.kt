@@ -68,6 +68,7 @@ fun ClientDetailScreen(
 
     // Campos para actualizar cliente
 
+
     var code by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var lastname by remember { mutableStateOf("") }
@@ -138,7 +139,10 @@ fun ClientDetailScreen(
             if (client?.invoices?.isNotEmpty() == true){
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(client!!.invoices){
-                        FacturaItem("Factura #${it.id}", it.state)
+                        FacturaItem(it.id,"Factura #${it.id}", it.state,
+                            goToDetail = {
+                                navController.navigate("InvoiceDetailScreen/${it}")
+                            })
                     }
                 }
             }
@@ -179,12 +183,16 @@ fun ClientText(title: String, value: String) {
 }
 
 @Composable
-fun FacturaItem(title: String, state:String) {
+fun FacturaItem(
+    id: Long,
+    title: String,
+    state:String,
+    goToDetail: (Long) -> Unit ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-
+                goToDetail.invoke(id)
             }
             .padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {

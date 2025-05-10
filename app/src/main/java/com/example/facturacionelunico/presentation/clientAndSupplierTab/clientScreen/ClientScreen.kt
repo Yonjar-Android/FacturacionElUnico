@@ -44,7 +44,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
-import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
 import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent

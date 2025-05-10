@@ -78,11 +78,13 @@ object RepositoriesModule {
         ventaDao: VentaDao,
         detalleVentaDao: DetalleVentaDao,
         abonoVentaDao: AbonoVentaDao,
-        detalleAbonoVentaDao: DetalleAbonoVentaDao
+        detalleAbonoVentaDao: DetalleAbonoVentaDao,
+        productoDao: ProductoDao
     ): InvoiceRepository {
         return InvoiceRepositoryImp(ventaDao,
             detalleVentaDao,
             abonoVentaDao,
-            detalleAbonoVentaDao)
+            detalleAbonoVentaDao,
+            productoDao = productoDao)
     }
 }

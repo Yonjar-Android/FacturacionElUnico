@@ -40,6 +40,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.productScree
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductUpdateScreen
 import com.example.facturacionelunico.presentation.sellScreen.SellScreenTab
+import com.example.facturacionelunico.presentation.sellScreen.invoideDetailScreen.InvoiceDetailScreen
 import com.example.facturacionelunico.ui.theme.FacturacionElUnicoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -181,6 +182,19 @@ class MainActivity : ComponentActivity() {
                         /*Pantalla de facturación*/
                         composable(route = "SellScreenTab") {
                             SellScreenTab(
+                                navController = controller
+                            )
+                        }
+
+                        /*Pantalla detalle de factura*/
+                        composable(route = "InvoiceDetailScreen/{invoiceId}",
+                            arguments = listOf(
+                                navArgument("invoiceId") { type = NavType.LongType }
+                            )) { backStackEntry ->
+                            val invoiceId = backStackEntry.arguments?.getLong("invoiceId") ?: 0L
+
+                            InvoiceDetailScreen(
+                                invoiceId = invoiceId,
                                 navController = controller
                             )
                         }

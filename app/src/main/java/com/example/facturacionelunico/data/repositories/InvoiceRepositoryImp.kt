@@ -1,7 +1,6 @@
 package com.example.facturacionelunico.data.repositories
 
 import com.example.facturacionelunico.data.database.dao.AbonoVentaDao
-import com.example.facturacionelunico.data.database.dao.ClienteDao
 import com.example.facturacionelunico.data.database.dao.DetalleAbonoVentaDao
 import com.example.facturacionelunico.data.database.dao.DetalleVentaDao
 import com.example.facturacionelunico.data.database.dao.ProductoDao
@@ -10,9 +9,15 @@ import com.example.facturacionelunico.data.database.entities.AbonoVentaEntity
 import com.example.facturacionelunico.data.database.entities.DetalleAbonoVentaEntity
 import com.example.facturacionelunico.data.database.entities.DetalleVentaEntity
 import com.example.facturacionelunico.data.database.entities.VentaEntity
+import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailDomainModel
 import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.domain.repositories.InvoiceRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class InvoiceRepositoryImp @Inject constructor(
@@ -20,16 +25,29 @@ class InvoiceRepositoryImp @Inject constructor(
     private val detailInvoiceDao: DetalleVentaDao,
     private val abonosDao: AbonoVentaDao,
     private val abonosDetalleDao: DetalleAbonoVentaDao,
-): InvoiceRepository {
-    override suspend fun getInvoices() {
-        println(invoiceDao.getAll())
-        println(detailInvoiceDao.getAll())
+    private val productoDao: ProductoDao
+) : InvoiceRepository {
+    override suspend fun getInvoices(): List<InvoiceDomainModel> {
+        return runCatching {
+            invoiceDao.getAll().map {
+                InvoiceDomainModel(
+                    id = it.id,
+                    sellDate = it.fechaVenta,
+                    total = it.total,
+                    clientId = it.idCliente,
+                    state = it.estado
+                )
+            }
+        }.getOrElse {
+            emptyList()
+        }
     }
 
     override suspend fun createInvoice(
         invoice: InvoiceDomainModel,
         details: List<DetailInvoiceDomainModel>,
-        moneyPaid: Double): String {
+        moneyPaid: Double
+    ): String {
 
         return runCatching {
             val invoiceEntity = VentaEntity(
@@ -40,6 +58,12 @@ class InvoiceRepositoryImp @Inject constructor(
             )
 
             val id = invoiceDao.insert(invoiceEntity)
+
+            val validate = stockValidation(details)
+
+            if (validate.contains("Error")) {
+                return@runCatching validate
+            }
 
             details.forEach {
                 val detailEntity = DetalleVentaEntity(
@@ -53,19 +77,17 @@ class InvoiceRepositoryImp @Inject constructor(
             }
 
             // Condicional donde si el pago es PENDIENTE se cree el abono del cliente
-            if (invoice.state == "PENDIENTE"){
+            if (invoice.state == "PENDIENTE") {
                 val abonoEntity = AbonoVentaEntity(
                     idVenta = id,
                     fechaCreacion = invoice.sellDate,
                     totalAPagar = invoice.total,
                     totalPendiente = invoice.total
                 )
-                println("total ${invoice.total}")
-                println("pagado $moneyPaid")
-                println(invoice.total - moneyPaid)
+
                 val idAbono = abonosDao.insert(abonoEntity)
 
-                if (moneyPaid > 0){
+                if (moneyPaid > 0) {
                     val abonoDetalleEntity = DetalleAbonoVentaEntity(
                         idAbonoVenta = idAbono,
                         monto = moneyPaid,
@@ -75,14 +97,62 @@ class InvoiceRepositoryImp @Inject constructor(
                 }
             }
 
-            println(invoiceDao.getAll())
-            println(detailInvoiceDao.getAll())
-            println(abonosDao.getAll())
-            println(abonosDetalleDao.getAll())
             "Factura creada con éxito"
 
         }.getOrElse {
             "Error: ${it.message}"
         }
+    }
+
+    override fun getInvoiceDetailById(id: Long): Flow<ResultPattern<InvoiceDetailDomainModel>> {
+        val invoiceFlow = invoiceDao.getInvoiceDetailById(id)
+        val productsFlow = detailInvoiceDao.getDetailsByInvoiceId(id)
+
+        return combine(invoiceFlow, productsFlow) { invoice, products ->
+            runCatching {
+                ResultPattern.Success(
+                    InvoiceDetailDomainModel(
+                        invoiceId = invoice.idFactura,
+                        clientName = if (invoice.nombreCliente.isNullOrEmpty()) "Ninguno" else "${invoice.nombreCliente} ${invoice.apellidoCliente}",
+                        total = invoice.totalFactura,
+                        debt = invoice.totalPendiente,
+                        products = products
+                    )
+                )
+            }.getOrElse { e ->
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
+            }
+        }.flowOn(Dispatchers.IO)
+    }
+
+    override suspend fun payInvoice(invoiceId: Long, amount: Double): String {
+        return runCatching {
+
+            val abono = abonosDao.getAbonoByInvoiceId(invoiceId)
+
+            if (abono.totalPendiente < amount) {
+                "Error: Se ha intentado pagar más de lo que se debe"
+            } else {
+
+                val abonoDetalleEntity = DetalleAbonoVentaEntity(
+                    idAbonoVenta = abono.id,
+                    monto = amount,
+                    fechaAbono = System.currentTimeMillis()
+                )
+
+                abonosDetalleDao.insert(abonoDetalleEntity)
+                "Pago realizado con éxito"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    suspend fun stockValidation(products: List<DetailInvoiceDomainModel>): String {
+        products.forEach {
+            val product = productoDao.getDetailedById(it.productId)
+            return "Error: No hay suficiente stock de ${product?.name}. Stock: ${product?.stock}"
+        }
+        return ""
     }
 }
