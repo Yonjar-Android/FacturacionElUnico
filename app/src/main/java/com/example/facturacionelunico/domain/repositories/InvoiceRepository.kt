@@ -10,6 +10,8 @@ interface InvoiceRepository {
 
     suspend fun getInvoices(): List<InvoiceDomainModel>
 
+    suspend fun getInvoicesWithDebt(): List<InvoiceDomainModel>
+
     suspend fun createInvoice(
         invoice: InvoiceDomainModel,
         details: List<DetailInvoiceDomainModel>,

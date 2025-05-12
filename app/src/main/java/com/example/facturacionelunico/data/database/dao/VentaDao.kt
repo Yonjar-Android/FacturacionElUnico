@@ -17,6 +17,12 @@ interface VentaDao {
         """)
     suspend fun getAll(): List<VentaEntity>
 
+    @Query("""SELECT * FROM venta
+        WHERE estado = 'PENDIENTE'
+        ORDER BY estado DESC
+        """)
+    suspend fun getInvoicesWithDebt(): List<VentaEntity>
+
     @Query("""
     SELECT * FROM venta
     WHERE idCliente = :id

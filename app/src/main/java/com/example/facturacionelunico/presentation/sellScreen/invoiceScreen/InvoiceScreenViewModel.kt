@@ -23,4 +23,14 @@ class InvoiceScreenViewModel @Inject constructor(
             _invoices.value = repository.getInvoices()
         }
     }
+
+    fun getInvoicesBySelectedOption(option: String){
+        viewModelScope.launch {
+            if (option == "Pendientes"){
+                _invoices.value = repository.getInvoicesWithDebt()
+            } else{
+                _invoices.value = repository.getInvoices()
+            }
+        }
+    }
 }

@@ -43,6 +43,22 @@ class InvoiceRepositoryImp @Inject constructor(
         }
     }
 
+    override suspend fun getInvoicesWithDebt(): List<InvoiceDomainModel> {
+        return runCatching {
+            invoiceDao.getInvoicesWithDebt().map {
+                InvoiceDomainModel(
+                    id = it.id,
+                    sellDate = it.fechaVenta,
+                    total = it.total,
+                    clientId = it.idCliente,
+                    state = it.estado
+                )
+            }
+        }.getOrElse {
+            emptyList()
+        }
+    }
+
     override suspend fun createInvoice(
         invoice: InvoiceDomainModel,
         details: List<DetailInvoiceDomainModel>,
