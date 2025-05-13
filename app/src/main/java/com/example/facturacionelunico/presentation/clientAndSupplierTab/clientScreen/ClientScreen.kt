@@ -116,10 +116,10 @@ fun ClientScreen(
 
 // Función para mostrar información de un cliente
 @Composable
-fun ClientItem(client: DetailedClientLocalModel, goToDetail:() -> Unit) {
+fun ClientItem(client: DetailedClientLocalModel, goToDetail: () -> Unit) {
     Row(
         modifier = Modifier
-            .clickable{
+            .clickable {
                 // LLamado a la función para navegar al detalle del cliente
                 goToDetail.invoke()
             }
@@ -181,7 +181,11 @@ fun ClientDialog(
             TextFieldClient(
                 title = "Código o Número",
                 value = code,
-                onValueChange = { code = it },
+                onValueChange = {
+                    if (it.isEmpty() || it.matches(Regex("^\\d*$"))) {
+                        code = it
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
@@ -200,7 +204,11 @@ fun ClientDialog(
             TextFieldClient(
                 title = "Teléfono",
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                onValueChange = {
+                    if (it.isEmpty() || it.matches(Regex("^\\d*$"))) {
+                        phoneNumber = it
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 

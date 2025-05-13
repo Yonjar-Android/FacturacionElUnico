@@ -61,9 +61,9 @@ fun SupplierScreen(
 
     var showDialog by remember { mutableStateOf(false) }
 
-    if (!message.isNullOrEmpty()){
-        Toast.makeText(LocalContext.current,message,Toast.LENGTH_SHORT).show()
-        if (!message!!.contains("Error")){
+    if (!message.isNullOrEmpty()) {
+        Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
+        if (!message!!.contains("Error")) {
             showDialog = false
         }
 
@@ -97,7 +97,7 @@ fun SupplierScreen(
         )
     }
 
-    if (showDialog){
+    if (showDialog) {
         SupplierDialog(
             title = "Añadir proveedor",
             textButton = "Añadir",
@@ -114,10 +114,10 @@ fun SupplierScreen(
 
 // Función para mostrar información de un proveedor
 @Composable
-fun SupplierItem(supplier: SupplierDomainModel, goToDetail: () -> Unit){
+fun SupplierItem(supplier: SupplierDomainModel, goToDetail: () -> Unit) {
     Row(
         modifier = Modifier
-            .clickable{
+            .clickable {
                 // Función para navegar al detalle del proveedor
                 goToDetail.invoke()
             }
@@ -139,11 +139,15 @@ fun SupplierItem(supplier: SupplierDomainModel, goToDetail: () -> Unit){
         }
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
-            Text("C$ Dinero", fontWeight = FontWeight.Bold,
-                fontSize = 20.sp)
+            Text(
+                "C$ Dinero", fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
 
-            Text("Deuda", fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp, color = Color.Gray)
+            Text(
+                "Deuda", fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp, color = Color.Gray
+            )
         }
     }
 }
@@ -155,7 +159,7 @@ fun SupplierDialog(
     textButton: String,
     dismiss: () -> Unit,
     onConfirm: (SupplierDomainModel) -> Unit
-){
+) {
 
     var company by remember { mutableStateOf("") }
     var contactName by remember { mutableStateOf("") }
@@ -193,7 +197,11 @@ fun SupplierDialog(
             TextFieldClient(
                 title = "Teléfono",
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                onValueChange = {
+                    if (it.isEmpty() || it.matches(Regex("^\\d*$"))) {
+                        phoneNumber = it
+                    }
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 

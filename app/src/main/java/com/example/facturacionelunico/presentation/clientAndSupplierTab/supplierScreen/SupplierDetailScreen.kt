@@ -52,7 +52,7 @@ fun SupplierDetailScreen(
     supplierId: Long,
     navController: NavController,
     viewModel: SupplierDetailViewModel = hiltViewModel()
-){
+) {
 
     LaunchedEffect(supplierId) {
         viewModel.getSupplierById(supplierId)
@@ -111,7 +111,7 @@ fun SupplierDetailScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             ClientText(title = "Nombre de Empresa", value = supplier?.company.toString())
 
             ClientText(title = "Nombre de Contacto", value = supplier?.contactName.toString())
@@ -128,20 +128,21 @@ fun SupplierDetailScreen(
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(10) {
-                    FacturaItem(1,"Factura #123456789","PENDIENTE",{})
+                    FacturaItem(1, "Factura #123456789", "PENDIENTE", {})
                 }
             }
         }
     }
 
-    if (showDialog){
+    if (showDialog) {
         SupplierDetailDialog(
             title = "Editar proveedor",
             textButton = "Actualizar",
             dismiss = { showDialog = false },
             onConfirm = { supplier ->
-                viewModel.updateSupplier(supplier
-                    .copy(id = supplierId)
+                viewModel.updateSupplier(
+                    supplier
+                        .copy(id = supplierId)
                 )
             },
             email = email,
@@ -152,7 +153,11 @@ fun SupplierDetailScreen(
             onCompanyChange = { company = it },
             onContactNameChange = { contactName = it },
             onEmailChange = { email = it },
-            onPhoneNumberChange = { phoneNumber = it },
+            onPhoneNumberChange = {
+                if (it.isEmpty() || it.matches(Regex("^\\d*$"))) {
+                    phoneNumber = it
+                }
+            },
             onAddressChange = { address = it }
         )
     }

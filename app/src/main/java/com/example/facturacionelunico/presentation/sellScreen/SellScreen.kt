@@ -58,6 +58,8 @@ import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.utils.validations.ValidationFunctions
+import kotlin.text.isEmpty
+import kotlin.text.matches
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -102,7 +104,7 @@ fun SellScreen(
 
     if (!message.isNullOrEmpty()) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        if(message?.contains("Error") == false){
+        if (message?.contains("Error") == false) {
             productList = mutableListOf()
             validationClient = true
             enabledRadioButtons = true
@@ -123,17 +125,29 @@ fun SellScreen(
                     GenericBlueUiButton(
                         buttonText = "Guardar",
                         onFunction = {
-                            if (productList.isEmpty()){
-                                Toast.makeText(context, "No ha agregado productos en la factura", Toast.LENGTH_SHORT).show()
+                            if (productList.isEmpty()) {
+                                Toast.makeText(
+                                    context,
+                                    "No ha agregado productos en la factura",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 return@GenericBlueUiButton
                             }
-                            if (deptSelectedOption == "Crédito"){
-                                if (!ValidationFunctions.isValidDouble(moneyToPay)){
-                                    Toast.makeText(context, "Rellene el campo de dinero a pagar con un valor numérico válido", Toast.LENGTH_SHORT).show()
+                            if (deptSelectedOption == "Crédito") {
+                                if (!ValidationFunctions.isValidDouble(moneyToPay)) {
+                                    Toast.makeText(
+                                        context,
+                                        "Rellene el campo de dinero a pagar con un valor numérico válido",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     return@GenericBlueUiButton
                                 }
-                                if (moneyToPay.toDouble() < 0){
-                                    Toast.makeText(context, "Rellene el campo de dinero a pagar con un valor positivo", Toast.LENGTH_SHORT).show()
+                                if (moneyToPay.toDouble() < 0) {
+                                    Toast.makeText(
+                                        context,
+                                        "Rellene el campo de dinero a pagar con un valor positivo",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     return@GenericBlueUiButton
                                 }
                             }
@@ -144,8 +158,8 @@ fun SellScreen(
                                     sellDate = System.currentTimeMillis(),
                                     total = total,
                                     clientId = clientId,
-                                    state = if(dept[0] == deptSelectedOption) "COMPLETADO" else "PENDIENTE",
-                                    paymentMethod = if(dept[0] == deptSelectedOption) "DEBITO" else "CREDITO"
+                                    state = if (dept[0] == deptSelectedOption) "COMPLETADO" else "PENDIENTE",
+                                    paymentMethod = if (dept[0] == deptSelectedOption) "DEBITO" else "CREDITO"
                                 ),
                                 details = productList.map {
                                     DetailInvoiceDomainModel(
@@ -156,7 +170,7 @@ fun SellScreen(
                                         subtotal = it.subtotal
                                     )
                                 },
-                                moneyPaid = if(dept[0] == deptSelectedOption) 0.0 else moneyToPay.toDouble()
+                                moneyPaid = if (dept[0] == deptSelectedOption) 0.0 else moneyToPay.toDouble()
                             )
                         }
                     )
@@ -221,14 +235,22 @@ fun SellScreen(
                 TextFieldInvoice(
                     title = "Precio",
                     value = price,
-                    onValueChange = { price = it },
+                    onValueChange = {
+                        if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                            price = it
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
                 TextFieldInvoice(
                     title = "Cantidad",
                     value = quantity,
-                    onValueChange = { quantity = it },
+                    onValueChange = {
+                        if (it.isEmpty() || it.matches(Regex("^\\d*$"))) {
+                            quantity = it
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
@@ -237,12 +259,12 @@ fun SellScreen(
                     onFunction = {
                         // Validamos los campos para posteriormente agregarlos a la tabla
                         if (!validations(
-                               enabledRadioButtonsClient = validationClient,
-                               client = client,
-                               product = product,
-                               price = price,
-                               quantity = quantity,
-                               context = context
+                                enabledRadioButtonsClient = validationClient,
+                                client = client,
+                                product = product,
+                                price = price,
+                                quantity = quantity,
+                                context = context
                             )
                         ) {
                             return@GenericBlueUiButton
@@ -297,7 +319,7 @@ fun SellScreen(
                     }
                 }
 
-                if (deptSelectedOption == "Crédito"){
+                if (deptSelectedOption == "Crédito") {
                     TextFieldInvoice(
                         title = "Pagar",
                         value = moneyToPay,
@@ -321,7 +343,8 @@ fun SellScreen(
                 searchProduct = { queryClient ->
                     viewModel.updateQueryClient(queryClient)
                 },
-                searchQueryClient = searchQueryClient)
+                searchQueryClient = searchQueryClient
+            )
         }
 
         if (showProducts) {
@@ -336,7 +359,8 @@ fun SellScreen(
                 searchQuery = { query ->
                     viewModel.updateQueryProduct(query)
                 },
-                searchQueryProduct = searchQueryProduct)
+                searchQueryProduct = searchQueryProduct
+            )
         }
     }
 }
@@ -492,7 +516,6 @@ fun InvoiceTable(productList: List<ProductItem>) {
 }
 
 
-
 /*Tabla de clientes para seleccionar*/
 @Composable
 fun SelectClientTable(
@@ -535,17 +558,19 @@ fun SelectClientTable(
             SearchBarComponent(
                 value = searchQueryClient,
                 onChangeValue = {
-                    searchProduct.invoke(it)}
+                    searchProduct.invoke(it)
+                }
             )
 
             Spacer(modifier = Modifier.size(5.dp))
 
             LazyColumn {
                 items(clients) { client ->
-                    ClientItemTable(client,
+                    ClientItemTable(
+                        client,
                         getValues = { name, id ->
-                        getValues.invoke(name, id)
-                    })
+                            getValues.invoke(name, id)
+                        })
                 }
             }
         }
@@ -568,7 +593,11 @@ fun ClientItemTable(
     ) {
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
-            Text("${client.name} ${client.lastName}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "${client.name} ${client.lastName}",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
 
             Text("Número: ${client.numberIdentifier}", fontSize = 16.sp, color = Color.Gray)
         }
@@ -579,7 +608,8 @@ fun ClientItemTable(
                 onFunction = {
                     getValues.invoke(
                         "${client.name} ${client.lastName}",
-                        client.id)
+                        client.id
+                    )
                 }
             )
         }
@@ -592,7 +622,7 @@ fun SelectProductTable(
     products: List<DetailedProductModel>,
     closeTable: () -> Unit,
     getValues: (String, Long, Double) -> Unit,
-    searchQuery:(String) -> Unit,
+    searchQuery: (String) -> Unit,
     searchQueryProduct: String
 ) {
 
@@ -635,10 +665,11 @@ fun SelectProductTable(
 
             LazyColumn {
                 items(products) { product ->
-                    ProductItemTable(product,
+                    ProductItemTable(
+                        product,
                         getValues = { name, id, precio ->
-                        getValues.invoke(name, id, precio)
-                    })
+                            getValues.invoke(name, id, precio)
+                        })
                 }
             }
         }
@@ -723,7 +754,7 @@ fun validations(
         return false
     }
 
-    if (quantity.toInt() <= 0){
+    if (quantity.toInt() <= 0) {
         Toast.makeText(
             context,
             "Rellene el campo cantidad con un valor entero positivo",

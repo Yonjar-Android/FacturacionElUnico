@@ -114,11 +114,11 @@ fun ProductUpdateScreen(
     // Muestra el mensaje ya sea error o éxito al cambiar desde el viewModel
 
     LaunchedEffect(message) {
-        if (!message.isNullOrEmpty()){
-            Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
+        if (!message.isNullOrEmpty()) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             viewModel.restartMessage()
 
-            if (navigateBack){
+            if (navigateBack) {
                 navController.navigateUp()
             }
         }
@@ -183,25 +183,38 @@ fun ProductUpdateScreen(
         TextFieldComponent(
             textFieldName = "Stock",
             textValue = stock.toString(),
-            onTextValueChange = { stock = it },
+            onTextValueChange = {
+                if (it.isEmpty() || it.matches(Regex("^\\d*$"))) {
+                    stock = it
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
         TextFieldComponent(
             textFieldName = "Precio Venta",
             textValue = priceSell.toString(),
-            onTextValueChange = { priceSell = it },
+            onTextValueChange = {
+                if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                    priceSell = it
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
         TextFieldComponent(
             textFieldName = "Precio Compra",
             textValue = priceBuy.toString(),
-            onTextValueChange = { priceBuy = it },
+            onTextValueChange = {
+                if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                    priceBuy = it
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
-        GenericBlueUiButton(buttonText = "Actualizar",
+        GenericBlueUiButton(
+            buttonText = "Actualizar",
             onFunction = {
                 viewModel.updateProduct(
                     ProductDomainModel(
@@ -230,7 +243,7 @@ fun ProductUpdateScreen(
                     category = it.categoryName
                     showDialogCat = false
                 },
-                updateQueryCat = {viewModel.updateQueryCategory(it)}
+                updateQueryCat = { viewModel.updateQueryCategory(it) }
             )
         }
 
@@ -247,7 +260,7 @@ fun ProductUpdateScreen(
                     brandId = it.brandId
                     showDialogBrand = false
                 },
-                updateQueryBrand = {viewModel.updateQueryBrand(it)}
+                updateQueryBrand = { viewModel.updateQueryBrand(it) }
             )
         }
 
@@ -275,7 +288,8 @@ fun ModalSelectionDialogCar(
                 TextField(
                     value = query,
                     onValueChange = { newQuery ->
-                        updateQueryCat.invoke(newQuery) },
+                        updateQueryCat.invoke(newQuery)
+                    },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
@@ -340,7 +354,8 @@ fun ModalSelectionDialogBrand(
                 TextField(
                     value = query,
                     onValueChange = { newQuery ->
-                        updateQueryBrand.invoke(newQuery) },
+                        updateQueryBrand.invoke(newQuery)
+                    },
                     placeholder = { Text("Buscar...") },
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
