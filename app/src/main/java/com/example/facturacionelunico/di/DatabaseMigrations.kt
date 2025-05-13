@@ -6,7 +6,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 object DatabaseMigrations {
 
-    val MIGRATION_7_8 = object : Migration(7, 8) {
+    val MIGRATION_8_9 = object : Migration(8, 9) {
         override fun migrate(db: SupportSQLiteDatabase) {
             // Evitar duplicación: eliminar primero
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock")

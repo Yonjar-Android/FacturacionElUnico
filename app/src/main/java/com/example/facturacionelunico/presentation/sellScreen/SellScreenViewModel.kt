@@ -2,11 +2,9 @@ package com.example.facturacionelunico.presentation.sellScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.facturacionelunico.domain.models.client.ClientDomainModel
-import com.example.facturacionelunico.domain.models.client.DetailedClientDomainModel
-import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ResultPattern
+import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
 import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.domain.repositories.ClientRepository
@@ -32,18 +30,19 @@ class SellScreenViewModel @Inject constructor(
     private val repository: InvoiceRepository,
     private val clientRepository: ClientRepository,
     private val productRepository: ProductRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
-    fun createInvoice(invoice: InvoiceDomainModel,
-                      details: List<DetailInvoiceDomainModel>,
-                      moneyPaid:Double){
+    fun createInvoice(
+        invoice: InvoiceDomainModel,
+        details: List<DetailInvoiceDomainModel>,
+        moneyPaid: Double
+    ) {
         viewModelScope.launch {
-            println(invoice)
-            println(details)
-           _message.value = repository.createInvoice(invoice,details,moneyPaid)
+            _message.value = repository.createInvoice(invoice, details, moneyPaid)
+            println("MENSAJE VIEWMODEL: ${_message.value}")
         }
     }
 
@@ -67,11 +66,11 @@ class SellScreenViewModel @Inject constructor(
         .map { result ->
             when (result) {
                 is ResultPattern.Success -> {
-                    _message.value = null
                     result.data
                 }
+
                 is ResultPattern.Error -> {
-                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
+                    _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
                     emptyList()
                 }
             }
@@ -115,7 +114,7 @@ class SellScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun restartMessage(){
+    fun restartMessage() {
         _message.value = null
     }
 }

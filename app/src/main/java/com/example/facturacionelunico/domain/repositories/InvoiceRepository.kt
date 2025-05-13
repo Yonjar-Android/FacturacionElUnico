@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.domain.repositories
 
+import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
 import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailDomainModel
@@ -16,6 +17,11 @@ interface InvoiceRepository {
         invoice: InvoiceDomainModel,
         details: List<DetailInvoiceDomainModel>,
         moneyPaid: Double): String
+
+    suspend fun createInvoiceDetail(
+        invoiceId: Long,
+        products: List<ProductItem>
+    ): String
 
     fun getInvoiceDetailById(id: Long): Flow<ResultPattern<InvoiceDetailDomainModel>>
 

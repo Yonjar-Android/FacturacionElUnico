@@ -67,9 +67,13 @@ fun SellScreen(
 ) {
 
     val message by viewModel.message.collectAsStateWithLifecycle()
+    println("MENSAJE PANTALLA: $message")
 
     val products by viewModel.products.collectAsStateWithLifecycle()
     val clients by viewModel.clients.collectAsStateWithLifecycle()
+
+    val searchQueryProduct by viewModel.searchQueryProduct.collectAsStateWithLifecycle()
+    val searchQueryClient by viewModel.searchQueryClient.collectAsStateWithLifecycle()
 
     var context = LocalContext.current
 
@@ -103,6 +107,8 @@ fun SellScreen(
             validationClient = true
             enabledRadioButtons = true
             client = ""
+            moneyToPay = ""
+
         }
         viewModel.restartMessage()
     }
@@ -126,8 +132,8 @@ fun SellScreen(
                                     Toast.makeText(context, "Rellene el campo de dinero a pagar con un valor numérico válido", Toast.LENGTH_SHORT).show()
                                     return@GenericBlueUiButton
                                 }
-                                if (moneyToPay.toDouble() <= 0){
-                                    Toast.makeText(context, "Rellene el campo de dinero a pagar con un valor mayor a 0", Toast.LENGTH_SHORT).show()
+                                if (moneyToPay.toDouble() < 0){
+                                    Toast.makeText(context, "Rellene el campo de dinero a pagar con un valor positivo", Toast.LENGTH_SHORT).show()
                                     return@GenericBlueUiButton
                                 }
                             }
@@ -138,7 +144,8 @@ fun SellScreen(
                                     sellDate = System.currentTimeMillis(),
                                     total = total,
                                     clientId = clientId,
-                                    state = if(dept[0] == deptSelectedOption) "COMPLETADO" else "PENDIENTE"
+                                    state = if(dept[0] == deptSelectedOption) "COMPLETADO" else "PENDIENTE",
+                                    paymentMethod = if(dept[0] == deptSelectedOption) "DEBITO" else "CREDITO"
                                 ),
                                 details = productList.map {
                                     DetailInvoiceDomainModel(
@@ -313,7 +320,8 @@ fun SellScreen(
                 },
                 searchProduct = { queryClient ->
                     viewModel.updateQueryClient(queryClient)
-                })
+                },
+                searchQueryClient = searchQueryClient)
         }
 
         if (showProducts) {
@@ -327,7 +335,8 @@ fun SellScreen(
                 },
                 searchQuery = { query ->
                     viewModel.updateQueryProduct(query)
-                })
+                },
+                searchQueryProduct = searchQueryProduct)
         }
     }
 }
@@ -490,9 +499,9 @@ fun SelectClientTable(
     clients: List<DetailedClientLocalModel>,
     closeTable: () -> Unit,
     getValues: (String, Long) -> Unit,
-    searchProduct: (String) -> Unit
+    searchProduct: (String) -> Unit,
+    searchQueryClient: String
 ) {
-    var query by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -524,9 +533,8 @@ fun SelectClientTable(
             Spacer(modifier = Modifier.size(5.dp))
 
             SearchBarComponent(
-                value = query,
+                value = searchQueryClient,
                 onChangeValue = {
-                    query = it
                     searchProduct.invoke(it)}
             )
 
@@ -584,10 +592,9 @@ fun SelectProductTable(
     products: List<DetailedProductModel>,
     closeTable: () -> Unit,
     getValues: (String, Long, Double) -> Unit,
-    searchQuery:(String) -> Unit
+    searchQuery:(String) -> Unit,
+    searchQueryProduct: String
 ) {
-
-    var query by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -619,9 +626,8 @@ fun SelectProductTable(
             Spacer(modifier = Modifier.size(5.dp))
 
             SearchBarComponent(
-                value = query,
+                value = searchQueryProduct,
                 onChangeValue = {
-                     query = it
                     searchQuery.invoke(it)
                 })
 

@@ -14,13 +14,15 @@ import com.example.facturacionelunico.ui.theme.blueUi
 @Composable
 fun GenericBlueUiButton(
     buttonText: String,
+    enabled: Boolean = true,
     onFunction: () -> Unit
 ){
     Button(
         modifier = Modifier.fillMaxWidth(fraction = 0.9f),
         onClick = {
             onFunction.invoke()
-        }, colors = ButtonDefaults.buttonColors(containerColor = blueUi)
+        }, colors = ButtonDefaults.buttonColors(containerColor = blueUi),
+        enabled = enabled
     ) {
         Text(
             buttonText, fontWeight = FontWeight.Bold, fontSize = 24.sp,

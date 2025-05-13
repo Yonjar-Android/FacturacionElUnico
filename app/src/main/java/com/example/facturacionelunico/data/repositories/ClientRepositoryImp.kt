@@ -66,7 +66,8 @@ class ClientRepositoryImp @Inject constructor(
                         sellDate = it.fechaVenta,
                         state = it.estado,
                         total = it.total,
-                        clientId = it.idCliente)
+                        clientId = it.idCliente,
+                        paymentMethod = it.tipoPago)
                 })
         }
     }

@@ -5,7 +5,8 @@ data class InvoiceDomainModel(
     val sellDate: Long,
     val total: Double,
     val clientId: Long?,
-    val state: String
+    val state: String,
+    val paymentMethod: String
 )
 
 data class DetailInvoiceDomainModel(

@@ -1,5 +1,7 @@
 package com.example.facturacionelunico.data.repositories
 
+import androidx.room.withTransaction
+import com.example.facturacionelunico.data.database.AppDatabase
 import com.example.facturacionelunico.data.database.dao.AbonoVentaDao
 import com.example.facturacionelunico.data.database.dao.DetalleAbonoVentaDao
 import com.example.facturacionelunico.data.database.dao.DetalleVentaDao
@@ -9,6 +11,7 @@ import com.example.facturacionelunico.data.database.entities.AbonoVentaEntity
 import com.example.facturacionelunico.data.database.entities.DetalleAbonoVentaEntity
 import com.example.facturacionelunico.data.database.entities.DetalleVentaEntity
 import com.example.facturacionelunico.data.database.entities.VentaEntity
+import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
 import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailDomainModel
@@ -25,7 +28,8 @@ class InvoiceRepositoryImp @Inject constructor(
     private val detailInvoiceDao: DetalleVentaDao,
     private val abonosDao: AbonoVentaDao,
     private val abonosDetalleDao: DetalleAbonoVentaDao,
-    private val productoDao: ProductoDao
+    private val productoDao: ProductoDao,
+    private val appDatabase: AppDatabase
 ) : InvoiceRepository {
     override suspend fun getInvoices(): List<InvoiceDomainModel> {
         return runCatching {
@@ -35,7 +39,8 @@ class InvoiceRepositoryImp @Inject constructor(
                     sellDate = it.fechaVenta,
                     total = it.total,
                     clientId = it.idCliente,
-                    state = it.estado
+                    state = it.estado,
+                    paymentMethod = it.tipoPago
                 )
             }
         }.getOrElse {
@@ -51,7 +56,8 @@ class InvoiceRepositoryImp @Inject constructor(
                     sellDate = it.fechaVenta,
                     total = it.total,
                     clientId = it.idCliente,
-                    state = it.estado
+                    state = it.estado,
+                    paymentMethod = it.tipoPago
                 )
             }
         }.getOrElse {
@@ -66,55 +72,113 @@ class InvoiceRepositoryImp @Inject constructor(
     ): String {
 
         return runCatching {
-            val invoiceEntity = VentaEntity(
-                fechaVenta = invoice.sellDate,
-                total = invoice.total,
-                idCliente = invoice.clientId,
-                estado = invoice.state
-            )
-
-            val id = invoiceDao.insert(invoiceEntity)
-
-            val validate = stockValidation(details)
-
-            if (validate.contains("Error")) {
-                return@runCatching validate
-            }
-
-            details.forEach {
-                val detailEntity = DetalleVentaEntity(
-                    idVenta = id,
-                    idProducto = it.productId,
-                    cantidad = it.quantity,
-                    precio = it.price,
-                    subtotal = it.subtotal
-                )
-                detailInvoiceDao.insert(detailEntity)
-            }
-
-            // Condicional donde si el pago es PENDIENTE se cree el abono del cliente
-            if (invoice.state == "PENDIENTE") {
-                val abonoEntity = AbonoVentaEntity(
-                    idVenta = id,
-                    fechaCreacion = invoice.sellDate,
-                    totalAPagar = invoice.total,
-                    totalPendiente = invoice.total
-                )
-
-                val idAbono = abonosDao.insert(abonoEntity)
-
-                if (moneyPaid > 0) {
-                    val abonoDetalleEntity = DetalleAbonoVentaEntity(
-                        idAbonoVenta = idAbono,
-                        monto = moneyPaid,
-                        fechaAbono = System.currentTimeMillis()
+            appDatabase.withTransaction {
+                    val invoiceEntity = VentaEntity(
+                        fechaVenta = invoice.sellDate,
+                        total = invoice.total,
+                        idCliente = invoice.clientId,
+                        estado = invoice.state,
+                        tipoPago = invoice.paymentMethod
                     )
-                    abonosDetalleDao.insert(abonoDetalleEntity)
+
+                val id = invoiceDao.insert(invoiceEntity)
+
+                val validate = stockValidation(details)
+
+                if (validate.isNotEmpty()) {
+                    throw IllegalArgumentException(validate)
+                }
+
+                details.forEach {
+                    val detailEntity = DetalleVentaEntity(
+                        idVenta = id,
+                        idProducto = it.productId,
+                        cantidad = it.quantity,
+                        precio = it.price,
+                        subtotal = it.subtotal,
+                        fechaActualizacion = invoice.sellDate
+                    )
+                    detailInvoiceDao.insert(detailEntity)
+                }
+
+                // Condicional donde si el pago es PENDIENTE se cree el abono del cliente
+                if (invoice.state == "PENDIENTE") {
+                    val abonoEntity = AbonoVentaEntity(
+                        idVenta = id,
+                        fechaCreacion = invoice.sellDate,
+                        totalAPagar = invoice.total,
+                        totalPendiente = invoice.total
+                    )
+
+                    val idAbono = abonosDao.insert(abonoEntity)
+
+                    if (moneyPaid > 0) {
+                        val abonoDetalleEntity = DetalleAbonoVentaEntity(
+                            idAbonoVenta = idAbono,
+                            monto = moneyPaid,
+                            fechaAbono = System.currentTimeMillis()
+                        )
+                        abonosDetalleDao.insert(abonoDetalleEntity)
+                    }
                 }
             }
-
+            println("I AM HERE")
             "Factura creada con éxito"
 
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun createInvoiceDetail(
+        invoiceId: Long,
+        products: List<ProductItem>
+    ): String {
+        return runCatching {
+            appDatabase.withTransaction { // Permite que Si una sola operación falla, se revierte todo.
+                products.forEach {
+                    val detailEntity = DetalleVentaEntity(
+                        idVenta = invoiceId,
+                        idProducto = it.id,
+                        cantidad = it.quantity,
+                        precio = it.price,
+                        subtotal = it.subtotal,
+                        fechaActualizacion = System.currentTimeMillis()
+                    )
+
+                    val validate = stockValidationOneProduct(
+                        productId = it.id,
+                        quantity = it.quantity
+                    )
+
+                    if (validate.isNotEmpty()) {
+                        throw IllegalArgumentException(validate)
+                    }
+
+                    detailInvoiceDao.insert(detailEntity)
+                }
+
+                val newTotal = products.sumOf { it.subtotal }
+                val invoice = invoiceDao.getInvoiceById(invoiceId)
+
+                invoiceDao.update(
+                    invoice.copy(
+                        total = invoice.total + newTotal,
+                        estado = "PENDIENTE"
+                    )
+                )
+
+                val abono = abonosDao.getAbonoByInvoiceId(invoiceId)
+
+                abonosDao.update(
+                    abono.copy(
+                        totalPendiente = abono.totalPendiente + newTotal,
+                        totalAPagar = abono.totalAPagar + newTotal
+                    )
+                )
+            }
+
+            "Factura actualizada con éxito"
         }.getOrElse {
             "Error: ${it.message}"
         }
@@ -124,7 +188,13 @@ class InvoiceRepositoryImp @Inject constructor(
         val invoiceFlow = invoiceDao.getInvoiceDetailById(id)
         val productsFlow = detailInvoiceDao.getDetailsByInvoiceId(id)
 
+
+
         return combine(invoiceFlow, productsFlow) { invoice, products ->
+            val abonos = abonosDao.getAll()
+            val abonosDetalle = abonosDetalleDao.getAll()
+            println("ABONOS $abonos")
+            println("Detalle $abonosDetalle")
             runCatching {
                 ResultPattern.Success(
                     InvoiceDetailDomainModel(
@@ -135,6 +205,7 @@ class InvoiceRepositoryImp @Inject constructor(
                         products = products
                     )
                 )
+
             }.getOrElse { e ->
                 ResultPattern.Error(exception = e, message = "Error: ${e.message}")
             }
@@ -165,9 +236,25 @@ class InvoiceRepositoryImp @Inject constructor(
     }
 
     suspend fun stockValidation(products: List<DetailInvoiceDomainModel>): String {
-        products.forEach {
-            val product = productoDao.getDetailedById(it.productId)
-            return "Error: No hay suficiente stock de ${product?.name}. Stock: ${product?.stock}"
+        products.forEach { productDetail ->
+            val product = productoDao.getDetailedById(productDetail.productId)
+            product?.stock.let { stock ->
+                if (stock!! < productDetail.quantity) {
+                    return "No hay suficiente stock de ${product?.name}. Stock: ${product?.stock}"
+                }
+            }
+        }
+        return ""
+    }
+
+    suspend fun stockValidationOneProduct(productId: Long, quantity: Int): String {
+        val product = productoDao.getDetailedById(productId)
+        product?.stock?.let {
+            println("Stock Validation $it")
+            println("Quantity $quantity")
+            if (it < quantity) {
+                return "No hay suficiente stock de ${product.name}. Stock: ${product?.stock}"
+            }
         }
         return ""
     }

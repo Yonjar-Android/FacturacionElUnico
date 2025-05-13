@@ -74,7 +74,7 @@ fun ProductDetailScreen(
 
         ProductDetailTexts(
             title = "Precio Compra:",
-            info = "C$ ${product?.salePrice.toString()}"
+            info = "C$ ${product?.purchasePrice.toString()}"
         )
 
         ProductDetailTexts(

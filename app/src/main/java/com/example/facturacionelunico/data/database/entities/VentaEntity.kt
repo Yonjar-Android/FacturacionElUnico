@@ -11,7 +11,8 @@ data class VentaEntity(
     val fechaVenta: Long,
     val total: Double,
     val idCliente: Long?,
-    val estado: String // PENDIENTE, COMPLETADO, CANCELADO
+    val estado: String, // PENDIENTE, COMPLETADO, CANCELADO
+    val tipoPago: String // DEBITO, CREDITO
 )
 
 @Entity(
@@ -41,7 +42,8 @@ data class DetalleVentaEntity(
     val idProducto: Long,
     val cantidad: Int,
     val precio: Double,
-    val subtotal: Double
+    val subtotal: Double,
+    val fechaActualizacion: Long
 )
 
 

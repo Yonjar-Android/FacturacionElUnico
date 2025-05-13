@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.VentaEntity
 import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailLocalModel
 import kotlinx.coroutines.flow.Flow
@@ -12,10 +13,18 @@ interface VentaDao {
     @Insert
     suspend fun insert(venta: VentaEntity): Long
 
+    @Update
+    suspend fun update(venta: VentaEntity)
+
     @Query("""SELECT * FROM venta
         ORDER BY estado DESC
         """)
     suspend fun getAll(): List<VentaEntity>
+
+    @Query("""SELECT * FROM venta
+        WHERE id = :id
+        """)
+    suspend fun getInvoiceById(id: Long): VentaEntity
 
     @Query("""SELECT * FROM venta
         WHERE estado = 'PENDIENTE'

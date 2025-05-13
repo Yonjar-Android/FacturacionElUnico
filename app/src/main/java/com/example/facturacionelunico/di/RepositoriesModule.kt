@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.di
 
+import com.example.facturacionelunico.data.database.AppDatabase
 import com.example.facturacionelunico.data.database.dao.AbonoVentaDao
 import com.example.facturacionelunico.data.database.dao.CategoriaDao
 import com.example.facturacionelunico.data.database.dao.ClienteDao
@@ -79,12 +80,15 @@ object RepositoriesModule {
         detalleVentaDao: DetalleVentaDao,
         abonoVentaDao: AbonoVentaDao,
         detalleAbonoVentaDao: DetalleAbonoVentaDao,
-        productoDao: ProductoDao
+        productoDao: ProductoDao,
+        appDatabase: AppDatabase
     ): InvoiceRepository {
         return InvoiceRepositoryImp(ventaDao,
             detalleVentaDao,
             abonoVentaDao,
             detalleAbonoVentaDao,
-            productoDao = productoDao)
+            productoDao = productoDao,
+            appDatabase = appDatabase
+            )
     }
 }
