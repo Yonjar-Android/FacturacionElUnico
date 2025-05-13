@@ -68,6 +68,7 @@ fun CategoryScreen(
             categoryScreenViewModel.restartMessage()
 
             if (!message!!.contains("Error")){
+                textValueCategory = ""
                 showDialog = false
             }
         }

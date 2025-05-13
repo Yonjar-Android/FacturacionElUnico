@@ -65,6 +65,7 @@ fun BrandScreen(
             brandScreenViewModel.restartMessage()
 
             if (!message!!.contains("Error")){
+                textValueBrand = ""
                 showDialog = false
             }
         }

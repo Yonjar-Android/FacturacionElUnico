@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -488,12 +489,14 @@ fun InvoiceTable(productList: List<ProductItem>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(product.name, Modifier.weight(1f), textAlign = TextAlign.Center)
+
                 Text(
                     "%.2f".format(product.price),
                     Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text("${product.quantity}", Modifier.weight(1f), textAlign = TextAlign.Center)
+
                 Text(
                     "%.2f".format(product.subtotal),
                     Modifier.weight(1f),
