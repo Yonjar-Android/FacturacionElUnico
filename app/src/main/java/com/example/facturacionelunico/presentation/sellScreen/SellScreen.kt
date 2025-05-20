@@ -23,7 +23,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -95,6 +94,7 @@ fun SellScreen(
         )
     }
 
+    var productId by remember { mutableStateOf("") }
     var product by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
@@ -274,7 +274,7 @@ fun SellScreen(
                         productList = productList.toMutableList().apply {
                             add(
                                 ProductItem(
-                                    1,
+                                    productId.toLong(),
                                     product,
                                     price.toDouble(),
                                     quantity.toInt()
@@ -285,6 +285,7 @@ fun SellScreen(
                         enabledRadioButtons = false
 
                         // Limpiar campos luego de agregar a la tabla
+                        productId = ""
                         product = ""
                         price = ""
                         quantity = ""
@@ -353,6 +354,7 @@ fun SellScreen(
                 products = products,
                 closeTable = { showProducts = false },
                 getValues = { name, id, precio ->
+                    productId = id.toString()
                     product = name
                     price = precio.toString()
                     showProducts = false
@@ -671,6 +673,7 @@ fun SelectProductTable(
                     ProductItemTable(
                         product,
                         getValues = { name, id, precio ->
+
                             getValues.invoke(name, id, precio)
                         })
                 }
@@ -703,6 +706,7 @@ fun ProductItemTable(
             GenericBlueUiButton(
                 buttonText = "Seleccionar",
                 onFunction = {
+                    println("Producto: $product")
                     getValues.invoke(product.name, product.id, product.salePrice)
                 }
             )

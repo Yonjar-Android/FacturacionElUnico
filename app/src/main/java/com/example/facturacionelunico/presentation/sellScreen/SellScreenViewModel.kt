@@ -42,7 +42,6 @@ class SellScreenViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _message.value = repository.createInvoice(invoice, details, moneyPaid)
-            println("MENSAJE VIEWMODEL: ${_message.value}")
         }
     }
 

@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.room)
     alias(libs.plugins.ksp)
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
 }
 
@@ -80,7 +79,7 @@ dependencies {
 
     //Dagger Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     //Compose Navigation
@@ -92,8 +91,4 @@ dependencies {
 
     // turbine unit testing
     testImplementation(libs.turbine)
-}
-
-kapt {
-    correctErrorTypes = true
 }
