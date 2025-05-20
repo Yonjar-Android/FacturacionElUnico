@@ -76,6 +76,8 @@ dependencies {
 
     //Paging 3 Integration
     implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
 
     //Dagger Hilt
     implementation(libs.hilt.android)
