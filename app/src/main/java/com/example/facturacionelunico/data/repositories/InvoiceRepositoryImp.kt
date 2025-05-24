@@ -1,5 +1,9 @@
 package com.example.facturacionelunico.data.repositories
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import androidx.room.withTransaction
 import com.example.facturacionelunico.data.database.AppDatabase
 import com.example.facturacionelunico.data.database.dao.AbonoVentaDao
@@ -20,7 +24,9 @@ import com.example.facturacionelunico.domain.repositories.InvoiceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class InvoiceRepositoryImp @Inject constructor(
@@ -31,37 +37,57 @@ class InvoiceRepositoryImp @Inject constructor(
     private val productoDao: ProductoDao,
     private val appDatabase: AppDatabase
 ) : InvoiceRepository {
-    override suspend fun getInvoices(): List<InvoiceDomainModel> {
+    override fun getInvoices(): Flow<PagingData<InvoiceDomainModel>> {
         return runCatching {
-            invoiceDao.getAll().map {
-                InvoiceDomainModel(
-                    id = it.id,
-                    sellDate = it.fechaVenta,
-                    total = it.total,
-                    clientId = it.idCliente,
-                    state = it.estado,
-                    paymentMethod = it.tipoPago
-                )
-            }
+            Pager(
+                config = PagingConfig(
+                    pageSize = 10,
+                    prefetchDistance = 5
+                ),
+                pagingSourceFactory = { invoiceDao.getAll() }
+            ).flow
+                .map { pagingData ->
+                    pagingData.map {
+                        InvoiceDomainModel(
+                            id = it.id,
+                            sellDate = it.fechaVenta,
+                            total = it.total,
+                            clientId = it.idCliente,
+                            state = it.estado,
+                            paymentMethod = it.tipoPago
+                        )
+                    }
+
+                }
         }.getOrElse {
-            emptyList()
+            flow { emit(PagingData.empty()) }
         }
     }
 
-    override suspend fun getInvoicesWithDebt(): List<InvoiceDomainModel> {
+    override fun getInvoicesWithDebt(): Flow<PagingData<InvoiceDomainModel>> {
         return runCatching {
-            invoiceDao.getInvoicesWithDebt().map {
-                InvoiceDomainModel(
-                    id = it.id,
-                    sellDate = it.fechaVenta,
-                    total = it.total,
-                    clientId = it.idCliente,
-                    state = it.estado,
-                    paymentMethod = it.tipoPago
-                )
-            }
+            Pager(
+                config = PagingConfig(
+                    pageSize = 10,
+                    prefetchDistance = 5
+                ),
+                pagingSourceFactory = { invoiceDao.getInvoicesWithDebt() }
+            ).flow
+                .map { pagingData ->
+                    pagingData.map {
+                        InvoiceDomainModel(
+                            id = it.id,
+                            sellDate = it.fechaVenta,
+                            total = it.total,
+                            clientId = it.idCliente,
+                            state = it.estado,
+                            paymentMethod = it.tipoPago
+                        )
+                    }
+
+                }
         }.getOrElse {
-            emptyList()
+            flow { emit(PagingData.empty()) }
         }
     }
 
@@ -73,13 +99,13 @@ class InvoiceRepositoryImp @Inject constructor(
 
         return runCatching {
             appDatabase.withTransaction {
-                    val invoiceEntity = VentaEntity(
-                        fechaVenta = invoice.sellDate,
-                        total = invoice.total,
-                        idCliente = invoice.clientId,
-                        estado = invoice.state,
-                        tipoPago = invoice.paymentMethod
-                    )
+                val invoiceEntity = VentaEntity(
+                    fechaVenta = invoice.sellDate,
+                    total = invoice.total,
+                    idCliente = invoice.clientId,
+                    estado = invoice.state,
+                    tipoPago = invoice.paymentMethod
+                )
 
                 val id = invoiceDao.insert(invoiceEntity)
 

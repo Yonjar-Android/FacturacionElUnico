@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -19,7 +20,7 @@ interface VentaDao {
     @Query("""SELECT * FROM venta
         ORDER BY estado DESC
         """)
-    suspend fun getAll(): List<VentaEntity>
+    fun getAll(): PagingSource<Int, VentaEntity>
 
     @Query("""SELECT * FROM venta
         WHERE id = :id
@@ -30,7 +31,7 @@ interface VentaDao {
         WHERE estado = 'PENDIENTE'
         ORDER BY estado DESC
         """)
-    suspend fun getInvoicesWithDebt(): List<VentaEntity>
+    fun getInvoicesWithDebt(): PagingSource<Int, VentaEntity>
 
     @Query("""
     SELECT * FROM venta

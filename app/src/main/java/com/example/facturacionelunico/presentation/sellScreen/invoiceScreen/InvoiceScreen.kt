@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -26,8 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 
 @Composable
 fun InvoiceScreen(
@@ -35,7 +36,7 @@ fun InvoiceScreen(
     viewModel: InvoiceScreenViewModel = hiltViewModel()
 ){
 
-    val invoices by viewModel.invoices.collectAsStateWithLifecycle()
+    val invoices: LazyPagingItems<InvoiceDomainModel> = viewModel.invoices.collectAsLazyPagingItems()
 
     val dept = listOf<String>("Todas", "Pendientes")
     var deptSelectedOption by remember { mutableStateOf(dept[0]) }
@@ -71,16 +72,24 @@ fun InvoiceScreen(
         }
 
         LazyColumn {
-            items(invoices) {
-                FacturaItem(
-                    id = it.id,
-                    title = "Factura $${it.id}",
-                    state = it.state,
-                    total = it.total,
-                    goToDetail = {
-                        navController.navigate("InvoiceDetailScreen/${it}")
-                    }
-                )
+            items(
+                count = invoices.itemCount,
+                key = { index -> invoices[index]?.id ?: index }
+            ) { index ->
+
+                val it = invoices[index]
+
+                if(it != null){
+                    FacturaItem(
+                        id = it.id,
+                        title = "Factura $${it.id}",
+                        state = it.state,
+                        total = it.total,
+                        goToDetail = {
+                            navController.navigate("InvoiceDetailScreen/${it}")
+                        }
+                    )
+                }
             }
         }
     }

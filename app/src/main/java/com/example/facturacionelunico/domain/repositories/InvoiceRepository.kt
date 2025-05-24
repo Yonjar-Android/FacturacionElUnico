@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.domain.repositories
 
+import androidx.paging.PagingData
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceDomainModel
@@ -9,9 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface InvoiceRepository {
 
-    suspend fun getInvoices(): List<InvoiceDomainModel>
+    fun getInvoices(): Flow<PagingData<InvoiceDomainModel>>
 
-    suspend fun getInvoicesWithDebt(): List<InvoiceDomainModel>
+    fun getInvoicesWithDebt(): Flow<PagingData<InvoiceDomainModel>>
 
     suspend fun createInvoice(
         invoice: InvoiceDomainModel,
