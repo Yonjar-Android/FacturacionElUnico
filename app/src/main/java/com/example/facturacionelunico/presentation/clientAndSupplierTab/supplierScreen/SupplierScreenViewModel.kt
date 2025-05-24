@@ -2,6 +2,8 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.supplie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.SupplierDomainModel
@@ -36,7 +38,7 @@ class SupplierScreenViewModel @Inject constructor(
         _searchQuery.value = newQuery
     }
 
-    val suppliers: StateFlow<List<SupplierDomainModel>> = _searchQuery
+    val suppliers: StateFlow<PagingData<SupplierDomainModel>> = _searchQuery
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -52,14 +54,15 @@ class SupplierScreenViewModel @Inject constructor(
 
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     // Función para crear proveedor y actualizar el mensaje

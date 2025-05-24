@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
@@ -41,6 +40,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.TextFieldClient
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
@@ -53,7 +55,7 @@ fun SupplierScreen(
     viewModel: SupplierScreenViewModel = hiltViewModel()
 ) {
 
-    val suppliers by viewModel.suppliers.collectAsStateWithLifecycle()
+    val suppliers: LazyPagingItems<SupplierDomainModel> = viewModel.suppliers.collectAsLazyPagingItems()
 
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -84,10 +86,19 @@ fun SupplierScreen(
             Spacer(modifier = Modifier.size(15.dp))
 
             LazyColumn {
-                items(suppliers) { supplier ->
-                    SupplierItem(supplier, goToDetail = {
-                        navController.navigate("SupplierDetailScreen/${supplier.id}")
-                    })
+                items(
+                    count = suppliers.itemCount,
+                    key = { index -> suppliers[index]?.id ?: index },
+                    contentType = suppliers.itemContentType{"Suppliers"}
+                ) { index ->
+
+                    val supplier = suppliers[index]
+
+                    if(supplier != null){
+                        SupplierItem(supplier, goToDetail = {
+                            navController.navigate("SupplierDetailScreen/${supplier.id}")
+                        })
+                    }
                 }
             }
         }

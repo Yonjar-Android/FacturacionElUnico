@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -17,7 +18,7 @@ interface ProveedorDao {
     suspend fun update(proveedor: ProveedorEntity)
 
     @Query("SELECT * FROM proveedor")
-    fun getAll(): Flow<List<ProveedorEntity>>
+    fun getAll(): PagingSource<Int, ProveedorEntity>
 
     @Query("SELECT * FROM proveedor WHERE id = :id")
     fun getSupplierById(id: Long): Flow<ProveedorEntity>
@@ -36,5 +37,5 @@ interface ProveedorDao {
         FROM proveedor
         WHERE nombreEmpresa LIKE '%' || :query || '%'
     """)
-    fun getSuppliersBySearch(query:String): Flow<List<SupplierDomainModel>>
+    fun getSuppliersBySearch(query:String): PagingSource<Int, SupplierDomainModel>
 }
