@@ -2,6 +2,8 @@ package com.example.facturacionelunico.presentation.sellScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
@@ -87,7 +89,7 @@ class SellScreenViewModel @Inject constructor(
         _searchQueryClient.value = newQuery
     }
 
-    val clients: StateFlow<List<DetailedClientLocalModel>> = _searchQueryClient
+    val clients: StateFlow<PagingData<DetailedClientLocalModel>> = _searchQueryClient
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -103,14 +105,15 @@ class SellScreenViewModel @Inject constructor(
 
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     fun restartMessage() {

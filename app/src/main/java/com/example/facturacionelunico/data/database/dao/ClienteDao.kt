@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -19,7 +20,7 @@ interface ClienteDao {
     suspend fun update(cliente: ClienteEntity)
 
     @Query("SELECT * FROM cliente")
-    fun getAll(): Flow<List<ClienteEntity>>
+    fun getAll(): PagingSource<Int, ClienteEntity>
 
     @Query(
         """
@@ -37,7 +38,7 @@ interface ClienteDao {
     ORDER BY deptTotal DESC
 """
     )
-    fun getClientsWithDebt(): Flow<List<DetailedClientLocalModel>>
+    fun getClientsWithDebt(): PagingSource<Int, DetailedClientLocalModel>
 
     @Query("""
     SELECT 
@@ -80,6 +81,6 @@ interface ClienteDao {
     ORDER BY deptTotal DESC
 """
     )
-    fun getClientByName(query: String): Flow<List<DetailedClientLocalModel>>
+    fun getClientByName(query: String): PagingSource<Int, DetailedClientLocalModel>
 }
 

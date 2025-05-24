@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
@@ -43,6 +42,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
@@ -55,7 +57,8 @@ fun ClientScreen(
     navController: NavController
 ) {
 
-    val clients by viewModel.clients.collectAsStateWithLifecycle()
+    val clients: LazyPagingItems<DetailedClientLocalModel> =
+        viewModel.clients.collectAsLazyPagingItems()
 
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -86,10 +89,19 @@ fun ClientScreen(
             Spacer(modifier = Modifier.size(25.dp))
 
             LazyColumn {
-                items(clients) { client ->
-                    ClientItem(client, goToDetail = {
-                        navController.navigate("ClientDetailScreen/${client.id}")
-                    })
+                items(
+                    count = clients.itemCount,
+                    key = { index -> clients[index]?.id ?: index },
+                    contentType = clients.itemContentType { "Clients" }
+                ) { index ->
+
+                    val client = clients[index]
+
+                    if (client != null) {
+                        ClientItem(client, goToDetail = {
+                            navController.navigate("ClientDetailScreen/${client.id}")
+                        })
+                    }
                 }
             }
         }

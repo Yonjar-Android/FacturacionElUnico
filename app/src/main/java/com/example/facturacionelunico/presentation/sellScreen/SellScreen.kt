@@ -50,6 +50,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.client.DetailedClientLocalModel
@@ -69,10 +72,10 @@ fun SellScreen(
 ) {
 
     val message by viewModel.message.collectAsStateWithLifecycle()
-    println("MENSAJE PANTALLA: $message")
 
     val products by viewModel.products.collectAsStateWithLifecycle()
-    val clients by viewModel.clients.collectAsStateWithLifecycle()
+    val clients: LazyPagingItems<DetailedClientLocalModel> =
+        viewModel.clients.collectAsLazyPagingItems()
 
     val searchQueryProduct by viewModel.searchQueryProduct.collectAsStateWithLifecycle()
     val searchQueryClient by viewModel.searchQueryClient.collectAsStateWithLifecycle()
@@ -524,7 +527,7 @@ fun InvoiceTable(productList: List<ProductItem>) {
 /*Tabla de clientes para seleccionar*/
 @Composable
 fun SelectClientTable(
-    clients: List<DetailedClientLocalModel>,
+    clients: LazyPagingItems<DetailedClientLocalModel>,
     closeTable: () -> Unit,
     getValues: (String, Long) -> Unit,
     searchProduct: (String) -> Unit,
@@ -570,12 +573,21 @@ fun SelectClientTable(
             Spacer(modifier = Modifier.size(5.dp))
 
             LazyColumn {
-                items(clients) { client ->
-                    ClientItemTable(
-                        client,
-                        getValues = { name, id ->
-                            getValues.invoke(name, id)
-                        })
+                items(
+                    count = clients.itemCount,
+                    key = { index -> clients[index]?.id ?: index },
+                    contentType = clients.itemContentType { "Clients" }
+                ) { index ->
+
+                    val client = clients[index]
+
+                    if (client != null) {
+                        ClientItemTable(
+                            client,
+                            getValues = { name, id ->
+                                getValues.invoke(name, id)
+                            })
+                    }
                 }
             }
         }

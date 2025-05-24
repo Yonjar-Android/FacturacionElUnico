@@ -1,5 +1,8 @@
 package com.example.facturacionelunico.data.repositories
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.example.facturacionelunico.data.database.dao.ClienteDao
 import com.example.facturacionelunico.data.database.dao.VentaDao
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
@@ -17,34 +20,31 @@ import javax.inject.Inject
 class ClientRepositoryImp @Inject constructor(
     private val clientDao: ClienteDao,
     private val invoiceDao: VentaDao
-): ClientRepository {
+) : ClientRepository {
     // Función para obtener a todos los clientes mediante un flow
-    override fun getClients(): Flow<ResultPattern<List<DetailedClientLocalModel>>> {
-        return clientDao.getClientsWithDebt()
-            .map {
-                it.map {
-                    DetailedClientLocalModel(
-                        id = it.id,
-                        name = it.name,
-                        lastName = it.lastName,
-                        phone = it.phone,
-                        numberIdentifier = it.numberIdentifier,
-                        deptTotal = it.deptTotal)
-                }
-            }.map<List<DetailedClientLocalModel>, ResultPattern<List<DetailedClientLocalModel>>> { suppliers ->
-                ResultPattern.Success(suppliers)
+    override fun getClients(): Flow<ResultPattern<PagingData<DetailedClientLocalModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { clientDao.getClientsWithDebt() }
+        ).flow
+            .map { pagingData ->
+                ResultPattern.Success(pagingData)
             }.catch { e ->
-                emit(ResultPattern.Error(exception = e, message = e.message))
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
+
             }
     }
 
-    override suspend fun getClientBySearch(query: String): Flow<ResultPattern<List<DetailedClientLocalModel>>> {
-        return clientDao.getClientByName(query)
-            .map<List<DetailedClientLocalModel>, ResultPattern<List<DetailedClientLocalModel>>> { products ->
-                ResultPattern.Success(products)
-            }
-            .catch { e ->
-                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
+    override suspend fun getClientBySearch(query: String): Flow<ResultPattern<PagingData<DetailedClientLocalModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { clientDao.getClientByName(query) }
+        ).flow
+            .map { pagingData ->
+                ResultPattern.Success(pagingData)
+            }.catch { e ->
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
+
             }
     }
 
@@ -67,7 +67,8 @@ class ClientRepositoryImp @Inject constructor(
                         state = it.estado,
                         total = it.total,
                         clientId = it.idCliente,
-                        paymentMethod = it.tipoPago)
+                        paymentMethod = it.tipoPago
+                    )
                 })
         }
     }
@@ -77,11 +78,12 @@ class ClientRepositoryImp @Inject constructor(
         return runCatching {
 
             // Función para verificar si ya existe un cliente con el mismo código proporcionado
-            val existingClient = clientDao.getClienteByIdentificadorExcludingId(client.numberIdentifier,client.id)
+            val existingClient =
+                clientDao.getClienteByIdentificadorExcludingId(client.numberIdentifier, client.id)
 
-            if (existingClient != null){
+            if (existingClient != null) {
                 return "Error: Ya existe un cliente con ese código"
-            } else{
+            } else {
                 val newClient = ClienteEntity(
                     nombre = client.name,
                     apellido = client.lastName,
@@ -92,7 +94,7 @@ class ClientRepositoryImp @Inject constructor(
                 "Se ha creado un nuevo cliente"
             }
         }.getOrElse {
-           "Error: ${it.message}"
+            "Error: ${it.message}"
         }
     }
 
@@ -100,11 +102,12 @@ class ClientRepositoryImp @Inject constructor(
         return runCatching {
 
             // Función para verificar si ya existe un cliente con el mismo código proporcionado
-            val existingClient = clientDao.getClienteByIdentificadorExcludingId(client.numberIdentifier, client.id)
+            val existingClient =
+                clientDao.getClienteByIdentificadorExcludingId(client.numberIdentifier, client.id)
 
-            if (existingClient != null){
+            if (existingClient != null) {
                 return "Error: Ya existe un cliente con ese código"
-            } else{
+            } else {
                 val newClient = ClienteEntity(
                     id = client.id,
                     nombre = client.name,
