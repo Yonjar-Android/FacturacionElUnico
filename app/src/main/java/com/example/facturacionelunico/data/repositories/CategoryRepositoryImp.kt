@@ -1,5 +1,9 @@
 package com.example.facturacionelunico.data.repositories
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.example.facturacionelunico.data.database.dao.CategoriaDao
 import com.example.facturacionelunico.data.database.entities.CategoriaEntity
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
@@ -14,18 +18,25 @@ import javax.inject.Inject
 class CategoryRepositoryImp @Inject constructor(
     private val categoryDao: CategoriaDao
 ) : CategoryRepository {
-    override fun getCategories(): Flow<ResultPattern<List<CategoryDomainModel>>> {
-        return categoryDao.getAll().map {
-            it.map {
-                CategoryDomainModel(
-                    categoryId = it.id,
-                    categoryName = it.nombre
-                )
+    override fun getCategories(): Flow<ResultPattern<PagingData<CategoryDomainModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { categoryDao.getAll() }
+        ).flow
+            .map { pagingData ->
+                pagingData.map { entity ->
+                    CategoryDomainModel(
+                        categoryId = entity.id,
+                        categoryName = entity.nombre
+                    )
+                }
             }
-        }.map<List<CategoryDomainModel>, ResultPattern<List<CategoryDomainModel>>> { categories ->
-            ResultPattern.Success(categories)
-        }.catch { e ->
-                emit(ResultPattern.Error(exception = e, message = e.message))
+            .map { domainPagingData ->
+                ResultPattern.Success(domainPagingData)
+
+            }
+            .catch { e ->
+                ResultPattern.Error(exception = e, message = e.message)
             }
     }
 
@@ -40,19 +51,25 @@ class CategoryRepositoryImp @Inject constructor(
             }
     }
 
-    override fun getCategoryByName(query: String): Flow<ResultPattern<List<CategoryDomainModel>>> {
-        return categoryDao.getCategoryByName(query).map {
-            it.map {
-                CategoryDomainModel(
-                    categoryId = it.id,
-                    categoryName = it.nombre
-                )
+    override fun getCategoryByName(query: String): Flow<ResultPattern<PagingData<CategoryDomainModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { categoryDao.getCategoryByName(query) }
+        ).flow
+            .map { pagingData ->
+                pagingData.map { entity ->
+                    CategoryDomainModel(
+                        categoryId = entity.id,
+                        categoryName = entity.nombre
+                    )
+                }
+            }.map {
+                ResultPattern.Success(it)
             }
-        }.map<List<CategoryDomainModel>, ResultPattern<List<CategoryDomainModel>>> { categories ->
-            ResultPattern.Success(categories)
-        }.catch { e ->
-            emit(ResultPattern.Error(exception = e, message = e.message))
-        }
+            .catch { e ->
+                ResultPattern.Error(exception = e, message = e.message)
+            }
+
     }
 
     override suspend fun getProductsByCategory(categoryId: Long): List<DetailedProductModel> {
@@ -64,9 +81,9 @@ class CategoryRepositoryImp @Inject constructor(
 
             val existCategory = categoryDao.existCategoryName(categoryName)
 
-            if (existCategory != null){
+            if (existCategory != null) {
                 "Error: La categoría ya existe"
-            } else{
+            } else {
                 categoryDao.insert(
                     CategoriaEntity(
                         nombre = categoryName
@@ -82,11 +99,12 @@ class CategoryRepositoryImp @Inject constructor(
     override suspend fun updateCategory(category: CategoryDomainModel): String {
         return runCatching {
 
-            val conflictingCategory = categoryDao.getOtherCategoryByName(category.categoryName, category.categoryId)
+            val conflictingCategory =
+                categoryDao.getOtherCategoryByName(category.categoryName, category.categoryId)
 
-            if (conflictingCategory != null){
+            if (conflictingCategory != null) {
                 "Error: Ya existe otra categoría con ese nombre"
-            }else{
+            } else {
 
                 categoryDao.update(
                     CategoriaEntity(

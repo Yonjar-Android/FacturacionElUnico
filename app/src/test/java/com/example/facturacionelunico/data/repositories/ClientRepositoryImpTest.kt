@@ -1,6 +1,7 @@
 package com.example.facturacionelunico.data.repositories
 
 import com.example.facturacionelunico.data.database.dao.ClienteDao
+import com.example.facturacionelunico.data.database.dao.VentaDao
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
 import com.example.facturacionelunico.data.repositories.motherObjects.MotherObjectClientSuppliers
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
@@ -25,12 +26,15 @@ class ClientRepositoryImpTest {
     @MockK
     lateinit var clienteDao: ClienteDao
 
+    @MockK
+    lateinit var invoiceDao: VentaDao
+
     lateinit var repository: ClientRepositoryImp
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        repository = ClientRepositoryImp(clienteDao)
+        repository = ClientRepositoryImp(clienteDao, invoiceDao)
     }
 
     @Test

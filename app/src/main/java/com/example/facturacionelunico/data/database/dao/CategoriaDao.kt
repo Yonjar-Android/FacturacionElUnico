@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -26,13 +27,13 @@ interface CategoriaDao {
     suspend fun getOtherCategoryByName(nombre: String, id: Long): CategoriaEntity?
 
     @Query("SELECT * FROM categoria")
-    fun getAll(): Flow<List<CategoriaEntity>>
+    fun getAll(): PagingSource<Int, CategoriaEntity>
 
     @Query("SELECT * FROM categoria WHERE id = :categoryId LIMIT 1")
     fun getCategoryById(categoryId: Long): Flow<CategoriaEntity>
 
     @Query("SELECT * FROM categoria WHERE nombre  LIKE '%' || :query || '%'")
-    fun getCategoryByName(query: String): Flow<List<CategoriaEntity>>
+    fun getCategoryByName(query: String): PagingSource<Int, CategoriaEntity>
 
     @Query("""
     SELECT producto.id, 

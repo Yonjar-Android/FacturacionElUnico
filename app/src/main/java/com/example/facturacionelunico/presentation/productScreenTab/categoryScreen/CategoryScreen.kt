@@ -37,6 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.DialogFormCreateUpdate
@@ -51,7 +54,7 @@ fun CategoryScreen(
 
     val contextHere = LocalContext.current
 
-    val categories by categoryScreenViewModel.categories.collectAsStateWithLifecycle()
+    val categories: LazyPagingItems<CategoryDomainModel> = categoryScreenViewModel.categories.collectAsLazyPagingItems()
 
     val searchQuery by categoryScreenViewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -88,11 +91,19 @@ fun CategoryScreen(
             Spacer(modifier = Modifier.size(10.dp))
 
             LazyColumn {
-                items(categories) {
-                    CategoryItem(it,
-                        navigate = { id, name ->
-                            navController.navigate("CategoryDetailScreen/$id")
-                        })
+                items(
+                    count = categories.itemCount,
+                    key = { categories[it]?.categoryId ?: 0 },
+                    contentType = categories.itemContentType{"Categories"}
+                ) { index ->
+                    val category = categories[index]
+
+                    if (category != null){
+                        CategoryItem(category,
+                            navigate = { id, name ->
+                                navController.navigate("CategoryDetailScreen/$id")
+                            })
+                    }
                 }
             }
 

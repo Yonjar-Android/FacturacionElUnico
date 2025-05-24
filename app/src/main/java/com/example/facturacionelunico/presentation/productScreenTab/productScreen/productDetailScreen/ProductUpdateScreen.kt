@@ -46,6 +46,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ProductDomainModel
@@ -73,7 +76,7 @@ fun ProductUpdateScreen(
     val message by viewModel.message.collectAsState()
     val navigateBack by viewModel.back.collectAsStateWithLifecycle()
 
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val categories: LazyPagingItems<CategoryDomainModel> = viewModel.categories.collectAsLazyPagingItems()
     val searchQueryCat by viewModel.searchQueryCategory.collectAsStateWithLifecycle()
 
     val brands by viewModel.brands.collectAsStateWithLifecycle()
@@ -273,7 +276,7 @@ fun ProductUpdateScreen(
 fun ModalSelectionDialogCar(
     query: String,
     title: String,
-    items: List<CategoryDomainModel>,
+    items: LazyPagingItems<CategoryDomainModel>,
     onDismiss: () -> Unit,
     onItemSelected: (CategoryDomainModel) -> Unit,
     updateQueryCat: (String) -> Unit
@@ -307,21 +310,27 @@ fun ModalSelectionDialogCar(
 
                 // Lista de items
                 LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                    items(items) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onItemSelected(item) }
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(item.categoryName)
-                            Button(onClick = { onItemSelected(item) }) {
-                                Text("Elegir")
+                    items(
+                        count = items.itemCount,
+                        key = { items[it]?.categoryId ?: 0 },
+                        contentType = items.itemContentType{"Categories"}
+                    ) { index ->
+                        val item = items[index]
+                        if (item != null){
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onItemSelected(item) }
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(item.categoryName)
+                                Button(onClick = { onItemSelected(item) }) {
+                                    Text("Elegir")
+                                }
                             }
                         }
-
                     }
                 }
             }

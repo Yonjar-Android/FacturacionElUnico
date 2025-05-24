@@ -2,6 +2,8 @@ package com.example.facturacionelunico.presentation.productScreenTab.categoryScr
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.CategoryDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.CategoryRepository
@@ -34,7 +36,7 @@ class CategoryScreenViewModel @Inject constructor(
         _searchQuery.value = newQuery
     }
 
-    val categories: StateFlow<List<CategoryDomainModel>> = _searchQuery
+    val categories: StateFlow<PagingData<CategoryDomainModel>> = _searchQuery
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -50,14 +52,15 @@ class CategoryScreenViewModel @Inject constructor(
 
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     fun createCategory(name: String) {
