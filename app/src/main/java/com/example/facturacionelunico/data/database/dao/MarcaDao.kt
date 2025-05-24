@@ -1,5 +1,6 @@
 package com.example.facturacionelunico.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -25,7 +26,7 @@ interface MarcaDao {
     suspend fun getOtherBrandByName(nombre: String, id: Long): MarcaEntity?
 
     @Query("SELECT * FROM marca")
-    fun getAll(): Flow<List<MarcaEntity>>
+    fun getAll(): PagingSource<Int, MarcaEntity>
 
     @Query("SELECT * FROM marca WHERE id = :brandId LIMIT 1")
     fun getBrandById(brandId: Long): Flow<MarcaEntity>
@@ -34,7 +35,7 @@ interface MarcaDao {
         SELECT * FROM marca
         WHERE nombre LIKE '%' || :query || '%'
     """)
-    fun getBrandByName(query:String): Flow<List<MarcaEntity>>
+    fun getBrandByName(query:String): PagingSource<Int, MarcaEntity>
 
     // Obtener productos con detalles de marca
     @Query("""

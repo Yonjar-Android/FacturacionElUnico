@@ -1,5 +1,9 @@
 package com.example.facturacionelunico.data.repositories
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.example.facturacionelunico.data.database.dao.MarcaDao
 import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.domain.models.BrandDomainModel
@@ -14,20 +18,23 @@ import javax.inject.Inject
 class BrandRepositoryImp @Inject constructor(
     private val brandDao: MarcaDao
 ) : BrandRepository {
-    override fun getBrands(): Flow<ResultPattern<List<BrandDomainModel>>> {
-        return brandDao.getAll().map {
-            it.map {
-                BrandDomainModel(
-                    brandId = it.id,
-                    brandName = it.nombre
-                )
+    override fun getBrands(): Flow<ResultPattern<PagingData<BrandDomainModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { brandDao.getAll() }
+        ).flow
+            .map { pagingData ->
+                pagingData.map { entity ->
+                    BrandDomainModel(
+                        brandId = entity.id,
+                        brandName = entity.nombre
+                    )
+                }
+            }.map { domainPagingData ->
+                ResultPattern.Success(domainPagingData)
+            }.catch { e ->
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
             }
-        }.map<List<BrandDomainModel>, ResultPattern<List<BrandDomainModel>>> { brands ->
-            ResultPattern.Success(brands)
-        }.catch { e ->
-            emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
-        }
-
     }
 
     override fun getBrandById(brandId: Long): Flow<BrandDomainModel> {
@@ -39,19 +46,22 @@ class BrandRepositoryImp @Inject constructor(
         }
     }
 
-    override fun getBrandByName(query: String): Flow<ResultPattern<List<BrandDomainModel>>> {
-        return brandDao.getBrandByName(query)
-            .map {
-                it.map {
+    override fun getBrandByName(query: String): Flow<ResultPattern<PagingData<BrandDomainModel>>> {
+        return return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { brandDao.getBrandByName(query) }
+        ).flow
+            .map { pagingData ->
+                pagingData.map { entity ->
                     BrandDomainModel(
-                        brandId = it.id,
-                        brandName = it.nombre
+                        brandId = entity.id,
+                        brandName = entity.nombre
                     )
                 }
-            }.map<List<BrandDomainModel>, ResultPattern<List<BrandDomainModel>>> { brands ->
-                ResultPattern.Success(brands)
+            }.map { domainPagingData ->
+                ResultPattern.Success(domainPagingData)
             }.catch { e ->
-                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
             }
     }
 

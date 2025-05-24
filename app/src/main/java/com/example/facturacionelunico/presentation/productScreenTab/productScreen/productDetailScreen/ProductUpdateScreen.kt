@@ -79,7 +79,7 @@ fun ProductUpdateScreen(
     val categories: LazyPagingItems<CategoryDomainModel> = viewModel.categories.collectAsLazyPagingItems()
     val searchQueryCat by viewModel.searchQueryCategory.collectAsStateWithLifecycle()
 
-    val brands by viewModel.brands.collectAsStateWithLifecycle()
+    val brands: LazyPagingItems<BrandDomainModel> = viewModel.brands.collectAsLazyPagingItems()
     val searchQueryBrand by viewModel.searchQueryBrand.collectAsStateWithLifecycle()
 
     var productName by remember { mutableStateOf("") }
@@ -348,7 +348,7 @@ fun ModalSelectionDialogCar(
 fun ModalSelectionDialogBrand(
     query: String,
     title: String,
-    items: List<BrandDomainModel>,
+    items: LazyPagingItems<BrandDomainModel>,
     onDismiss: () -> Unit,
     onItemSelected: (BrandDomainModel) -> Unit,
     updateQueryBrand: (String) -> Unit
@@ -382,20 +382,30 @@ fun ModalSelectionDialogBrand(
 
                 // Lista de items
                 LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                    items(items) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onItemSelected(item) }
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(item.brandName)
-                            Button(onClick = { onItemSelected(item) }) {
-                                Text("Elegir")
+                    items(
+                        count = items.itemCount,
+                        key = { items[it]?.brandId ?: 0 },
+                        contentType = items.itemContentType{"Brands"}
+                    ) { index ->
+
+                        val item = items[index]
+
+                        if (item != null){
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onItemSelected(item) }
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(item.brandName)
+                                Button(onClick = { onItemSelected(item) }) {
+                                    Text("Elegir")
+                                }
                             }
                         }
+
 
                     }
                 }

@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.CategoriaEntity
-import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import kotlinx.coroutines.flow.Flow
 

@@ -2,6 +2,8 @@ package com.example.facturacionelunico.presentation.productScreenTab.brandScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.repositories.BrandRepository
@@ -36,7 +38,7 @@ class BrandScreenViewModel @Inject constructor(
     }
 
     // Con flatMapLatest, cada vez que cambia el query se ejecuta la consulta correspondiente.
-    val brands: StateFlow<List<BrandDomainModel>> = _searchQuery
+    val brands: StateFlow<PagingData<BrandDomainModel>> = _searchQuery
         .debounce(300) // Para evitar llamadas excesivas mientras se escribe.
         .flatMapLatest { query ->
             // Si el query está vacío, podrías mostrar todas las marcas, o bien una lista vacía según la necesidad.
@@ -53,14 +55,15 @@ class BrandScreenViewModel @Inject constructor(
                 }
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     fun createBrand(name: String){

@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.DialogFormCreateUpdate
@@ -50,7 +53,7 @@ fun BrandScreen(
 
     val context = LocalContext.current
 
-    val brands by brandScreenViewModel.brands.collectAsStateWithLifecycle()
+    val brands: LazyPagingItems<BrandDomainModel> = brandScreenViewModel.brands.collectAsLazyPagingItems()
 
     val searchQuery by brandScreenViewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -86,11 +89,20 @@ fun BrandScreen(
             Spacer(modifier = Modifier.size(10.dp))
 
             LazyColumn {
-                items(brands) {
-                    BrandItem(it,
-                        navigate = { id, name ->
-                            navController.navigate("BrandDetailScreen/$id")
-                        })
+                items(
+                    count = brands.itemCount,
+                    key = { brands[it]?.brandId ?: 0 },
+                    contentType = brands.itemContentType{"Brands"}
+                ) { index ->
+
+                    val brand = brands[index]
+
+                    if(brand != null){
+                        BrandItem(brand,
+                            navigate = { id, name ->
+                                navController.navigate("BrandDetailScreen/$id")
+                            })
+                    }
                 }
             }
 

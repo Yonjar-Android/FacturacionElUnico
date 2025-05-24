@@ -149,7 +149,7 @@ class ProductUpdateViewModel @Inject constructor
     }
 
     // Con flatMapLatest, cada vez que cambia el query se ejecuta la consulta correspondiente.
-    val brands: StateFlow<List<BrandDomainModel>> = _searchQueryBrand
+    val brands: StateFlow<PagingData<BrandDomainModel>> = _searchQueryBrand
         .debounce(300) // Para evitar llamadas excesivas mientras se escribe.
         .flatMapLatest { query ->
             // Si el query está vacío, podrías mostrar todas las marcas, o bien una lista vacía según la necesidad.
@@ -167,14 +167,15 @@ class ProductUpdateViewModel @Inject constructor
 
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     fun restartMessage() {
