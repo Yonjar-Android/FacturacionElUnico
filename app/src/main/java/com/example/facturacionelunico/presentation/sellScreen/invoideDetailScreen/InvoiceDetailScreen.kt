@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
 import com.example.facturacionelunico.presentation.sellScreen.InvoiceTable
@@ -65,7 +68,7 @@ fun InvoiceDetailScreen(
 
     val context = LocalContext.current
 
-    val products by viewModel.products.collectAsStateWithLifecycle()
+    val products: LazyPagingItems<DetailedProductModel> = viewModel.products.collectAsLazyPagingItems()
     val productQuery by viewModel.searchQueryProduct.collectAsStateWithLifecycle()
     var quantity by remember { mutableStateOf("") }
     var showProductDialog by remember { mutableStateOf(false) }

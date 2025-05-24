@@ -1,10 +1,10 @@
 package com.example.facturacionelunico.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.facturacionelunico.data.database.entities.MarcaEntity
 import com.example.facturacionelunico.data.database.entities.ProductoEntity
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import kotlinx.coroutines.flow.Flow
@@ -44,7 +44,7 @@ interface ProductoDao {
     LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
 """)
-    fun getAllDetailed(): Flow<List<DetailedProductModel>>
+    fun getAllDetailed(): PagingSource<Int, DetailedProductModel>
 
     @Query("""
     SELECT producto.id, 
@@ -82,6 +82,6 @@ interface ProductoDao {
     LEFT JOIN marca ON producto.idMarca = marca.id
     WHERE producto.nombre LIKE '%' || :query || '%'
 """)
-    fun getProductsBySearch(query: String): Flow<List<DetailedProductModel>>
+    fun getProductsBySearch(query: String): PagingSource<Int, DetailedProductModel>
 
 }

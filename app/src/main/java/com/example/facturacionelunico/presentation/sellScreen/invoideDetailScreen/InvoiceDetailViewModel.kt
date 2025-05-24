@@ -2,6 +2,8 @@ package com.example.facturacionelunico.presentation.sellScreen.invoideDetailScre
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
@@ -72,7 +74,7 @@ class InvoiceDetailViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val products: StateFlow<List<DetailedProductModel>> = _searchQueryProduct
+    val products: StateFlow<PagingData<DetailedProductModel>> = _searchQueryProduct
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -90,14 +92,15 @@ class InvoiceDetailViewModel @Inject constructor(
 
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     fun restartMessage(){

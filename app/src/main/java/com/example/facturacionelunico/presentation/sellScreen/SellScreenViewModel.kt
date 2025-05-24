@@ -55,7 +55,7 @@ class SellScreenViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val products: StateFlow<List<DetailedProductModel>> = _searchQueryProduct
+    val products: StateFlow<PagingData<DetailedProductModel>> = _searchQueryProduct
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -72,14 +72,15 @@ class SellScreenViewModel @Inject constructor(
 
                 is ResultPattern.Error -> {
                     _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
-                    emptyList()
+                    PagingData.empty()
                 }
             }
         }
+        .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = PagingData.empty()
         )
 
     private val _searchQueryClient = MutableStateFlow("")

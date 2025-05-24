@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
@@ -39,7 +40,7 @@ fun ProductScreen(
     productScreenViewModel: ProductScreenViewModel = hiltViewModel()
 ) {
 
-    val products by productScreenViewModel.products.collectAsStateWithLifecycle()
+    val products: LazyPagingItems<DetailedProductModel> = productScreenViewModel.products.collectAsLazyPagingItems()
 
     val searchQuery by productScreenViewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -64,8 +65,17 @@ fun ProductScreen(
             Spacer(modifier = Modifier.size(15.dp))
 
             LazyColumn {
-                items(products) {
-                    ProductItem(it, navController)
+                items(
+                    count = products.itemCount,
+                    key = { index -> products[index]?.id ?: index }
+                ) { index ->
+
+                    val product = products[index]
+
+                    if(product != null){
+                        ProductItem(product, navController)
+                    }
+
                 }
             }
         }

@@ -1,5 +1,8 @@
 package com.example.facturacionelunico.data.repositories
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.example.facturacionelunico.data.database.dao.ProductoDao
 import com.example.facturacionelunico.data.mappers.ProductMapper
 import com.example.facturacionelunico.domain.models.DetailedProductModel
@@ -15,13 +18,16 @@ class ProductRepositoryImp @Inject constructor(
     private val productDao: ProductoDao
 ) : ProductRepository {
     // Función para obtener todos los productos mediante un flow
-    override fun getProducts(): Flow<ResultPattern<List<DetailedProductModel>>> {
-        return productDao.getAllDetailed()
-            .map<List<DetailedProductModel>, ResultPattern<List<DetailedProductModel>>> { products ->
-                ResultPattern.Success(products)
+    override fun getProducts(): Flow<ResultPattern<PagingData<DetailedProductModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { productDao.getAllDetailed() }
+        ).flow
+            .map { domainPagingData ->
+                ResultPattern.Success(domainPagingData)
             }
             .catch { e ->
-                emit(ResultPattern.Error(exception = e, message = e.message))
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
             }
     }
 
@@ -45,13 +51,16 @@ class ProductRepositoryImp @Inject constructor(
     }
 
     //función para obtener producto por búsqueda
-    override suspend fun getProductBySearch(query: String): Flow<ResultPattern<List<DetailedProductModel>>> {
-        return productDao.getProductsBySearch(query)
-            .map<List<DetailedProductModel>, ResultPattern<List<DetailedProductModel>>> { products ->
-                ResultPattern.Success(products)
+    override suspend fun getProductBySearch(query: String): Flow<ResultPattern<PagingData<DetailedProductModel>>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { productDao.getProductsBySearch(query) }
+        ).flow
+            .map { domainPagingData ->
+                ResultPattern.Success(domainPagingData)
             }
             .catch { e ->
-                emit(ResultPattern.Error(exception = e, message = "Error: ${e.message}"))
+                ResultPattern.Error(exception = e, message = "Error: ${e.message}")
             }
     }
 

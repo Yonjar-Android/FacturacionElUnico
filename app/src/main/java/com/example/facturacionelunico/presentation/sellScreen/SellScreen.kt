@@ -73,7 +73,9 @@ fun SellScreen(
 
     val message by viewModel.message.collectAsStateWithLifecycle()
 
-    val products by viewModel.products.collectAsStateWithLifecycle()
+    val products: LazyPagingItems<DetailedProductModel> =
+        viewModel.products.collectAsLazyPagingItems()
+
     val clients: LazyPagingItems<DetailedClientLocalModel> =
         viewModel.clients.collectAsLazyPagingItems()
 
@@ -636,7 +638,7 @@ fun ClientItemTable(
 /*Tabla de productos para seleccionar*/
 @Composable
 fun SelectProductTable(
-    products: List<DetailedProductModel>,
+    products: LazyPagingItems<DetailedProductModel>,
     closeTable: () -> Unit,
     getValues: (String, Long, Double) -> Unit,
     searchQuery: (String) -> Unit,
@@ -681,13 +683,22 @@ fun SelectProductTable(
             Spacer(modifier = Modifier.size(5.dp))
 
             LazyColumn {
-                items(products) { product ->
-                    ProductItemTable(
-                        product,
-                        getValues = { name, id, precio ->
+                items(
+                    count = products.itemCount,
+                    key = { index -> products[index]?.id ?: index },
+                    contentType = products.itemContentType { "Products" }
+                ) { index ->
 
-                            getValues.invoke(name, id, precio)
-                        })
+                    val product = products[index]
+
+                    if (product != null) {
+                        ProductItemTable(
+                            product,
+                            getValues = { name, id, precio ->
+
+                                getValues.invoke(name, id, precio)
+                            })
+                    }
                 }
             }
         }
