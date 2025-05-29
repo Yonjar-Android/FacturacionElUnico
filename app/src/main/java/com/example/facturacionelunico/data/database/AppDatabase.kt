@@ -51,7 +51,7 @@ import com.example.facturacionelunico.data.database.entities.VentaEntity
         AbonoVentaEntity::class,
         DetalleAbonoVentaEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -145,10 +145,9 @@ class InvoiceRepositoryImp @Inject constructor(
                             fechaAbono = System.currentTimeMillis()
                         )
                         abonosDetalleDao.insert(abonoDetalleEntity)
-                    }
+                       }
                 }
             }
-            println("I AM HERE")
             "Factura creada con éxito"
 
         }.getOrElse {

@@ -40,7 +40,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "elunico_db" // Nombre de la base de datos
         )
-            //.addMigrations(DatabaseMigrations.MIGRATION_8_9)
+            .addMigrations(DatabaseMigrations.MIGRATION_9_10)
             .addCallback(DatabaseMigrations.dbCallback)
             .build()
     }

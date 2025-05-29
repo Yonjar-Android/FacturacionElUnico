@@ -30,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.facturacionelunico.presentation.buyScreen.BuyScreenTab
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.ClientSupplierTab
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientDetailScreen
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.supplierScreen.SupplierDetailScreen
@@ -198,6 +199,13 @@ class MainActivity : ComponentActivity() {
                                 navController = controller
                             )
                         }
+
+                        /*Pantalla de compras*/
+                        composable(route = "BuyScreenTab") {
+                            BuyScreenTab(
+                                navController = controller
+                            )
+                        }
                     }
                 }
             }
@@ -263,7 +271,7 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected = selectedScreen == 3, onClick = {
                     onChangeScreen.invoke(3)
-                    navController.navigate("ProductScreen")
+                    navController.navigate("BuyScreenTab")
                 }, icon = {
                     NavIcon(
                         icon = R.drawable.shopping_bag,

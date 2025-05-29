@@ -8,7 +8,7 @@ import com.example.facturacionelunico.data.database.entities.AbonoCompraEntity
 @Dao
 interface AbonoCompraDao {
     @Insert
-    suspend fun insert(abono: AbonoCompraEntity)
+    suspend fun insert(abono: AbonoCompraEntity): Long
 
     @Query("SELECT * FROM abono_compra")
     suspend fun getAll(): List<AbonoCompraEntity>
