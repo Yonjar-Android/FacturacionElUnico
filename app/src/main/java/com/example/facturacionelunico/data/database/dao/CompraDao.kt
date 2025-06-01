@@ -18,7 +18,7 @@ interface CompraDao {
     @Update
     suspend fun update(compra: CompraEntity)
 
-    @Query("SELECT * FROM compra")
+    @Query("SELECT * FROM compra ORDER BY estado DESC")
     fun getAll(): PagingSource<Int, CompraEntity>
 
     @Query("SELECT * FROM compra WHERE id = :id")
@@ -43,6 +43,11 @@ interface CompraDao {
         """)
     fun getPurchaseDetailById(id: Long): Flow<PurchaseDetailLocalModel>
 
-    @Query("SELECT * FROM compra WHERE idProveedor = :id")
+    @Query("""
+        SELECT * FROM compra WHERE idProveedor = :id
+        ORDER BY 
+            CASE WHEN estado = 'PENDIENTE' THEN 0 ELSE 1 END,
+             fechaCompra DESC
+    """)
     suspend fun getPurchasesBySupplierId(id: Long): List<CompraEntity>
 }

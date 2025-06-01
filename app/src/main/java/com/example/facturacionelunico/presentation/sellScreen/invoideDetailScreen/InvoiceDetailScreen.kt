@@ -107,6 +107,7 @@ fun InvoiceDetailScreen(
             showDialog = false
             showConfirmDialog = false
             amount = ""
+            productsForUpdate.clear()
         }
         viewModel.restartMessage()
     }
