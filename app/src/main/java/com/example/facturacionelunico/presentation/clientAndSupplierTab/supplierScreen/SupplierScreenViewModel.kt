@@ -6,7 +6,8 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository
 import com.example.facturacionelunico.utils.transform.FormatNames
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +39,7 @@ class SupplierScreenViewModel @Inject constructor(
         _searchQuery.value = newQuery
     }
 
-    val suppliers: StateFlow<PagingData<SupplierDomainModel>> = _searchQuery
+    val suppliers: StateFlow<PagingData<DetailedSupplierLocalModel>> = _searchQuery
         .debounce(300)
         .flatMapLatest { query ->
             if (query.isBlank()) {

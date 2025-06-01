@@ -5,6 +5,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.facturacionelunico.data.database.entities.CompraEntity
+import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
+import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailLocalModel
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CompraDao {
@@ -13,4 +16,26 @@ interface CompraDao {
 
     @Query("SELECT * FROM compra")
     fun getAll(): PagingSource<Int, CompraEntity>
+
+    @Query("""SELECT * FROM compra
+        WHERE estado = 'PENDIENTE'
+        ORDER BY estado DESC
+    """)
+    fun getPurchasesWithDebt(): PagingSource<Int, CompraEntity>
+
+    @Query("""
+        SELECT c.id as id,
+        p.nombreEmpresa as company,
+        c.total as total,
+        IFNULL(SUM(ac.totalPendiente), 0.0) as totalPendiente
+        from compra c
+        LEFT JOIN proveedor p on p.id = c.idProveedor
+        LEFT JOIN abono_compra ac on ac.idCompra = c.id
+        WHERE c.id = :id
+        GROUP BY c.id, c.total
+        """)
+    fun getPurchaseDetailById(id: Long): Flow<PurchaseDetailLocalModel>
+
+    @Query("SELECT * FROM compra WHERE idProveedor = :id")
+    suspend fun getPurchasesBySupplierId(id: Long): List<CompraEntity>
 }

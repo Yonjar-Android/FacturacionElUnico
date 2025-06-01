@@ -213,13 +213,7 @@ class InvoiceRepositoryImp @Inject constructor(
         val invoiceFlow = invoiceDao.getInvoiceDetailById(id)
         val productsFlow = detailInvoiceDao.getDetailsByInvoiceId(id)
 
-
-
         return combine(invoiceFlow, productsFlow) { invoice, products ->
-            val abonos = abonosDao.getAll()
-            val abonosDetalle = abonosDetalleDao.getAll()
-            println("ABONOS $abonos")
-            println("Detalle $abonosDetalle")
             runCatching {
                 ResultPattern.Success(
                     InvoiceDetailDomainModel(

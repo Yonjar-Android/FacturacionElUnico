@@ -5,7 +5,7 @@ import com.example.facturacionelunico.data.repositories.motherObjects.MotherObje
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.ClientRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery

@@ -3,7 +3,7 @@ package com.example.facturacionelunico.data.repositories.motherObjects
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
 import com.example.facturacionelunico.data.database.entities.ProveedorEntity
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 
 object MotherObjectClientSuppliers {
 

@@ -14,11 +14,17 @@ import com.example.facturacionelunico.data.database.entities.AbonoCompraEntity
 import com.example.facturacionelunico.data.database.entities.CompraEntity
 import com.example.facturacionelunico.data.database.entities.DetalleAbonoCompraEntity
 import com.example.facturacionelunico.data.database.entities.DetalleCompraEntity
+import com.example.facturacionelunico.domain.models.ProductItem
+import com.example.facturacionelunico.domain.models.ResultPattern
+import com.example.facturacionelunico.domain.models.purchase.DetailPurchaseDomainModelUI
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.repositories.PurchaseRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -54,8 +60,50 @@ class PurchaseRepositoryImp @Inject constructor(
         }
     }
 
-    override fun getPurchasesWithDebt() {
+    override fun getPurchasesWithDebt(): Flow<PagingData<PurchaseDomainModel>> {
+        return runCatching {
+            Pager(
+                config = PagingConfig(
+                    pageSize = 10,
+                    prefetchDistance = 5
+                ),
+                pagingSourceFactory = { purchaseDao.getPurchasesWithDebt() }
+            ).flow
+                .map { pagingData ->
+                    pagingData.map {
+                        PurchaseDomainModel(
+                            purchaseId = it.id,
+                            purchaseDate = it.fechaCompra,
+                            total = it.total,
+                            supplierId = it.idProveedor,
+                            state = it.estado
+                        )
+                    }
+                }
+        }.getOrElse {
+            flow { emit(PagingData.empty()) }
+        }
+    }
 
+    override suspend fun getPurchaseDetailById(purchaseId: Long): Flow<ResultPattern<DetailPurchaseDomainModelUI>> {
+        val purchaseFlow = purchaseDao.getPurchaseDetailById(purchaseId)
+        val productsFlow = purchaseDetailDao.getDetailsByPurchaseId(purchaseId)
+
+        return combine(purchaseFlow, productsFlow) { purchase, products ->
+            runCatching {
+                ResultPattern.Success(
+                    DetailPurchaseDomainModelUI(
+                        id = purchase.id,
+                        supplier = purchase.company,
+                        total = purchase.total,
+                        debt = purchase.totalPendiente,
+                        products = products
+                    )
+                )
+            }.getOrElse {
+                ResultPattern.Error(exception = it, message = "Error: ${it.message}")
+            }
+        }.flowOn(Dispatchers.IO)
     }
 
     override suspend fun createPurchase(
@@ -86,7 +134,7 @@ class PurchaseRepositoryImp @Inject constructor(
                 }
 
                 // Condicional donde si el pago es PENDIENTE se cree el abono del proveedor
-                if(purchase.state == "PENDIENTE"){
+                if (purchase.state == "PENDIENTE") {
                     val abonoEntity = AbonoCompraEntity(
                         idCompra = idPurchase,
                         fechaCreacion = purchase.purchaseDate,
@@ -96,7 +144,7 @@ class PurchaseRepositoryImp @Inject constructor(
 
                     val idAbono = compraAbonoDao.insert(abonoEntity)
 
-                    if(moneyPaid > 0){
+                    if (moneyPaid > 0) {
                         val abonoDetalleEntity = DetalleAbonoCompraEntity(
                             idAbonoCompra = idAbono,
                             monto = moneyPaid,
@@ -115,6 +163,6 @@ class PurchaseRepositoryImp @Inject constructor(
     }
 
     override suspend fun createPurchaseDetail(): String {
-return ""
+        return ""
     }
 }

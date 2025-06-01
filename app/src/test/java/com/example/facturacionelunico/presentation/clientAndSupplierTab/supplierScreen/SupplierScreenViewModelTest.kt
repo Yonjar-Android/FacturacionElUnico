@@ -4,7 +4,7 @@ import app.cash.turbine.turbineScope
 import com.example.facturacionelunico.data.repositories.motherObjects.MotherObjectClientSuppliers
 import com.example.facturacionelunico.domain.models.BrandDomainModel
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery

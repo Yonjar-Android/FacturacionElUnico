@@ -1,4 +1,4 @@
-package com.example.facturacionelunico.presentation.buyScreen
+package com.example.facturacionelunico.presentation.buyScreen.purchaseDetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,12 +6,10 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
-import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
-import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailDomainModel
+import com.example.facturacionelunico.domain.models.purchase.DetailPurchaseDomainModelUI
 import com.example.facturacionelunico.domain.repositories.ProductRepository
 import com.example.facturacionelunico.domain.repositories.PurchaseRepository
-import com.example.facturacionelunico.domain.repositories.SupplierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -26,23 +24,29 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class BuyScreenViewModel @Inject constructor(
+class PurchaseDetailScreenViewModel @Inject constructor(
     private val repository: PurchaseRepository,
-    private val productRepository: ProductRepository,
-    private val supplierRepository: SupplierRepository
+    private val productRepository: ProductRepository
 ): ViewModel() {
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
-    fun createPurchase(
-        purchase: PurchaseDomainModel,
-        details: List<PurchaseDetailDomainModel>,
-        moneyPaid: Double
-    ){
+    private val _purchase = MutableStateFlow<DetailPurchaseDomainModelUI?>(null)
+    val purchase = _purchase.asStateFlow()
+
+    fun getInvoiceDetail(invoiceId: Long) {
         viewModelScope.launch {
-            _message.value = repository.createPurchase(purchase, details, moneyPaid)
+            repository.getPurchaseDetailById(invoiceId).collect { result ->
+                when (result) {
+                    is ResultPattern.Success -> {
+                        _purchase.value = result.data
+                    }
+                    is ResultPattern.Error -> {
+                        _message.value = result.message
+                    }
+                }
+            }
         }
     }
 
@@ -53,6 +57,7 @@ class BuyScreenViewModel @Inject constructor(
         _searchQueryProduct.value = newQuery
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val products: StateFlow<PagingData<DetailedProductModel>> = _searchQueryProduct
         .debounce(300)
         .flatMapLatest { query ->
@@ -65,11 +70,12 @@ class BuyScreenViewModel @Inject constructor(
         .map { result ->
             when (result) {
                 is ResultPattern.Success -> {
+                    _message.value = null
                     result.data
                 }
 
                 is ResultPattern.Error -> {
-                    _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
+                    _message.value = result.message ?: "Ha ocurrido un error desconocido"
                     PagingData.empty()
                 }
             }
@@ -81,41 +87,7 @@ class BuyScreenViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    private val _searchQuerySupplier = MutableStateFlow("")
-    val searchQuerySupplier: StateFlow<String> = _searchQuerySupplier.asStateFlow()
-
-    fun updateQuerySupplier(newQuery: String) {
-        _searchQuerySupplier.value = newQuery
-    }
-
-    val suppliers: StateFlow<PagingData<DetailedSupplierLocalModel>> = _searchQuerySupplier
-        .debounce(300)
-        .flatMapLatest { query ->
-            if (query.isBlank()) {
-                supplierRepository.getSuppliers()
-            } else {
-                supplierRepository.getSuppliersBySearch(query)
-            }
-        }.map { result ->
-            when (result) {
-                is ResultPattern.Success -> {
-                    result.data
-                }
-
-                is ResultPattern.Error -> {
-                    _message.value = result.message ?: "Error: Ha ocurrido un error desconocido"
-                    PagingData.empty()
-                }
-            }
-        }
-        .cachedIn(viewModelScope)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PagingData.empty()
-        )
-
-    fun restartMessage() {
+    fun restartMessage(){
         _message.value = null
     }
 }

@@ -43,7 +43,8 @@ import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.TextFieldClient
 import com.example.facturacionelunico.presentation.sharedComponents.AddButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
@@ -55,7 +56,7 @@ fun SupplierScreen(
     viewModel: SupplierScreenViewModel = hiltViewModel()
 ) {
 
-    val suppliers: LazyPagingItems<SupplierDomainModel> = viewModel.suppliers.collectAsLazyPagingItems()
+    val suppliers: LazyPagingItems<DetailedSupplierLocalModel> = viewModel.suppliers.collectAsLazyPagingItems()
 
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
@@ -125,7 +126,7 @@ fun SupplierScreen(
 
 // Función para mostrar información de un proveedor
 @Composable
-fun SupplierItem(supplier: SupplierDomainModel, goToDetail: () -> Unit) {
+fun SupplierItem(supplier: DetailedSupplierLocalModel, goToDetail: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable {
@@ -151,7 +152,7 @@ fun SupplierItem(supplier: SupplierDomainModel, goToDetail: () -> Unit) {
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
             Text(
-                "C$ Dinero", fontWeight = FontWeight.Bold,
+                "C$ ${supplier.deptTotal}", fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
 

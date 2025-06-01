@@ -82,8 +82,6 @@ fun ClientDetailScreen(
         phoneNumber = client?.phone.toString()
     }
 
-    println(client?.invoices)
-
     if (!message.isNullOrEmpty()) {
         Toast.makeText(LocalContext.current, message, Toast.LENGTH_SHORT).show()
 

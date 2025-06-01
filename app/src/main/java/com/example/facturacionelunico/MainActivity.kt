@@ -31,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.facturacionelunico.presentation.buyScreen.BuyScreenTab
+import com.example.facturacionelunico.presentation.buyScreen.purchaseDetail.PurchaseDetailScreen
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.ClientSupplierTab
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientDetailScreen
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.supplierScreen.SupplierDetailScreen
@@ -203,6 +204,19 @@ class MainActivity : ComponentActivity() {
                         /*Pantalla de compras*/
                         composable(route = "BuyScreenTab") {
                             BuyScreenTab(
+                                navController = controller
+                            )
+                        }
+
+                        /*Pantalla detalle de compras*/
+                        composable(route = "PurchaseDetailScreen/{purchaseId}",
+                            arguments = listOf(
+                                navArgument("purchaseId") { type = NavType.LongType }
+                            )) { backStackEntry ->
+                            val purchaseId = backStackEntry.arguments?.getLong("purchaseId") ?: 0L
+
+                            PurchaseDetailScreen(
+                                purchaseId = purchaseId,
                                 navController = controller
                             )
                         }

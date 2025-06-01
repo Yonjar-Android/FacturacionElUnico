@@ -4,10 +4,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.example.facturacionelunico.data.database.dao.CompraDao
 import com.example.facturacionelunico.data.database.dao.ProveedorDao
 import com.example.facturacionelunico.data.database.entities.ProveedorEntity
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
+import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -15,23 +19,25 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class SupplierRepositoryImp @Inject constructor(
-    private val supplierDao: ProveedorDao
+    private val supplierDao: ProveedorDao,
+    private val purchaseDao: CompraDao
 ) : SupplierRepository {
     // Función para obtener todos los proveedores mediante un flow
-    override fun getSuppliers(): Flow<ResultPattern<PagingData<SupplierDomainModel>>> {
+    override fun getSuppliers(): Flow<ResultPattern<PagingData<DetailedSupplierLocalModel>>> {
         return Pager(
             config = PagingConfig(pageSize = 10, prefetchDistance = 5),
-            pagingSourceFactory = { supplierDao.getAll() }
+            pagingSourceFactory = { supplierDao.getSuppliersWithDebt() }
         ).flow
             .map { pagingData ->
                 pagingData.map {
-                    SupplierDomainModel(
+                    DetailedSupplierLocalModel(
                         id = it.id,
-                        company = it.nombreEmpresa,
-                        contactName = it.nombreContacto,
-                        phone = it.telefono,
-                        email = it.correo,
-                        address = it.direccion
+                        company = it.company,
+                        contactName = it.contactName,
+                        phone = it.phone,
+                        email = it.email,
+                        address = it.address,
+                        deptTotal = it.deptTotal
                     )
                 }
             }.map { domainPaginData ->
@@ -41,20 +47,33 @@ class SupplierRepositoryImp @Inject constructor(
             }
     }
 
-    override fun getSupplierById(id: Long): Flow<SupplierDomainModel?> {
+    override suspend fun getSupplierById(id: Long): Flow<DetailedSupplierDomainModel?> {
+
+        val purchases = purchaseDao.getPurchasesBySupplierId(id)
+
         return supplierDao.getSupplierById(id).map {
-            SupplierDomainModel(
+            DetailedSupplierDomainModel(
                 id = it.id,
-                company = it.nombreEmpresa,
-                contactName = it.nombreContacto,
-                phone = it.telefono,
-                email = it.correo,
-                address = it.direccion
+                company = it.company,
+                contactName = it.contactName,
+                phone = it.phone.toString(),
+                email = it.email.toString(),
+                address = it.address.toString(),
+                debt = it.deptTotal,
+                purchases = purchases.map {
+                    PurchaseDomainModel(
+                        purchaseId = it.id,
+                        purchaseDate = it.fechaCompra,
+                        total = it.total,
+                        supplierId = it.idProveedor,
+                        state = it.estado
+                        )
+                }
             )
         }
     }
 
-    override suspend fun getSuppliersBySearch(query: String): Flow<ResultPattern<PagingData<SupplierDomainModel>>> {
+    override suspend fun getSuppliersBySearch(query: String): Flow<ResultPattern<PagingData<DetailedSupplierLocalModel>>> {
         return Pager(
             config = PagingConfig(pageSize = 10, prefetchDistance = 5),
             pagingSourceFactory = { supplierDao.getSuppliersBySearch(query) }

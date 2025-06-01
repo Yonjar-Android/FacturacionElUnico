@@ -38,8 +38,8 @@ interface ClienteDao {
     ORDER BY deptTotal DESC
 """
     )
-    fun getClientsWithDebt(): PagingSource<Int, DetailedClientLocalModel>
 
+    fun getClientsWithDebt(): PagingSource<Int, DetailedClientLocalModel>
     @Query("""
     SELECT 
         c.id as id,

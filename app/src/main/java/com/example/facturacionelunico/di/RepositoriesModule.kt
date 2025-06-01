@@ -74,9 +74,11 @@ object RepositoriesModule {
     @Provides
     @Singleton
     fun provideSupplierRepository(
-        supplierDao: ProveedorDao
+        supplierDao: ProveedorDao,
+        purchaseDao: CompraDao
     ): SupplierRepository {
-        return SupplierRepositoryImp(supplierDao)
+        return SupplierRepositoryImp(supplierDao,
+            purchaseDao)
     }
 
     @Provides
@@ -106,14 +108,12 @@ object RepositoriesModule {
         purchaseDao: CompraDao,
         purchaseDetailDao: DetalleCompraDao,
         compraAbonoDao: AbonoCompraDao,
-        detalleAbonoCompraDao: DetalleAbonoCompraDao
-    ): PurchaseRepository {
+        detalleAbonoCompraDao: DetalleAbonoCompraDao): PurchaseRepository {
         return PurchaseRepositoryImp(
             appDatabase,
             purchaseDao,
             purchaseDetailDao,
             compraAbonoDao,
-            detalleAbonoCompraDao
-        )
+            detalleAbonoCompraDao)
     }
 }

@@ -7,10 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
@@ -37,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.FacturaItem
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.TextFieldClient
@@ -116,17 +119,29 @@ fun SupplierDetailScreen(
 
             ClientText(title = "Teléfono", value = supplier?.phone.toString())
 
-            ClientText(title = "Correo", value = supplier?.email.toString())
+            ClientText(
+                title = "Correo",
+                value = if (supplier?.email.isNullOrEmpty()) "Sin correo" else supplier?.email.toString()
+            )
 
-            ClientText(title = "Dirección", value = supplier?.address.toString())
+            ClientText(
+                title = "Dirección",
+                value = if (supplier?.address.isNullOrEmpty()) "Sin dirección" else supplier?.address.toString()
+            )
 
             ClientText(title = "Deuda", value = "C$ 1200")
 
-            Text(text = "Factura deuda", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(text = "Compras", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+
+            Spacer(modifier = Modifier.size(10.dp))
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(10) {
-                    FacturaItem(1, "Factura #123456789", "PENDIENTE", {})
+                if (supplier?.purchases != null && supplier?.purchases?.isNotEmpty() == true) {
+                    items(supplier!!.purchases) {
+                        FacturaItem(it.purchaseId, "Compra #${it.purchaseId}", it.state, {
+                            navController.navigate("PurchaseDetailScreen/${it}")
+                        })
+                    }
                 }
             }
         }

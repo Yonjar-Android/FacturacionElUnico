@@ -44,9 +44,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
+import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
 import com.example.facturacionelunico.presentation.sellScreen.ClickableTextField
 import com.example.facturacionelunico.presentation.sellScreen.InvoiceTable
 import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
@@ -66,8 +67,8 @@ fun BuyScreen(
     val products: LazyPagingItems<DetailedProductModel> =
         viewModel.products.collectAsLazyPagingItems()
 
-    val clients: LazyPagingItems<SupplierDomainModel> =
-        viewModel.clients.collectAsLazyPagingItems()
+    val suppliers: LazyPagingItems<DetailedSupplierLocalModel> =
+        viewModel.suppliers.collectAsLazyPagingItems()
 
     val searchQueryProduct by viewModel.searchQueryProduct.collectAsStateWithLifecycle()
     val searchQuerySupplier by viewModel.searchQuerySupplier.collectAsStateWithLifecycle()
@@ -303,7 +304,7 @@ fun BuyScreen(
         }
         if (showSuppliers) {
             SelectSupplierTable(
-                suppliers = clients,
+                suppliers = suppliers,
                 closeTable = { showSuppliers = false },
                 getValues = { name, id ->
                     supplier = name
@@ -339,7 +340,7 @@ fun BuyScreen(
 /*Tabla de clientes para seleccionar*/
 @Composable
 fun SelectSupplierTable(
-    suppliers: LazyPagingItems<SupplierDomainModel>,
+    suppliers: LazyPagingItems<DetailedSupplierLocalModel>,
     closeTable: () -> Unit,
     getValues: (String, Long) -> Unit,
     searchProduct: (String) -> Unit,
@@ -410,7 +411,7 @@ fun SelectSupplierTable(
 
 @Composable
 fun SupplierItemTable(
-    supplier: SupplierDomainModel,
+    supplier: DetailedSupplierLocalModel,
     getValues: (String, Long) -> Unit
 ) {
     Row(

@@ -2,7 +2,8 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.supplie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.facturacionelunico.domain.models.SupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierDomainModel
+import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ class SupplierDetailViewModel @Inject constructor(
     private val repository: SupplierRepository
 ): ViewModel() {
 
-    private val _supplier = MutableStateFlow<SupplierDomainModel?>(null)
+    private val _supplier = MutableStateFlow<DetailedSupplierDomainModel?>(null)
     val supplier  = _supplier.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)

@@ -118,18 +118,19 @@ fun InvoiceDetailScreen(
             )
         },
         bottomBar = {
-            if (invoice?.clientName != "Ninguno"){
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    GenericBlueUiButton(
-                        buttonText = "Pagar",
-                        onFunction = { showDialog = true }
-                    )
+            if (invoice != null){
+                if (invoice?.clientName != "Ninguno" && invoice!!.debt > 0){
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        GenericBlueUiButton(
+                            buttonText = "Pagar",
+                            onFunction = { showDialog = true }
+                        )
+                    }
                 }
             }
-
         }
     ) {
         Column(
