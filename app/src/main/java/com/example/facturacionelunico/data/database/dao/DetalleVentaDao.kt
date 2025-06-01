@@ -17,7 +17,7 @@ interface DetalleVentaDao {
     suspend fun getAll(): List<DetalleVentaEntity>
 
     @Query("""SELECT  
-        dv.id AS id,
+        p.id AS id,
         dv.cantidad AS quantity,
         dv.precio AS price,
         p.nombre AS name

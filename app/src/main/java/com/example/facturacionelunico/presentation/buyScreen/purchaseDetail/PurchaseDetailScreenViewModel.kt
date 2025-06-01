@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.facturacionelunico.domain.models.DetailedProductModel
+import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.invoice.InvoiceDetailDomainModel
 import com.example.facturacionelunico.domain.models.purchase.DetailPurchaseDomainModelUI
 import com.example.facturacionelunico.domain.repositories.ProductRepository
 import com.example.facturacionelunico.domain.repositories.PurchaseRepository
@@ -50,6 +50,21 @@ class PurchaseDetailScreenViewModel @Inject constructor(
         }
     }
 
+    fun payInvoice(purchaseId: Long, amount: Double) {
+        viewModelScope.launch {
+            _message.value = repository.payPurchase(purchaseId, amount)
+        }
+    }
+
+    fun addProductsToPurchase(products: List<ProductItem>){
+        viewModelScope.launch {
+            _message.value = repository.createPurchaseDetail(
+                purchaseId = purchase.value?.id ?: 0,
+                products = products
+            )
+        }
+    }
+
     private val _searchQueryProduct = MutableStateFlow("")
     val searchQueryProduct: StateFlow<String> = _searchQueryProduct.asStateFlow()
 
@@ -70,7 +85,6 @@ class PurchaseDetailScreenViewModel @Inject constructor(
         .map { result ->
             when (result) {
                 is ResultPattern.Success -> {
-                    _message.value = null
                     result.data
                 }
 

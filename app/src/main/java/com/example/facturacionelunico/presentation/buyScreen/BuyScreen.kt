@@ -44,7 +44,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
-import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
@@ -164,7 +163,7 @@ fun BuyScreen(
                                         subtotal = it.subtotal
                                     )
                                 },
-                                moneyPaid = if (dept[0] == deptSelectedOption) 0.0 else moneyToPay.toDouble()
+                                moneyPaid = if (dept[0] == deptSelectedOption) total else moneyToPay.toDouble()
                             )
                         }
                     )
@@ -250,7 +249,6 @@ fun BuyScreen(
                                 )
                             )
                         }
-
                         enabledRadioButtons = false
 
                         // Limpiar campos luego de agregar a la tabla
@@ -337,7 +335,7 @@ fun BuyScreen(
     }
 }
 
-/*Tabla de clientes para seleccionar*/
+/*Tabla de Proveedores para seleccionar*/
 @Composable
 fun SelectSupplierTable(
     suppliers: LazyPagingItems<DetailedSupplierLocalModel>,
@@ -370,7 +368,7 @@ fun SelectSupplierTable(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Buscar cliente", fontSize = 28.sp, fontWeight = FontWeight.Bold,
+                "Buscar proveedor", fontSize = 28.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 10.dp)
             )
 
@@ -389,7 +387,7 @@ fun SelectSupplierTable(
                 items(
                     count = suppliers.itemCount,
                     key = { index -> suppliers[index]?.id ?: index },
-                    contentType = suppliers.itemContentType { "Clients" }
+                    contentType = suppliers.itemContentType { "Suppliers" }
                 ) { index ->
 
                     val supplier = suppliers[index]

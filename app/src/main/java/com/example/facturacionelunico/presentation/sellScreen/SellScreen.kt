@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,8 +60,6 @@ import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.SearchBarComponent
 import com.example.facturacionelunico.utils.validations.ValidationFunctions
-import kotlin.text.isEmpty
-import kotlin.text.matches
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -176,7 +173,7 @@ fun SellScreen(
                                         subtotal = it.subtotal
                                     )
                                 },
-                                moneyPaid = if (dept[0] == deptSelectedOption) 0.0 else moneyToPay.toDouble()
+                                moneyPaid = if (dept[0] == deptSelectedOption) total else moneyToPay.toDouble()
                             )
                         }
                     )

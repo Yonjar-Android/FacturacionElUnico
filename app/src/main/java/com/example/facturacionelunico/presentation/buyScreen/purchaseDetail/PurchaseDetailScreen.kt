@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.facturacionelunico.presentation.buyScreen.purchaseDetail
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,11 +10,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,9 +42,13 @@ import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
 import com.example.facturacionelunico.presentation.sellScreen.InvoiceTable
+import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
+import com.example.facturacionelunico.presentation.sellScreen.invoideDetailScreen.DialogConfirmProduct
+import com.example.facturacionelunico.presentation.sellScreen.invoideDetailScreen.DialogFormPay
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun PurchaseDetailScreen(
     purchaseId: Long,
@@ -57,6 +72,7 @@ fun PurchaseDetailScreen(
 
     val message by viewModel.message.collectAsStateWithLifecycle()
 
+    println("MENSAJE PANTALLA: $message")
     var showDialog by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -87,7 +103,7 @@ fun PurchaseDetailScreen(
     Scaffold(
         topBar = {
             TopAppBarCustom(
-                title = "Factura",
+                title = "Compra",
                 onNavigationClick = { navController.navigateUp() }
             )
         },
@@ -143,5 +159,90 @@ fun PurchaseDetailScreen(
             }
         }
         Spacer(modifier = Modifier.size(30.dp))
+    }
+
+    if (showDialog) {
+        DialogFormPay(
+            value = amount,
+            onValueChange = { amount = it },
+            dismiss = { showDialog = false },
+            onConfirm = {
+                viewModel.payInvoice(purchaseId, it)
+            })
+    }
+
+    if (showProductDialog) {
+        SelectProductTable(
+            products = products,
+            closeTable = { showProductDialog = false },
+            getValues = { name, id, precio ->
+                showDialogConfirm = true
+                productItem.value = ProductItem(id, name, precio, 0)
+            },
+            searchQuery = {
+                viewModel.updateQueryProduct(it)
+            },
+            searchQueryProduct = productQuery
+        )
+    }
+
+    if (showDialogConfirm){
+        DialogConfirmProduct(
+            value = quantity,
+            onValueChange = { quantity = it },
+            dismiss = { showDialogConfirm = false },
+            onConfirm = {
+                val exist = productsTable.any{ it.id == productItem.value.id }
+                if (exist){
+                    Toast.makeText(context, "El producto ya se encuentra en la tabla", Toast.LENGTH_SHORT).show()
+                    return@DialogConfirmProduct
+                }
+                productsTable.add(productItem.value.copy(quantity = it))
+                productsForUpdate.add(productItem.value.copy(quantity = it))
+                showDialogConfirm = false
+                showProductDialog = false
+            })
+    }
+
+    if (showConfirmDialog){
+        ConfirmPurchaseDialog(
+            onConfirm = {
+                viewModel.addProductsToPurchase(productsForUpdate)
+            },
+            onDismiss = { showConfirmDialog = false }
+        )
+    }
+}
+
+@Composable
+fun ConfirmPurchaseDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 8.dp
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = "Confirmar compra", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "¿Confirmas la compra de los productos agregados?")
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancelar")
+                    }
+                    TextButton(onClick = onConfirm) {
+                        Text("Confirmar")
+                    }
+                }
+            }
+        }
     }
 }

@@ -86,7 +86,6 @@ class InvoiceDetailViewModel @Inject constructor(
         .map { result ->
             when (result) {
                 is ResultPattern.Success -> {
-                    _message.value = null
                     result.data
                 }
 

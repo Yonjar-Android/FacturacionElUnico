@@ -89,6 +89,7 @@ class PurchaseRepositoryImp @Inject constructor(
         val purchaseFlow = purchaseDao.getPurchaseDetailById(purchaseId)
         val productsFlow = purchaseDetailDao.getDetailsByPurchaseId(purchaseId)
 
+
         return combine(purchaseFlow, productsFlow) { purchase, products ->
             runCatching {
                 ResultPattern.Success(
@@ -121,7 +122,6 @@ class PurchaseRepositoryImp @Inject constructor(
                 )
 
                 val idPurchase = purchaseDao.insert(purchaseEntity)
-
                 details.forEach {
                     val detailEntity = DetalleCompraEntity(
                         idCompra = idPurchase,
@@ -133,8 +133,6 @@ class PurchaseRepositoryImp @Inject constructor(
                     purchaseDetailDao.insert(detailEntity)
                 }
 
-                // Condicional donde si el pago es PENDIENTE se cree el abono del proveedor
-                if (purchase.state == "PENDIENTE") {
                     val abonoEntity = AbonoCompraEntity(
                         idCompra = idPurchase,
                         fechaCreacion = purchase.purchaseDate,
@@ -153,7 +151,6 @@ class PurchaseRepositoryImp @Inject constructor(
 
                         detalleAbonoCompraDao.insert(abonoDetalleEntity)
                     }
-                }
 
             }
             "Compra creada con éxito"
@@ -162,7 +159,68 @@ class PurchaseRepositoryImp @Inject constructor(
         }
     }
 
-    override suspend fun createPurchaseDetail(): String {
-        return ""
+    override suspend fun createPurchaseDetail(
+        purchaseId: Long,
+        products: List<ProductItem>
+    ): String {
+        return runCatching {
+            appDatabase.withTransaction {
+                products.forEach {
+                    val detailEntity = DetalleCompraEntity(
+                        idCompra = purchaseId,
+                        idProducto = it.id,
+                        cantidad = it.quantity,
+                        precio = it.price,
+                        subtotal = it.subtotal
+                    )
+                    purchaseDetailDao.insert(detailEntity)
+                }
+
+                val newTotal = products.sumOf { it.subtotal }
+                val purchase = purchaseDao.getPurchaseById(purchaseId)
+
+                purchaseDao.update(
+                    purchase.copy(
+                        total = purchase.total + newTotal,
+                        estado = "PENDIENTE"
+                    )
+                )
+
+                val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseId)
+                compraAbonoDao.update(
+                    abono.copy(
+                        totalPendiente = abono.totalPendiente + newTotal,
+                        totalAPagar = abono.totalAPagar + newTotal
+                    )
+                )
+
+                "Compra actualizada con éxito"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun payPurchase(
+        purchaseId: Long,
+        amount: Double
+    ): String {
+        return runCatching {
+            val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseId)
+
+            if (abono.totalPendiente < amount) {
+                "Error: Se ha intentado pagar más de lo que se debe"
+            } else {
+                val abonoDetalleEntity = DetalleAbonoCompraEntity(
+                    idAbonoCompra = abono.id,
+                    monto = amount,
+                    fechaAbono = System.currentTimeMillis()
+                )
+                detalleAbonoCompraDao.insert(abonoDetalleEntity)
+                "Pago realizado con éxito"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
     }
 }

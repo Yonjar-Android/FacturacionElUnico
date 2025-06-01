@@ -127,8 +127,6 @@ class InvoiceRepositoryImp @Inject constructor(
                     detailInvoiceDao.insert(detailEntity)
                 }
 
-                // Condicional donde si el pago es PENDIENTE se cree el abono del cliente
-                if (invoice.state == "PENDIENTE") {
                     val abonoEntity = AbonoVentaEntity(
                         idVenta = id,
                         fechaCreacion = invoice.sellDate,
@@ -146,10 +144,8 @@ class InvoiceRepositoryImp @Inject constructor(
                         )
                         abonosDetalleDao.insert(abonoDetalleEntity)
                        }
-                }
+                "Factura creada con éxito"
             }
-            "Factura creada con éxito"
-
         }.getOrElse {
             "Error: ${it.message}"
         }

@@ -16,12 +16,12 @@ interface DetalleCompraDao {
     suspend fun getAll(): List<DetalleCompraEntity>
 
     @Query("""SELECT  
-        dc.id AS id,
+        p.id AS id,
         dc.cantidad AS quantity,
         dc.precio AS price,
         p.nombre AS name
 FROM detalle_compra dc
         INNER JOIN producto p ON dc.idProducto = p.id
-        WHERE dc.id = :id""")
+        WHERE dc.idCompra = :id""")
     fun getDetailsByPurchaseId(id: Long): Flow<List<ProductItem>>
 }

@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.CompraEntity
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailLocalModel
@@ -14,8 +15,14 @@ interface CompraDao {
     @Insert
     suspend fun insert(compra: CompraEntity): Long
 
+    @Update
+    suspend fun update(compra: CompraEntity)
+
     @Query("SELECT * FROM compra")
     fun getAll(): PagingSource<Int, CompraEntity>
+
+    @Query("SELECT * FROM compra WHERE id = :id")
+    suspend fun getPurchaseById(id: Long): CompraEntity
 
     @Query("""SELECT * FROM compra
         WHERE estado = 'PENDIENTE'
