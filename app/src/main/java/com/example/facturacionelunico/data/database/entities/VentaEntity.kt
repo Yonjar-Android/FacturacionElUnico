@@ -42,6 +42,7 @@ data class DetalleVentaEntity(
     val idProducto: Long,
     val cantidad: Int,
     val precio: Double,
+    val precioCompra:Double,
     val subtotal: Double,
     val fechaActualizacion: Long
 )

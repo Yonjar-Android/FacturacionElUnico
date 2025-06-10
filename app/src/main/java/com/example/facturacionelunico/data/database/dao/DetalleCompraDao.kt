@@ -19,7 +19,8 @@ interface DetalleCompraDao {
         p.id AS id,
         dc.cantidad AS quantity,
         dc.precio AS price,
-        p.nombre AS name
+        p.nombre AS name,
+        0 AS purchasePrice
 FROM detalle_compra dc
         INNER JOIN producto p ON dc.idProducto = p.id
         WHERE dc.idCompra = :id""")

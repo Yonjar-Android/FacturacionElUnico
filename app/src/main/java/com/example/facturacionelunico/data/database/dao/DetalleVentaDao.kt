@@ -20,7 +20,8 @@ interface DetalleVentaDao {
         p.id AS id,
         dv.cantidad AS quantity,
         dv.precio AS price,
-        p.nombre AS name
+        p.nombre AS name,
+        dv.precioCompra AS purchasePrice
 FROM detalle_venta dv
         INNER JOIN producto p ON dv.idProducto = p.id
         WHERE idVenta = :id""")

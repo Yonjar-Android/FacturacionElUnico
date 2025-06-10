@@ -99,6 +99,7 @@ fun SellScreen(
     var productId by remember { mutableStateOf("") }
     var product by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var purchasePrice by remember { mutableDoubleStateOf(0.0) }
     var quantity by remember { mutableStateOf("") }
     var client by remember { mutableStateOf("") }
     var clientId by remember { mutableStateOf<Long?>(null) }
@@ -170,7 +171,8 @@ fun SellScreen(
                                         productId = it.id,
                                         quantity = it.quantity,
                                         price = it.price,
-                                        subtotal = it.subtotal
+                                        subtotal = it.subtotal,
+                                        purchasePrice = it.purchasePrice
                                     )
                                 },
                                 moneyPaid = if (dept[0] == deptSelectedOption) total else moneyToPay.toDouble()
@@ -279,7 +281,8 @@ fun SellScreen(
                                     productId.toLong(),
                                     product,
                                     price.toDouble(),
-                                    quantity.toInt()
+                                    quantity = quantity.toInt(),
+                                    purchasePrice = purchasePrice.toDouble()
                                 )
                             )
                         }
@@ -291,6 +294,7 @@ fun SellScreen(
                         product = ""
                         price = ""
                         quantity = ""
+                        purchasePrice = 0.0
 
                         // Suma del total
                         total = productList.sumOf { it.subtotal }
@@ -355,10 +359,11 @@ fun SellScreen(
             SelectProductTable(
                 products = products,
                 closeTable = { showProducts = false },
-                getValues = { name, id, precio ->
+                getValues = { name, id, precio, precioCompra ->
                     productId = id.toString()
                     product = name
                     price = precio.toString()
+                    purchasePrice = precioCompra
                     showProducts = false
                 },
                 searchQuery = { query ->
@@ -637,7 +642,7 @@ fun ClientItemTable(
 fun SelectProductTable(
     products: LazyPagingItems<DetailedProductModel>,
     closeTable: () -> Unit,
-    getValues: (String, Long, Double) -> Unit,
+    getValues: (String, Long, Double, Double) -> Unit,
     searchQuery: (String) -> Unit,
     searchQueryProduct: String
 ) {
@@ -691,9 +696,9 @@ fun SelectProductTable(
                     if (product != null) {
                         ProductItemTable(
                             product,
-                            getValues = { name, id, precio ->
+                            getValues = { name, id, precio, precioCompra ->
 
-                                getValues.invoke(name, id, precio)
+                                getValues.invoke(name, id, precio, precioCompra)
                             })
                     }
                 }
@@ -706,7 +711,7 @@ fun SelectProductTable(
 @Composable
 fun ProductItemTable(
     product: DetailedProductModel,
-    getValues: (String, Long, Double) -> Unit
+    getValues: (String, Long, Double, Double) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -727,7 +732,7 @@ fun ProductItemTable(
                 buttonText = "Seleccionar",
                 onFunction = {
                     println("Producto: $product")
-                    getValues.invoke(product.name, product.id, product.salePrice)
+                    getValues.invoke(product.name, product.id, product.salePrice, product.purchasePrice)
                 }
             )
         }

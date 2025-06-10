@@ -245,7 +245,8 @@ fun BuyScreen(
                                     productId.toLong(),
                                     product,
                                     price.toDouble(),
-                                    quantity.toInt()
+                                    quantity = quantity.toInt(),
+                                    purchasePrice = 0.0,
                                 )
                             )
                         }
@@ -320,7 +321,7 @@ fun BuyScreen(
             SelectProductTable(
                 products = products,
                 closeTable = { showProducts = false },
-                getValues = { name, id, precio ->
+                getValues = { name, id, precio, precioNoUsar ->
                     productId = id.toString()
                     product = name
                     price = precio.toString()

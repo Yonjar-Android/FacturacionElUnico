@@ -69,12 +69,14 @@ fun InvoiceDetailScreen(
 
     val context = LocalContext.current
 
-    val products: LazyPagingItems<DetailedProductModel> = viewModel.products.collectAsLazyPagingItems()
+    val products: LazyPagingItems<DetailedProductModel> =
+        viewModel.products.collectAsLazyPagingItems()
     val productQuery by viewModel.searchQueryProduct.collectAsStateWithLifecycle()
     var quantity by remember { mutableStateOf("") }
     var showProductDialog by remember { mutableStateOf(false) }
     var showDialogConfirm by remember { mutableStateOf(false) }
-    val productItem = remember { mutableStateOf(ProductItem(0, "", 0.0, 0)) }
+    val productItem =
+        remember { mutableStateOf(ProductItem(0, "", 0.0, quantity = 0, purchasePrice = 0.0)) }
 
     LaunchedEffect(invoiceId) {
         viewModel.getInvoiceDetail(invoiceId)
@@ -120,8 +122,8 @@ fun InvoiceDetailScreen(
             )
         },
         bottomBar = {
-            if (invoice != null){
-                if (invoice?.clientName != "Ninguno" && invoice!!.debt > 0){
+            if (invoice != null) {
+                if (invoice?.clientName != "Ninguno" && invoice!!.debt > 0) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -155,7 +157,7 @@ fun InvoiceDetailScreen(
 
             InvoiceTable(productsTable)
 
-            if (invoice?.clientName != "Ninguno"){
+            if (invoice?.clientName != "Ninguno") {
                 GenericBlueUiButton(
                     buttonText = "Agregar producto",
                     onFunction = { showProductDialog = true }
@@ -187,9 +189,10 @@ fun InvoiceDetailScreen(
         SelectProductTable(
             products = products,
             closeTable = { showProductDialog = false },
-            getValues = { name, id, precio ->
+            getValues = { name, id, precio, precioNoUsar ->
                 showDialogConfirm = true
-                productItem.value = ProductItem(id, name, precio, 0)
+                productItem.value =
+                    ProductItem(id, name, precio, quantity = 0, purchasePrice = precioNoUsar)
             },
             searchQuery = {
                 viewModel.updateQueryProduct(it)
@@ -198,15 +201,19 @@ fun InvoiceDetailScreen(
         )
     }
 
-    if (showDialogConfirm){
+    if (showDialogConfirm) {
         DialogConfirmProduct(
             value = quantity,
             onValueChange = { quantity = it },
             dismiss = { showDialogConfirm = false },
             onConfirm = {
-                val exist = productsTable.any{ it.id == productItem.value.id }
-                if (exist){
-                    Toast.makeText(context, "El producto ya se encuentra en la tabla", Toast.LENGTH_SHORT).show()
+                val exist = productsTable.any { it.id == productItem.value.id }
+                if (exist) {
+                    Toast.makeText(
+                        context,
+                        "El producto ya se encuentra en la tabla",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@DialogConfirmProduct
                 }
 
@@ -217,7 +224,7 @@ fun InvoiceDetailScreen(
             })
     }
 
-    if (showConfirmDialog){
+    if (showConfirmDialog) {
         ConfirmDialog(
             onConfirm = {
                 viewModel.addProductsToInvoice(productsForUpdate)
@@ -317,7 +324,7 @@ fun DialogConfirmProduct(
     value: String,
     onValueChange: (String) -> Unit,
     dismiss: () -> Unit,
-    onConfirm: (quantity:Int) -> Unit
+    onConfirm: (quantity: Int) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -335,8 +342,10 @@ fun DialogConfirmProduct(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text("Ingresar cantidad del producto", fontWeight = FontWeight.Bold, fontSize = 24.sp,
-                textAlign = TextAlign.Center)
+            Text(
+                "Ingresar cantidad del producto", fontWeight = FontWeight.Bold, fontSize = 24.sp,
+                textAlign = TextAlign.Center
+            )
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -369,7 +378,11 @@ fun DialogConfirmProduct(
                     modifier = Modifier.fillMaxWidth(fraction = 0.8f),
                     onClick = {
                         if (value.isEmpty()) {
-                            Toast.makeText(context, "Ingrese la cantidad del producto", Toast.LENGTH_SHORT)
+                            Toast.makeText(
+                                context,
+                                "Ingrese la cantidad del producto",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
                             return@Button
                         }

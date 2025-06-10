@@ -122,7 +122,8 @@ class InvoiceRepositoryImp @Inject constructor(
                         cantidad = it.quantity,
                         precio = it.price,
                         subtotal = it.subtotal,
-                        fechaActualizacion = invoice.sellDate
+                        fechaActualizacion = invoice.sellDate,
+                        precioCompra = it.purchasePrice
                     )
                     detailInvoiceDao.insert(detailEntity)
                 }
@@ -164,7 +165,8 @@ class InvoiceRepositoryImp @Inject constructor(
                         cantidad = it.quantity,
                         precio = it.price,
                         subtotal = it.subtotal,
-                        fechaActualizacion = System.currentTimeMillis()
+                        fechaActualizacion = System.currentTimeMillis(),
+                        precioCompra = it.purchasePrice
                     )
 
                     val validate = stockValidationOneProduct(

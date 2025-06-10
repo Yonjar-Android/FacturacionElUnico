@@ -62,7 +62,7 @@ fun PurchaseDetailScreen(
     var quantity by remember { mutableStateOf("") }
     var showProductDialog by remember { mutableStateOf(false) }
     var showDialogConfirm by remember { mutableStateOf(false) }
-    val productItem = remember { mutableStateOf(ProductItem(0, "", 0.0, 0)) }
+    val productItem = remember { mutableStateOf(ProductItem(0, "", 0.0, quantity = 0,purchasePrice = 0.0)) }
 
     LaunchedEffect(purchaseId) {
         viewModel.getInvoiceDetail(purchaseId)
@@ -176,9 +176,9 @@ fun PurchaseDetailScreen(
         SelectProductTable(
             products = products,
             closeTable = { showProductDialog = false },
-            getValues = { name, id, precio ->
+            getValues = { name, id, precio, precioNoUsar ->
                 showDialogConfirm = true
-                productItem.value = ProductItem(id, name, precio, 0)
+                productItem.value = ProductItem(id, name, precio, quantity = 0, purchasePrice = precioNoUsar)
             },
             searchQuery = {
                 viewModel.updateQueryProduct(it)

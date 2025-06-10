@@ -15,5 +15,6 @@ data class DetailInvoiceDomainModel(
     val productId: Long,
     val quantity: Int,
     val price: Double,
+    val purchasePrice:Double,
     val subtotal: Double
 )
