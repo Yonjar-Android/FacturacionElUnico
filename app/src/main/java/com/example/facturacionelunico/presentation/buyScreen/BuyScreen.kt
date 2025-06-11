@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,6 +51,7 @@ import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
 import com.example.facturacionelunico.presentation.sellScreen.ClickableTextField
 import com.example.facturacionelunico.presentation.sellScreen.InvoiceTable
+import com.example.facturacionelunico.presentation.sellScreen.ProductOptionsDialog
 import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
 import com.example.facturacionelunico.presentation.sellScreen.TextFieldInvoice
 import com.example.facturacionelunico.presentation.sellScreen.validations
@@ -97,6 +100,10 @@ fun BuyScreen(
     var supplierId by remember { mutableStateOf<Long?>(null) }
     var total by remember { mutableDoubleStateOf(0.0) }
     var moneyToPay by remember { mutableStateOf("") }
+
+    var quantityToModify by remember { mutableIntStateOf(0) }
+    var productToModify by remember { mutableLongStateOf(0) }
+    var showEdiDeleteDialog by remember { mutableStateOf(false) }
 
     if (!message.isNullOrEmpty()) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -239,6 +246,11 @@ fun BuyScreen(
                             return@GenericBlueUiButton
                         }
 
+                        if (productList.any { it.id == productId.toLong() }){
+                            Toast.makeText(context, "El producto ya se encuentra en la tabla", Toast.LENGTH_SHORT).show()
+                            return@GenericBlueUiButton
+                        }
+
                         productList = productList.toMutableList().apply {
                             add(
                                 ProductItem(
@@ -266,7 +278,11 @@ fun BuyScreen(
                 // Tabla de productos a facturar
                 InvoiceTable(
                     productList = productList,
-                    showDialog = { quantity, id -> }
+                    showDialog = { quantity, id ->
+                        showEdiDeleteDialog = true
+                        quantityToModify = quantity
+                        productToModify = id
+                    }
                 )
 
 
@@ -333,6 +349,39 @@ fun BuyScreen(
                 },
                 searchQueryProduct = searchQueryProduct
             )
+        }
+
+        if (showEdiDeleteDialog) {
+            ProductOptionsDialog(
+                currentQuantity = quantityToModify,
+                onEditClick = {
+                    showEdiDeleteDialog = false
+
+                    productList.toMutableList().apply {
+                        val index = indexOfFirst { it.id == productToModify }
+                        if (index != -1) {
+                            val updatedItem = this[index].copy(quantity = it)
+                            this[index] = updatedItem
+                            productList = this // Esto actualiza el estado y dispara recomposición
+                        }
+                    }
+
+                    println("Lista de productos: $productList")
+                    quantityToModify = 0
+                },
+                onDismiss = {
+                    showEdiDeleteDialog = false
+                },
+                onDeleteClick = {
+                    productList.toMutableList().apply {
+                        removeIf { it.id == productToModify }
+                        productList = this
+                    }
+
+                    if (productList.isEmpty()) enabledRadioButtons = true
+
+                    showEdiDeleteDialog = false
+                })
         }
     }
 }

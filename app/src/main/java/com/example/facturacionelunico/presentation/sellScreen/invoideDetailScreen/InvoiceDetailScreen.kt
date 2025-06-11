@@ -155,7 +155,11 @@ fun InvoiceDetailScreen(
 
             ClientText(title = "Productos", value = "")
 
-            InvoiceTable(productsTable,{quantity, id ->})
+            InvoiceTable(
+                productsTable,
+                showDialog = { quantity, id ->
+
+                })
 
             if (invoice?.clientName != "Ninguno") {
                 GenericBlueUiButton(

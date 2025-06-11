@@ -129,7 +129,7 @@ fun SupplierDetailScreen(
                 value = if (supplier?.address.isNullOrEmpty()) "Sin dirección" else supplier?.address.toString()
             )
 
-            ClientText(title = "Deuda", value = "C$ 1200")
+            ClientText(title = "Deuda", value = "C$ ${supplier?.debt}")
 
             Text(text = "Compras", fontWeight = FontWeight.Bold, fontSize = 20.sp)
 
