@@ -142,7 +142,7 @@ fun PurchaseDetailScreen(
 
             ClientText(title = "Productos", value = "")
 
-            InvoiceTable(productsTable)
+            InvoiceTable(productsTable,{quantity, price ->})
 
             if (invoice?.supplier != "Ninguno"){
                 GenericBlueUiButton(

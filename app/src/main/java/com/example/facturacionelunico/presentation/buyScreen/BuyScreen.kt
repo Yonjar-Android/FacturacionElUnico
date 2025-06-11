@@ -265,7 +265,8 @@ fun BuyScreen(
 
                 // Tabla de productos a facturar
                 InvoiceTable(
-                    productList = productList
+                    productList = productList,
+                    showDialog = { quantity, id -> }
                 )
 
 

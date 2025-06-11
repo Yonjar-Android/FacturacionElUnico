@@ -155,7 +155,7 @@ fun InvoiceDetailScreen(
 
             ClientText(title = "Productos", value = "")
 
-            InvoiceTable(productsTable)
+            InvoiceTable(productsTable,{quantity, id ->})
 
             if (invoice?.clientName != "Ninguno") {
                 GenericBlueUiButton(

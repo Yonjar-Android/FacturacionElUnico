@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,17 +24,22 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +53,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -83,6 +91,7 @@ fun SellScreen(
 
     var showClients by remember { mutableStateOf(false) }
     var showProducts by remember { mutableStateOf(false) }
+    var showEdiDeleteDialog by remember { mutableStateOf(false) }
 
     var enabledRadioButtons by remember { mutableStateOf(true) }
     var validationClient by remember { mutableStateOf(true) }
@@ -105,6 +114,9 @@ fun SellScreen(
     var clientId by remember { mutableStateOf<Long?>(null) }
     var total by remember { mutableDoubleStateOf(0.0) }
     var moneyToPay by remember { mutableStateOf("") }
+
+    var quantityToModify by remember { mutableIntStateOf(0) }
+    var productToModify by remember { mutableLongStateOf(0) }
 
     if (!message.isNullOrEmpty()) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -209,7 +221,12 @@ fun SellScreen(
                         ) {
                             RadioButton(
                                 selected = selectedOption == client,
-                                onClick = { selectedOption = client },
+                                onClick = {
+                                    selectedOption = client
+                                    if (client == "Sin Cliente") {
+                                        deptSelectedOption = dept[0]
+                                    }
+                                },
                                 enabled = enabledRadioButtons
                             )
                             Text(text = client, color = Color.Black)
@@ -275,6 +292,11 @@ fun SellScreen(
                             return@GenericBlueUiButton
                         }
 
+                        if (productList.any { it.id == productId.toLong() }){
+                            Toast.makeText(context, "El producto ya se encuentra en la tabla", Toast.LENGTH_SHORT).show()
+                            return@GenericBlueUiButton
+                        }
+
                         productList = productList.toMutableList().apply {
                             add(
                                 ProductItem(
@@ -303,7 +325,12 @@ fun SellScreen(
 
                 // Tabla de productos a facturar
                 InvoiceTable(
-                    productList = productList
+                    productList = productList,
+                    showDialog = { quantity, id ->
+                        showEdiDeleteDialog = true
+                        quantityToModify = quantity
+                        productToModify = id
+                    }
                 )
 
 
@@ -321,6 +348,7 @@ fun SellScreen(
                             RadioButton(
                                 selected = deptSelectedOption == dept,
                                 onClick = { deptSelectedOption = dept },
+                                enabled = if (selectedOption == clientList[1]) false else true
                             )
                             Text(text = dept, color = Color.Black)
                         }
@@ -355,6 +383,7 @@ fun SellScreen(
             )
         }
 
+
         if (showProducts) {
             SelectProductTable(
                 products = products,
@@ -372,6 +401,41 @@ fun SellScreen(
                 searchQueryProduct = searchQueryProduct
             )
         }
+    }
+
+
+
+    if (showEdiDeleteDialog) {
+        ProductOptionsDialog(
+            currentQuantity = quantityToModify,
+            onEditClick = {
+                showEdiDeleteDialog = false
+
+                productList.toMutableList().apply {
+                    val index = indexOfFirst { it.id == productToModify }
+                    if (index != -1) {
+                        val updatedItem = this[index].copy(quantity = it)
+                        this[index] = updatedItem
+                        productList = this // Esto actualiza el estado y dispara recomposición
+                    }
+                }
+
+                println("Lista de productos: $productList")
+                quantityToModify = 0
+            },
+            onDismiss = {
+                showEdiDeleteDialog = false
+            },
+            onDeleteClick = {
+                productList.toMutableList().apply {
+                    removeIf { it.id == productToModify }
+                    productList = this
+                }
+
+                if (productList.isEmpty()) enabledRadioButtons = true
+
+                showEdiDeleteDialog = false
+            })
     }
 }
 
@@ -455,7 +519,7 @@ fun ClickableTextField(
 }
 
 @Composable
-fun InvoiceTable(productList: List<ProductItem>) {
+fun InvoiceTable(productList: List<ProductItem>, showDialog: (Int, Long) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -493,6 +557,9 @@ fun InvoiceTable(productList: List<ProductItem>) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable {
+                        showDialog(product.quantity, product.id)
+                    }
                     .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -527,6 +594,105 @@ fun InvoiceTable(productList: List<ProductItem>) {
     }
 }
 
+/**/
+
+@Composable
+fun ProductOptionsDialog(
+    onDismiss: () -> Unit,
+    currentQuantity: Int,
+    onEditClick: (Int) -> Unit,
+    onDeleteClick: () -> Unit,
+) {
+    var showEditDialog by remember { mutableStateOf(false) }
+    var quantity by remember { mutableIntStateOf(currentQuantity) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(fraction = 0.8f)
+                .fillMaxHeight(fraction = 0.2f)
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color.White)
+                .padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Opciones del producto", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = { showEditDialog = true }
+                ) {
+                    Text("Editar")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(
+                    onClick = onDeleteClick
+                ) {
+                    Text("Eliminar", color = Color.Red)
+                }
+            }
+        }
+    }
+
+    if (showEditDialog) {
+        Dialog(
+            onDismissRequest = {
+                showEditDialog = false
+                onDismiss.invoke()
+            }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.8f)
+                    .fillMaxHeight(fraction = 0.25f)
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(Color.White)
+                    .padding(30.dp)
+            ) {
+                Text("Cantidad actual", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = quantity.toString(),
+                    onValueChange = { newValue ->
+                        quantity = newValue.toIntOrNull() ?: 1
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = { showEditDialog = false }
+                    ) {
+                        Text("Cancelar")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        onClick = {
+                            onEditClick(quantity)
+                            showEditDialog = false
+                        }
+                    ) {
+                        Text("Guardar")
+                    }
+                }
+            }
+
+
+        }
+    }
+}
 
 /*Tabla de clientes para seleccionar*/
 @Composable
@@ -731,8 +897,12 @@ fun ProductItemTable(
             GenericBlueUiButton(
                 buttonText = "Seleccionar",
                 onFunction = {
-                    println("Producto: $product")
-                    getValues.invoke(product.name, product.id, product.salePrice, product.purchasePrice)
+                    getValues.invoke(
+                        product.name,
+                        product.id,
+                        product.salePrice,
+                        product.purchasePrice
+                    )
                 }
             )
         }
