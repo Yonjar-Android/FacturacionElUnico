@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.DetalleCompraEntity
 import com.example.facturacionelunico.domain.models.ProductItem
 import kotlinx.coroutines.flow.Flow
@@ -12,10 +13,17 @@ interface DetalleCompraDao {
     @Insert
     suspend fun insert(detalle: DetalleCompraEntity)
 
+    @Update
+    suspend fun update(detalle: DetalleCompraEntity)
+
+    @Query("DELETE FROM detalle_compra WHERE id = :id")
+    suspend fun delete(id: Long)
+
     @Query("SELECT * FROM detalle_compra")
     suspend fun getAll(): List<DetalleCompraEntity>
 
-    @Query("""SELECT  
+    @Query("""SELECT 
+        dc.id AS detailId,
         p.id AS id,
         dc.cantidad AS quantity,
         dc.precio AS price,

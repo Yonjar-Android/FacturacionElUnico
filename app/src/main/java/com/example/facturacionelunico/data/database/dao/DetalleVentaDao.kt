@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.facturacionelunico.data.database.entities.DetalleVentaEntity
 import com.example.facturacionelunico.domain.models.ProductItem
-import com.example.facturacionelunico.domain.models.invoice.DetailInvoiceProduct
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,6 +16,7 @@ interface DetalleVentaDao {
     suspend fun getAll(): List<DetalleVentaEntity>
 
     @Query("""SELECT  
+        dv.id AS detailId,
         p.id AS id,
         dv.cantidad AS quantity,
         dv.precio AS price,

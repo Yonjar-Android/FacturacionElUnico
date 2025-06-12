@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.example.facturacionelunico.data.database.entities.DetalleCompraEntity
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
@@ -28,7 +29,7 @@ import javax.inject.Inject
 class PurchaseDetailScreenViewModel @Inject constructor(
     private val repository: PurchaseRepository,
     private val productRepository: ProductRepository
-): ViewModel() {
+) : ViewModel() {
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
@@ -42,6 +43,7 @@ class PurchaseDetailScreenViewModel @Inject constructor(
                     is ResultPattern.Success -> {
                         _purchase.value = result.data
                     }
+
                     is ResultPattern.Error -> {
                         _message.value = result.message
                     }
@@ -56,12 +58,44 @@ class PurchaseDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun addProductsToPurchase(products: List<ProductItem>){
+    fun addProductsToPurchase(products: List<ProductItem>) {
         viewModelScope.launch {
             _message.value = repository.createPurchaseDetail(
                 purchaseId = purchase.value?.id ?: 0,
                 products = products
             )
+        }
+    }
+
+    fun updateProduct(product: ProductItem, newTotal: Double) {
+        viewModelScope.launch {
+
+            val purchaseDetailUpdated = DetalleCompraEntity(
+                id = product.id,
+                idCompra = purchase.value?.id ?: 0,
+                idProducto = product.id,
+                cantidad = product.quantity,
+                precio = product.price,
+                subtotal = product.subtotal
+            )
+
+            _message.value = repository.updatePurchaseDetail(purchaseDetailUpdated, newTotal)
+        }
+    }
+
+    fun deleteProduct(product: ProductItem, newTotal: Double) {
+        viewModelScope.launch {
+
+            val purchaseDetailUpdated = DetalleCompraEntity(
+                id = product.id,
+                idCompra = purchase.value?.id ?: 0,
+                idProducto = product.id,
+                cantidad = product.quantity,
+                precio = product.price,
+                subtotal = product.subtotal
+            )
+
+            _message.value = repository.deletePurchaseDetail(purchaseDetailUpdated, newTotal)
         }
     }
 
@@ -101,7 +135,7 @@ class PurchaseDetailScreenViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    fun restartMessage(){
+    fun restartMessage() {
         _message.value = null
     }
 }

@@ -12,4 +12,10 @@ interface DetalleAbonoCompraDao {
 
     @Query("SELECT * FROM detalle_abono_compra")
     suspend fun getAll(): List<DetalleAbonoCompraEntity>
+
+    @Query("""
+        SELECT * FROM detalle_abono_compra
+        WHERE idAbonoCompra = :id
+    """)
+    suspend fun getAllByAbonoId(id: Long): List<DetalleAbonoCompraEntity>
 }

@@ -292,8 +292,12 @@ fun SellScreen(
                             return@GenericBlueUiButton
                         }
 
-                        if (productList.any { it.id == productId.toLong() }){
-                            Toast.makeText(context, "El producto ya se encuentra en la tabla", Toast.LENGTH_SHORT).show()
+                        if (productList.any { it.id == productId.toLong() }) {
+                            Toast.makeText(
+                                context,
+                                "El producto ya se encuentra en la tabla",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             return@GenericBlueUiButton
                         }
 
@@ -301,8 +305,8 @@ fun SellScreen(
                             add(
                                 ProductItem(
                                     productId.toLong(),
-                                    product,
-                                    price.toDouble(),
+                                    name = product,
+                                    price = price.toDouble(),
                                     quantity = quantity.toInt(),
                                     purchasePrice = purchasePrice.toDouble()
                                 )
@@ -420,7 +424,6 @@ fun SellScreen(
                     }
                 }
 
-                println("Lista de productos: $productList")
                 quantityToModify = 0
             },
             onDismiss = {

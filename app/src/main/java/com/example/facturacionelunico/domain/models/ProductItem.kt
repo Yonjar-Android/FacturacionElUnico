@@ -1,6 +1,7 @@
 package com.example.facturacionelunico.domain.models
 
 data class ProductItem(
+    val detailId: Long = 0L,
     val id: Long = 0L,
     val name: String,
     val price: Double,

@@ -1,6 +1,7 @@
 package com.example.facturacionelunico.domain.repositories
 
 import androidx.paging.PagingData
+import com.example.facturacionelunico.data.database.entities.DetalleCompraEntity
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
 import com.example.facturacionelunico.domain.models.purchase.DetailPurchaseDomainModelUI
@@ -21,7 +22,14 @@ interface PurchaseRepository {
         moneyPaid: Double
     ): String
 
-    suspend fun createPurchaseDetail(purchaseId:Long, products:List<ProductItem>): String
+    suspend fun createPurchaseDetail(purchaseId: Long, products: List<ProductItem>): String
 
     suspend fun payPurchase(purchaseId: Long, amount: Double): String
+
+    suspend fun updatePurchaseDetail(purchaseDetail: DetalleCompraEntity, newTotal: Double): String
+
+    suspend fun deletePurchaseDetail(
+        purchaseDetail: DetalleCompraEntity,
+        newTotal: Double
+    ): String
 }

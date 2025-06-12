@@ -133,24 +133,24 @@ class PurchaseRepositoryImp @Inject constructor(
                     purchaseDetailDao.insert(detailEntity)
                 }
 
-                    val abonoEntity = AbonoCompraEntity(
-                        idCompra = idPurchase,
-                        fechaCreacion = purchase.purchaseDate,
-                        totalAPagar = purchase.total,
-                        totalPendiente = purchase.total
+                val abonoEntity = AbonoCompraEntity(
+                    idCompra = idPurchase,
+                    fechaCreacion = purchase.purchaseDate,
+                    totalAPagar = purchase.total,
+                    totalPendiente = purchase.total
+                )
+
+                val idAbono = compraAbonoDao.insert(abonoEntity)
+
+                if (moneyPaid > 0) {
+                    val abonoDetalleEntity = DetalleAbonoCompraEntity(
+                        idAbonoCompra = idAbono,
+                        monto = moneyPaid,
+                        fechaAbono = System.currentTimeMillis()
                     )
 
-                    val idAbono = compraAbonoDao.insert(abonoEntity)
-
-                    if (moneyPaid > 0) {
-                        val abonoDetalleEntity = DetalleAbonoCompraEntity(
-                            idAbonoCompra = idAbono,
-                            monto = moneyPaid,
-                            fechaAbono = System.currentTimeMillis()
-                        )
-
-                        detalleAbonoCompraDao.insert(abonoDetalleEntity)
-                    }
+                    detalleAbonoCompraDao.insert(abonoDetalleEntity)
+                }
 
             }
             "Compra creada con éxito"
@@ -221,6 +221,74 @@ class PurchaseRepositoryImp @Inject constructor(
             }
         }.getOrElse {
             "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun updatePurchaseDetail(
+        purchaseDetail: DetalleCompraEntity,
+        newTotal: Double
+    ): String {
+        return runCatching {
+            appDatabase.withTransaction {
+
+                // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+                val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseDetail.idCompra)
+                val abonos = detalleAbonoCompraDao.getAllByAbonoId(abono.id)
+
+                compraAbonoDao.update(
+                    abono.copy(
+                        totalPendiente = newTotal - abonos.sumOf { it.monto },
+                        totalAPagar = newTotal
+                    )
+                )
+
+                // Actualizar el total de la factura
+                val purchase = purchaseDao.getPurchaseById(purchaseDetail.idCompra)
+                purchaseDao.update(
+                    purchase.copy(
+                        total = newTotal,
+                    )
+                )
+
+                purchaseDetailDao.update(purchaseDetail)
+                "Detalle actualizado con éxito"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun deletePurchaseDetail(
+        purchaseDetail: DetalleCompraEntity,
+        newTotal: Double
+    ): String {
+        runCatching {
+
+            // Eliminar el detalle de la compra
+            purchaseDetailDao.delete(purchaseDetail.id)
+
+            // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+            val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseDetail.idCompra)
+            val abonos = detalleAbonoCompraDao.getAllByAbonoId(abono.id)
+
+            compraAbonoDao.update(
+                abono.copy(
+                    totalPendiente = newTotal - abonos.sumOf { it.monto },
+                    totalAPagar = newTotal
+                )
+            )
+
+            // Actualizar el total de la factura
+            val purchase = purchaseDao.getPurchaseById(purchaseDetail.idCompra)
+            purchaseDao.update(
+                purchase.copy(
+                    total = newTotal,
+                )
+            )
+
+            return "Detalle eliminado con éxito"
+        }.getOrElse {
+            return "Error: ${it.message}"
         }
     }
 }

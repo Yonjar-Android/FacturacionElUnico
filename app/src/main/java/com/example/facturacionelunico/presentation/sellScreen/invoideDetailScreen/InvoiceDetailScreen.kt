@@ -76,7 +76,17 @@ fun InvoiceDetailScreen(
     var showProductDialog by remember { mutableStateOf(false) }
     var showDialogConfirm by remember { mutableStateOf(false) }
     val productItem =
-        remember { mutableStateOf(ProductItem(0, "", 0.0, quantity = 0, purchasePrice = 0.0)) }
+        remember {
+            mutableStateOf(
+                ProductItem(
+                    id = 0,
+                    name = "",
+                    price = 0.0,
+                    quantity = 0,
+                    purchasePrice = 0.0
+                )
+            )
+        }
 
     LaunchedEffect(invoiceId) {
         viewModel.getInvoiceDetail(invoiceId)
@@ -196,7 +206,13 @@ fun InvoiceDetailScreen(
             getValues = { name, id, precio, precioNoUsar ->
                 showDialogConfirm = true
                 productItem.value =
-                    ProductItem(id, name, precio, quantity = 0, purchasePrice = precioNoUsar)
+                    ProductItem(
+                        id = id,
+                        name = name,
+                        price = precio,
+                        quantity = 0,
+                        purchasePrice = precioNoUsar
+                    )
             },
             searchQuery = {
                 viewModel.updateQueryProduct(it)

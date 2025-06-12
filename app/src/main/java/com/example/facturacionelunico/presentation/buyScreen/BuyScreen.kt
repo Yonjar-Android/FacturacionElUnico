@@ -193,13 +193,13 @@ fun BuyScreen(
 
 
 
-                    ClickableTextField(
-                        title = "Proveedor",
-                        value = supplier,
-                        onClick = { showSuppliers = true },
-                        enabled = enabledRadioButtons
-                    )
-                    validationClient = true
+                ClickableTextField(
+                    title = "Proveedor",
+                    value = supplier,
+                    onClick = { showSuppliers = true },
+                    enabled = enabledRadioButtons
+                )
+                validationClient = true
 
 
                 ClickableTextField(
@@ -246,17 +246,21 @@ fun BuyScreen(
                             return@GenericBlueUiButton
                         }
 
-                        if (productList.any { it.id == productId.toLong() }){
-                            Toast.makeText(context, "El producto ya se encuentra en la tabla", Toast.LENGTH_SHORT).show()
+                        if (productList.any { it.id == productId.toLong() }) {
+                            Toast.makeText(
+                                context,
+                                "El producto ya se encuentra en la tabla",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             return@GenericBlueUiButton
                         }
 
                         productList = productList.toMutableList().apply {
                             add(
                                 ProductItem(
-                                    productId.toLong(),
-                                    product,
-                                    price.toDouble(),
+                                    id = productId.toLong(),
+                                    name = product,
+                                    price = price.toDouble(),
                                     quantity = quantity.toInt(),
                                     purchasePrice = 0.0,
                                 )
@@ -284,7 +288,6 @@ fun BuyScreen(
                         productToModify = id
                     }
                 )
-
 
                 // Radiobuttons para seleccionar si el pago es con débito o crédito
 
@@ -366,7 +369,6 @@ fun BuyScreen(
                         }
                     }
 
-                    println("Lista de productos: $productList")
                     quantityToModify = 0
                 },
                 onDismiss = {
