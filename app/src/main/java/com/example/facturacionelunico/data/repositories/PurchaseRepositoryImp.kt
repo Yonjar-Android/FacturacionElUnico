@@ -262,33 +262,34 @@ class PurchaseRepositoryImp @Inject constructor(
         purchaseDetail: DetalleCompraEntity,
         newTotal: Double
     ): String {
-        runCatching {
+        return runCatching {
+            appDatabase.withTransaction {
+                // Eliminar el detalle de la compra
+                purchaseDetailDao.delete(purchaseDetail.id)
 
-            // Eliminar el detalle de la compra
-            purchaseDetailDao.delete(purchaseDetail.id)
+                // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+                val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseDetail.idCompra)
+                val abonos = detalleAbonoCompraDao.getAllByAbonoId(abono.id)
 
-            // Actualizar el nuevo total a abonar y el total pendiente correspondiente
-            val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseDetail.idCompra)
-            val abonos = detalleAbonoCompraDao.getAllByAbonoId(abono.id)
-
-            compraAbonoDao.update(
-                abono.copy(
-                    totalPendiente = newTotal - abonos.sumOf { it.monto },
-                    totalAPagar = newTotal
+                compraAbonoDao.update(
+                    abono.copy(
+                        totalPendiente = newTotal - abonos.sumOf { it.monto },
+                        totalAPagar = newTotal
+                    )
                 )
-            )
 
-            // Actualizar el total de la factura
-            val purchase = purchaseDao.getPurchaseById(purchaseDetail.idCompra)
-            purchaseDao.update(
-                purchase.copy(
-                    total = newTotal,
+                // Actualizar el total de la factura
+                val purchase = purchaseDao.getPurchaseById(purchaseDetail.idCompra)
+                purchaseDao.update(
+                    purchase.copy(
+                        total = newTotal,
+                    )
                 )
-            )
 
-            return "Detalle eliminado con éxito"
+                "Detalle eliminado con éxito"
+            }
         }.getOrElse {
-            return "Error: ${it.message}"
+            "Error: ${it.message}"
         }
     }
 }

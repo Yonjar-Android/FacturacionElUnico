@@ -87,7 +87,7 @@ class PurchaseDetailScreenViewModel @Inject constructor(
         viewModelScope.launch {
 
             val purchaseDetailUpdated = DetalleCompraEntity(
-                id = product.id,
+                id = product.detailId,
                 idCompra = purchase.value?.id ?: 0,
                 idProducto = product.id,
                 cantidad = product.quantity,

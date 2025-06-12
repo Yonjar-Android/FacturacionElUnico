@@ -246,7 +246,7 @@ fun BuyScreen(
                             return@GenericBlueUiButton
                         }
 
-                        if (productList.any { it.id == productId.toLong() }) {
+                        if(productList.any { it.id == productId.toLong() }) {
                             Toast.makeText(
                                 context,
                                 "El producto ya se encuentra en la tabla",

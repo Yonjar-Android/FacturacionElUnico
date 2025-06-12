@@ -292,7 +292,10 @@ fun SellScreen(
                             return@GenericBlueUiButton
                         }
 
-                        if (productList.any { it.id == productId.toLong() }) {
+                        if (productList.any {
+                            it.id == productId.toLong()
+                        }) {
+
                             Toast.makeText(
                                 context,
                                 "El producto ya se encuentra en la tabla",
@@ -304,7 +307,7 @@ fun SellScreen(
                         productList = productList.toMutableList().apply {
                             add(
                                 ProductItem(
-                                    productId.toLong(),
+                                    id = productId.toLong(),
                                     name = product,
                                     price = price.toDouble(),
                                     quantity = quantity.toInt(),
@@ -866,7 +869,6 @@ fun SelectProductTable(
                         ProductItemTable(
                             product,
                             getValues = { name, id, precio, precioCompra ->
-
                                 getValues.invoke(name, id, precio, precioCompra)
                             })
                     }

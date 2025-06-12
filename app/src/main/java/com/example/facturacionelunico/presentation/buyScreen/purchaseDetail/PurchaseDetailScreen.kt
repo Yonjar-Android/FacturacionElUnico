@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -113,9 +112,9 @@ fun PurchaseDetailScreen(
     }
     var showEdiDeleteDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(invoice?.products) {
-        productsTable = invoice?.products?.toMutableList() ?: mutableListOf()
-    }
+        LaunchedEffect(invoice?.products) {
+            productsTable = invoice?.products?.toMutableList() ?: mutableListOf()
+        }
 
     var productsForUpdate by remember {
         mutableStateOf(
@@ -175,7 +174,7 @@ fun PurchaseDetailScreen(
 
             ClientText(title = "Productos", value = "")
 
-            InvoiceTableDetail(productsTable, { quantity, product ->
+            InvoiceTableDetail(productsTable, showDialog = { quantity, product ->
                 showEdiDeleteDialog = true
                 quantityToModify = quantity
                 productToModify = product
@@ -235,7 +234,7 @@ fun PurchaseDetailScreen(
             value = quantity,
             onValueChange = { quantity = it },
             dismiss = { showDialogConfirm = false },
-            onConfirm = {
+            onConfirm = { quantityOfProduct ->
                 val exist = productsTable.any { it.id == productItem.value.id }
                 if (exist) {
                     Toast.makeText(
@@ -245,8 +244,16 @@ fun PurchaseDetailScreen(
                     ).show()
                     return@DialogConfirmProduct
                 }
-                productsTable.add(productItem.value.copy(quantity = it))
-                productsForUpdate.add(productItem.value.copy(quantity = it))
+
+                // Agregar nuevo producto y actualizar estado de la ui
+                productsTable = productsTable.apply {
+                    add(productItem.value.copy(quantity = quantityOfProduct))
+                    productsTable = this
+                }
+
+                productsForUpdate.add(productItem.value.copy(quantity = quantityOfProduct))
+
+                quantity = ""
                 showDialogConfirm = false
                 showProductDialog = false
             })
@@ -288,14 +295,39 @@ fun PurchaseDetailScreen(
             },
             onDeleteClick = {
 
+                if (productsTable.count() == 1) {
+                    Toast.makeText(
+                        context,
+                        "No puedes eliminar todos los productos de la factura",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ProductOptionsDialog
+                }
+
+                val tableDifference = productsTable.count() - productsForUpdate.count()
+
+                println("TABLEDIFFERENCE: $tableDifference")
+
+                println("BOOLEANO: ${productToModify !in productsForUpdate && tableDifference == 1}")
+
+                if (productToModify !in productsForUpdate && tableDifference == 1) {
+                    Toast.makeText(
+                        context,
+                        "No puedes eliminar todos los productos agregados con anterioridad",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ProductOptionsDialog
+                }
+
                 // Remover el item a eliminar de la tabla para luego calcular el nuevo total
                 productsTable.toMutableList().apply {
                     removeIf { it.id == productToModify.id }
                     productsTable = this
                 }
 
-                if (productsTable.isEmpty()){
-                    Toast.makeText(context, "No puedes eliminar todos los productos", Toast.LENGTH_SHORT).show()
+                if (productToModify in productsForUpdate) {
+                    productsForUpdate.remove(productToModify)
+                    showEdiDeleteDialog = false
                     return@ProductOptionsDialog
                 }
 
