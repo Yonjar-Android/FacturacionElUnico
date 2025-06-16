@@ -235,6 +235,10 @@ class PurchaseRepositoryImp @Inject constructor(
                 val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseDetail.idCompra)
                 val abonos = detalleAbonoCompraDao.getAllByAbonoId(abono.id)
 
+                if (newTotal < abonos.sumOf { it.monto }) {
+                    throw IllegalArgumentException("El nuevo total es menor a la cantidad ya abonada")
+                }
+
                 compraAbonoDao.update(
                     abono.copy(
                         totalPendiente = newTotal - abonos.sumOf { it.monto },
@@ -270,6 +274,12 @@ class PurchaseRepositoryImp @Inject constructor(
                 // Actualizar el nuevo total a abonar y el total pendiente correspondiente
                 val abono = compraAbonoDao.getAbonoByPurchaseId(purchaseDetail.idCompra)
                 val abonos = detalleAbonoCompraDao.getAllByAbonoId(abono.id)
+
+
+
+                if (newTotal < abonos.sumOf { it.monto }) {
+                    throw IllegalArgumentException("El nuevo total es menor a la cantidad ya abonada")
+                }
 
                 compraAbonoDao.update(
                     abono.copy(

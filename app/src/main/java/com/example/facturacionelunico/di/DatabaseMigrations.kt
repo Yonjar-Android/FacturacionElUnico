@@ -54,6 +54,29 @@ object DatabaseMigrations {
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_abono_y_estado_venta")
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_detalle_compra")
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_al_eliminar_detalle_compra")
+            db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_detalle_venta")
+            db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_al_eliminar_detalle_venta")
+
+
+            db.execSQL("""
+                CREATE TRIGGER actualizar_stock_al_eliminar_detalle_venta
+                AFTER DELETE ON detalle_venta
+                BEGIN
+                    UPDATE producto
+                    SET stock = stock - OLD.cantidad
+                    WHERE id = OLD.idProducto;
+                END;
+            """.trimIndent())
+
+            db.execSQL("""
+                CREATE TRIGGER actualizar_stock_detalle_venta
+                AFTER UPDATE ON detalle_venta
+                BEGIN
+                    UPDATE producto
+                    SET stock = stock + (NEW.cantidad - OLD.cantidad)
+                    WHERE id = NEW.idProducto;
+                END;
+            """.trimIndent())
 
             db.execSQL("""
                 CREATE TRIGGER actualizar_stock_al_eliminar_detalle_compra

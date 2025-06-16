@@ -32,6 +32,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,8 +53,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
+import com.example.facturacionelunico.presentation.buyScreen.purchaseDetail.InvoiceTableDetail
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
-import com.example.facturacionelunico.presentation.sellScreen.InvoiceTable
+import com.example.facturacionelunico.presentation.sellScreen.ProductOptionsDialog
 import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
@@ -103,6 +105,21 @@ fun InvoiceDetailScreen(
 
     var productsTable by remember { mutableStateOf(mutableListOf<ProductItem>()) }
 
+    var quantityToModify by remember { mutableIntStateOf(0) }
+    var productToModify by remember {
+        mutableStateOf(
+            ProductItem(
+                detailId = 0,
+                id = 0,
+                name = "",
+                price = 0.0,
+                quantity = 0,
+                purchasePrice = 0.0
+            )
+        )
+    }
+    var showEdiDeleteDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(invoice?.products) {
         productsTable = invoice?.products?.toMutableList() ?: mutableListOf()
     }
@@ -140,7 +157,8 @@ fun InvoiceDetailScreen(
                     ) {
                         GenericBlueUiButton(
                             buttonText = "Pagar",
-                            onFunction = { showDialog = true }
+                            onFunction = { showDialog = true },
+                            enabled = productsForUpdate.isEmpty()
                         )
                     }
                 }
@@ -165,10 +183,12 @@ fun InvoiceDetailScreen(
 
             ClientText(title = "Productos", value = "")
 
-            InvoiceTable(
+            InvoiceTableDetail(
                 productsTable,
-                showDialog = { quantity, id ->
-
+                showDialog = { quantity, product ->
+                    showEdiDeleteDialog = true
+                    quantityToModify = quantity
+                    productToModify = product
                 })
 
             if (invoice?.clientName != "Ninguno") {
@@ -226,7 +246,7 @@ fun InvoiceDetailScreen(
             value = quantity,
             onValueChange = { quantity = it },
             dismiss = { showDialogConfirm = false },
-            onConfirm = {
+            onConfirm = { quantityForProduct ->
                 val exist = productsTable.any { it.id == productItem.value.id }
                 if (exist) {
                     Toast.makeText(
@@ -237,8 +257,10 @@ fun InvoiceDetailScreen(
                     return@DialogConfirmProduct
                 }
 
-                productsTable.add(productItem.value.copy(quantity = it))
-                productsForUpdate.add(productItem.value.copy(quantity = it))
+                productsTable.add(productItem.value.copy(quantity = quantityForProduct))
+                productsForUpdate.add(productItem.value.copy(quantity = quantityForProduct))
+
+                quantity = "0"
                 showDialogConfirm = false
                 showProductDialog = false
             })
@@ -251,6 +273,73 @@ fun InvoiceDetailScreen(
             },
             onDismiss = { showConfirmDialog = false }
         )
+    }
+
+    if (showEdiDeleteDialog) {
+        ProductOptionsDialog(
+            context = context,
+            currentQuantity = quantityToModify,
+            onEditClick = {
+                showEdiDeleteDialog = false
+
+                productsTable.toMutableList().apply {
+                    val index = indexOfFirst { it.id == productToModify.id }
+                    if (index != -1) {
+                        val updatedItem = this[index].copy(quantity = it)
+                        this[index] = updatedItem
+                        productsTable = this // Esto actualiza el estado y dispara recomposición
+                    }
+                }
+
+                viewModel.updateProduct(
+                    productToModify.copy(quantity = it),
+                    productsTable.sumOf { it.subtotal }
+                )
+
+                quantityToModify = 0
+            },
+            onDismiss = {
+                showEdiDeleteDialog = false
+            },
+            onDeleteClick = {
+
+                if (productsTable.count() == 1) {
+                    Toast.makeText(
+                        context,
+                        "No puedes eliminar todos los productos de la factura",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ProductOptionsDialog
+                }
+
+                val tableDifference = productsTable.count() - productsForUpdate.count()
+
+                if (productToModify !in productsForUpdate && tableDifference == 1) {
+                    Toast.makeText(
+                        context,
+                        "No puedes eliminar todos los productos agregados con anterioridad",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ProductOptionsDialog
+                }
+
+                // Remover el item a eliminar de la tabla para luego calcular el nuevo total
+                productsTable.toMutableList().apply {
+                    remove(productToModify)
+                }
+
+                if (productToModify in productsForUpdate) {
+                    productsForUpdate.remove(productToModify)
+                    showEdiDeleteDialog = false
+                    return@ProductOptionsDialog
+                }
+
+                viewModel.deleteProduct(
+                    productToModify,
+                    productsTable.sumOf { it.subtotal }) // Cálculo del nuevo total
+
+                showEdiDeleteDialog = false
+            })
     }
 }
 

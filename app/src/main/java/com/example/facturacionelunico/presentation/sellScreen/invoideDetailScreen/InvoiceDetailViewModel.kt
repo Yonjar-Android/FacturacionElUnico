@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.example.facturacionelunico.data.database.entities.DetalleVentaEntity
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
 import com.example.facturacionelunico.domain.models.ResultPattern
@@ -48,6 +49,41 @@ class InvoiceDetailViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    // Función para actualizar un producto de la factura
+    fun updateProduct(product: ProductItem, newTotal:Double){
+        viewModelScope.launch {
+
+            val newDetail = DetalleVentaEntity(
+                id = product.detailId,
+                idVenta = invoice.value?.invoiceId ?: 0,
+                idProducto = product.id,
+                cantidad = product.quantity,
+                precio = product.price,
+                subtotal = product.subtotal,
+                fechaActualizacion = System.currentTimeMillis(),
+                precioCompra = product.purchasePrice
+            )
+            _message.value = repository.updateInvoiceDetail(newDetail, newTotal)
+        }
+    }
+
+    // Función para eliminar un producto de la factura
+    fun deleteProduct(product: ProductItem, newTotal:Double){
+        viewModelScope.launch {
+            val detail = DetalleVentaEntity(
+                id = product.detailId,
+                idVenta = invoice.value?.invoiceId ?: 0,
+                idProducto = product.id,
+                cantidad = product.quantity,
+                precio = product.price,
+                subtotal = product.subtotal,
+                fechaActualizacion = System.currentTimeMillis(),
+                precioCompra = product.purchasePrice
+            )
+            _message.value = repository.deleteInvoiceDetail(detail, newTotal)
         }
     }
 

@@ -128,23 +128,23 @@ class InvoiceRepositoryImp @Inject constructor(
                     detailInvoiceDao.insert(detailEntity)
                 }
 
-                    val abonoEntity = AbonoVentaEntity(
-                        idVenta = id,
-                        fechaCreacion = invoice.sellDate,
-                        totalAPagar = invoice.total,
-                        totalPendiente = invoice.total
+                val abonoEntity = AbonoVentaEntity(
+                    idVenta = id,
+                    fechaCreacion = invoice.sellDate,
+                    totalAPagar = invoice.total,
+                    totalPendiente = invoice.total
+                )
+
+                val idAbono = abonosDao.insert(abonoEntity)
+
+                if (moneyPaid > 0) {
+                    val abonoDetalleEntity = DetalleAbonoVentaEntity(
+                        idAbonoVenta = idAbono,
+                        monto = moneyPaid,
+                        fechaAbono = System.currentTimeMillis()
                     )
-
-                    val idAbono = abonosDao.insert(abonoEntity)
-
-                    if (moneyPaid > 0) {
-                        val abonoDetalleEntity = DetalleAbonoVentaEntity(
-                            idAbonoVenta = idAbono,
-                            monto = moneyPaid,
-                            fechaAbono = System.currentTimeMillis()
-                        )
-                        abonosDetalleDao.insert(abonoDetalleEntity)
-                       }
+                    abonosDetalleDao.insert(abonoDetalleEntity)
+                }
                 "Factura creada con éxito"
             }
         }.getOrElse {
@@ -246,6 +246,74 @@ class InvoiceRepositoryImp @Inject constructor(
 
                 abonosDetalleDao.insert(abonoDetalleEntity)
                 "Pago realizado con éxito"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun updateInvoiceDetail(
+        newDetail: DetalleVentaEntity,
+        newTotal: Double
+    ): String {
+        return runCatching {
+            appDatabase.withTransaction {
+
+                // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+                val abono = abonosDao.getAbonoByInvoiceId(newDetail.idVenta)
+                val abonos = abonosDetalleDao.getAllByAbonoId(abono.id)
+
+                abonosDao.update(
+                    abono.copy(
+                        totalPendiente = newTotal - abonos.sumOf { it.monto },
+                        totalAPagar = newTotal
+                    )
+                )
+
+                // Actualizar el total de la factura
+                val invoice = invoiceDao.getInvoiceById(newDetail.idVenta)
+                invoiceDao.update(
+                    invoice.copy(
+                        total = newTotal,
+                    )
+                )
+
+                detailInvoiceDao.update(newDetail)
+                "Detalle actualizado con éxito"
+            }
+        }.getOrElse {
+            "Error: ${it.message}"
+        }
+    }
+
+    override suspend fun deleteInvoiceDetail(
+        invoiceDetail: DetalleVentaEntity,
+        newTotal: Double
+    ): String {
+        return runCatching {
+            appDatabase.withTransaction {
+                // Eliminar el detalle de la venta
+                detailInvoiceDao.delete(invoiceDetail.id)
+
+                // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+                val abono = abonosDao.getAbonoByInvoiceId(invoiceDetail.idVenta)
+                val abonos = abonosDetalleDao.getAllByAbonoId(abono.id)
+
+                abonosDao.update(
+                    abono.copy(
+                        totalPendiente = newTotal - abonos.sumOf { it.monto },
+                        totalAPagar = newTotal
+                    )
+                )
+
+                // Actualizar el total de la factura
+                val invoice = invoiceDao.getInvoiceById(invoiceDetail.idVenta)
+                invoiceDao.update(
+                    invoice.copy(
+                        total = newTotal,
+                    )
+                )
+                "Detalle eliminado con éxito"
             }
         }.getOrElse {
             "Error: ${it.message}"

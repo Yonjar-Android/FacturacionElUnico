@@ -67,24 +67,7 @@ class PurchaseDetailScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateProduct(product: ProductItem, newTotal: Double) {
-        viewModelScope.launch {
-
-            val purchaseDetailUpdated = DetalleCompraEntity(
-                id = product.id,
-                idCompra = purchase.value?.id ?: 0,
-                idProducto = product.id,
-                cantidad = product.quantity,
-                precio = product.price,
-                subtotal = product.subtotal
-            )
-
-            _message.value = repository.updatePurchaseDetail(purchaseDetailUpdated, newTotal)
-        }
-    }
-
-    fun deleteProduct(product: ProductItem, newTotal: Double) {
-        viewModelScope.launch {
+    suspend fun updateProduct(product: ProductItem, newTotal: Double):String {
 
             val purchaseDetailUpdated = DetalleCompraEntity(
                 id = product.detailId,
@@ -95,8 +78,33 @@ class PurchaseDetailScreenViewModel @Inject constructor(
                 subtotal = product.subtotal
             )
 
-            _message.value = repository.deletePurchaseDetail(purchaseDetailUpdated, newTotal)
+        val message = repository.updatePurchaseDetail(purchaseDetailUpdated, newTotal)
+        if (message == "Error: El nuevo total es menor a la cantidad ya abonada") {
+            return message
         }
+
+        _message.value = message
+        return ""
+
+    }
+
+    suspend fun deleteProduct(product: ProductItem, newTotal: Double):String {
+        val purchaseDetailUpdated = DetalleCompraEntity(
+            id = product.detailId,
+            idCompra = purchase.value?.id ?: 0,
+            idProducto = product.id,
+            cantidad = product.quantity,
+            precio = product.price,
+            subtotal = product.subtotal
+        )
+
+        val message = repository.deletePurchaseDetail(purchaseDetailUpdated, newTotal)
+        if (message == "Error: El nuevo total es menor a la cantidad ya abonada") {
+            return message
+        }
+
+        _message.value = message
+        return ""
     }
 
     private val _searchQueryProduct = MutableStateFlow("")

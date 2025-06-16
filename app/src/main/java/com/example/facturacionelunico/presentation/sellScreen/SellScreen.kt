@@ -414,6 +414,7 @@ fun SellScreen(
 
     if (showEdiDeleteDialog) {
         ProductOptionsDialog(
+            context = context,
             currentQuantity = quantityToModify,
             onEditClick = {
                 showEdiDeleteDialog = false
@@ -608,6 +609,7 @@ fun ProductOptionsDialog(
     currentQuantity: Int,
     onEditClick: (Int) -> Unit,
     onDeleteClick: () -> Unit,
+    context: Context
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var quantity by remember { mutableIntStateOf(currentQuantity) }
@@ -647,6 +649,7 @@ fun ProductOptionsDialog(
     }
 
     if (showEditDialog) {
+        var quantityText by remember { mutableStateOf(quantity.toString()) }
         Dialog(
             onDismissRequest = {
                 showEditDialog = false
@@ -663,9 +666,9 @@ fun ProductOptionsDialog(
                 Text("Cantidad actual", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
-                    value = quantity.toString(),
+                    value = quantityText,
                     onValueChange = { newValue ->
-                        quantity = newValue.toIntOrNull() ?: 1
+                        quantityText = newValue
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
@@ -686,7 +689,13 @@ fun ProductOptionsDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(
                         onClick = {
-                            onEditClick(quantity)
+                            val newQuantity = quantityText.toIntOrNull()
+                            if (newQuantity != null && newQuantity > 0) {
+                                onEditClick(newQuantity) // ✅ Solo se llama si el valor es válido
+                                showEditDialog = false
+                            } else {
+                                Toast.makeText(context, "Ingrese una cantidad válida", Toast.LENGTH_SHORT).show()
+                            }
                             showEditDialog = false
                         }
                     ) {

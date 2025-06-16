@@ -356,6 +356,7 @@ fun BuyScreen(
 
         if (showEdiDeleteDialog) {
             ProductOptionsDialog(
+                context = context,
                 currentQuantity = quantityToModify,
                 onEditClick = {
                     showEdiDeleteDialog = false

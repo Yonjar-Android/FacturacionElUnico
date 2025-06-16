@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,10 @@ import com.example.facturacionelunico.presentation.sellScreen.invoideDetailScree
 import com.example.facturacionelunico.presentation.sellScreen.invoideDetailScreen.DialogFormPay
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
+import com.example.facturacionelunico.utils.validations.ValidationFunctions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -62,6 +67,8 @@ fun PurchaseDetailScreen(
     viewModel: PurchaseDetailScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
+    val coroutine = rememberCoroutineScope()
 
     val products: LazyPagingItems<DetailedProductModel> =
         viewModel.products.collectAsLazyPagingItems()
@@ -112,9 +119,9 @@ fun PurchaseDetailScreen(
     }
     var showEdiDeleteDialog by remember { mutableStateOf(false) }
 
-        LaunchedEffect(invoice?.products) {
-            productsTable = invoice?.products?.toMutableList() ?: mutableListOf()
-        }
+    LaunchedEffect(invoice?.products) {
+        productsTable = invoice?.products?.toMutableList() ?: mutableListOf()
+    }
 
     var productsForUpdate by remember {
         mutableStateOf(
@@ -149,7 +156,8 @@ fun PurchaseDetailScreen(
                     ) {
                         GenericBlueUiButton(
                             buttonText = "Pagar",
-                            onFunction = { showDialog = true }
+                            onFunction = { showDialog = true },
+                            enabled = productsForUpdate.isEmpty()
                         )
                     }
                 }
@@ -246,9 +254,8 @@ fun PurchaseDetailScreen(
                 }
 
                 // Agregar nuevo producto y actualizar estado de la ui
-                productsTable = productsTable.apply {
+                productsTable = productsTable.toMutableList().apply {
                     add(productItem.value.copy(quantity = quantityOfProduct))
-                    productsTable = this
                 }
 
                 productsForUpdate.add(productItem.value.copy(quantity = quantityOfProduct))
@@ -270,23 +277,31 @@ fun PurchaseDetailScreen(
 
     if (showEdiDeleteDialog) {
         ProductOptionsDialog(
+            context = context,
             currentQuantity = quantityToModify,
-            onEditClick = {
+            onEditClick = { quantity ->
                 showEdiDeleteDialog = false
 
+                val oldTable = productsTable.toList()  // Copia inmutable (segura)
+
                 productsTable.toMutableList().apply {
-                    val index = indexOfFirst { it.id == productToModify.id }
-                    if (index != -1) {
-                        val updatedItem = this[index].copy(quantity = it)
-                        this[index] = updatedItem
-                        productsTable = this // Esto actualiza el estado y dispara recomposición
+                    removeIf { it.id == productToModify.id }
+                    productsTable = this
+                }
+
+                coroutine.launch {
+                    val message = viewModel.updateProduct(
+                        productToModify.copy(quantity = quantity),
+                        productsTable.sumOf { it.subtotal }
+                    )
+
+                    if (message == "Error: El nuevo total es menor a la cantidad ya abonada") {
+                        productsTable = oldTable.toMutableList() // Restaurar en caso de error
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        return@launch
                     }
                 }
 
-                viewModel.updateProduct(
-                    productToModify.copy(quantity = it),
-                    productsTable.sumOf { it.subtotal }
-                )
 
                 quantityToModify = 0
             },
@@ -306,10 +321,6 @@ fun PurchaseDetailScreen(
 
                 val tableDifference = productsTable.count() - productsForUpdate.count()
 
-                println("TABLEDIFFERENCE: $tableDifference")
-
-                println("BOOLEANO: ${productToModify !in productsForUpdate && tableDifference == 1}")
-
                 if (productToModify !in productsForUpdate && tableDifference == 1) {
                     Toast.makeText(
                         context,
@@ -319,23 +330,49 @@ fun PurchaseDetailScreen(
                     return@ProductOptionsDialog
                 }
 
-                // Remover el item a eliminar de la tabla para luego calcular el nuevo total
-                productsTable.toMutableList().apply {
-                    removeIf { it.id == productToModify.id }
-                    productsTable = this
-                }
+                // Cálculo del nuevo total
+                val totalSinProductoModificado = productsTable
+                    .filter { it.id != productToModify.id }
+                    .sumOf { it.subtotal }
 
-                if (productToModify in productsForUpdate) {
-                    productsForUpdate.remove(productToModify)
+                // Lanzar corrutina para obtener el mensaje de la función asíncrona
+                coroutine.launch {
+
+                    /* Si el producto a modificar está en la lista de productos a actualizar, entonces lo removemos de la tabla y no llamamos a la función de eliminar
+                     ya que no se encuentra en la base de datos */
+                    if (productToModify in productsForUpdate) {
+                        productsForUpdate.remove(productToModify)
+                        showEdiDeleteDialog = false
+
+                        productsTable.toMutableList().apply {
+                            removeIf { it.id == productToModify.id }
+                            productsTable = this
+                        }
+                        return@launch
+                    }
+
+                    // Si no hubo error, actualizar las tablas de ui y la de productos a agregar a la factura
+
+                    val oldProductsTable = productsTable.toList() // Copia inmutable (segura)
+
+                    productsTable.toMutableList().apply {
+                        removeIf { it.id == productToModify.id }
+                        productsTable = this
+                    }
+
+                    val message1 =
+                        viewModel.deleteProduct(productToModify, totalSinProductoModificado)
+
+                    if (message1 == "Error: El nuevo total es menor a la cantidad ya abonada") {
+                        productsTable = oldProductsTable.toMutableList() // Restaurar
+                        Toast.makeText(context, message1, Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
+
+
+
                     showEdiDeleteDialog = false
-                    return@ProductOptionsDialog
                 }
-
-                viewModel.deleteProduct(
-                    productToModify,
-                    productsTable.sumOf { it.subtotal }) // Cálculo del nuevo total
-
-                showEdiDeleteDialog = false
             })
     }
 }
