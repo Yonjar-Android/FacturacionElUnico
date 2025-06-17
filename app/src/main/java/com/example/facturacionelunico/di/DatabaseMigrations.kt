@@ -13,7 +13,8 @@ object DatabaseMigrations {
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_abono_y_estado_compra")
 
             // Trigger para stock de productos al hacer una compra
-            db.execSQL("""
+            db.execSQL(
+                """
             CREATE TRIGGER actualizar_stock_compra
             AFTER INSERT ON detalle_compra
             BEGIN
@@ -21,10 +22,12 @@ object DatabaseMigrations {
                 SET stock = stock + NEW.cantidad
                 WHERE id = NEW.idProducto;
             END;
-        """.trimIndent())
+        """.trimIndent()
+            )
 
             // Trigger para actualizar abono y estado de compra
-            db.execSQL("""
+            db.execSQL(
+                """
             CREATE TRIGGER actualizar_abono_y_estado_compra
             AFTER INSERT ON detalle_abono_compra
             BEGIN
@@ -40,7 +43,8 @@ object DatabaseMigrations {
                     WHERE id = NEW.idAbonoCompra AND totalPendiente <= 0
                 );
             END;
-        """.trimIndent())
+        """.trimIndent()
+            )
         }
     }
 
@@ -57,28 +61,32 @@ object DatabaseMigrations {
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_detalle_venta")
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_al_eliminar_detalle_venta")
 
-
-            db.execSQL("""
+            db.execSQL(
+                """
                 CREATE TRIGGER actualizar_stock_al_eliminar_detalle_venta
                 AFTER DELETE ON detalle_venta
                 BEGIN
                     UPDATE producto
-                    SET stock = stock - OLD.cantidad
+                    SET stock = stock + OLD.cantidad
                     WHERE id = OLD.idProducto;
                 END;
-            """.trimIndent())
+            """.trimIndent()
+            )
 
-            db.execSQL("""
+            db.execSQL(
+                """
                 CREATE TRIGGER actualizar_stock_detalle_venta
                 AFTER UPDATE ON detalle_venta
                 BEGIN
-                    UPDATE producto
-                    SET stock = stock + (NEW.cantidad - OLD.cantidad)
-                    WHERE id = NEW.idProducto;
+                UPDATE producto
+                SET stock = stock + (NEW.cantidad - OLD.cantidad)
+                WHERE id = NEW.idProducto;
                 END;
-            """.trimIndent())
+            """.trimIndent()
+            )
 
-            db.execSQL("""
+            db.execSQL(
+                """
                 CREATE TRIGGER actualizar_stock_al_eliminar_detalle_compra
                 AFTER DELETE ON detalle_compra
                 BEGIN
@@ -86,9 +94,11 @@ object DatabaseMigrations {
                     SET stock = stock - OLD.cantidad
                     WHERE id = OLD.idProducto;
                 END;
-            """.trimIndent())
+            """.trimIndent()
+            )
 
-            db.execSQL("""
+            db.execSQL(
+                """
                 CREATE TRIGGER actualizar_stock_detalle_compra
                 AFTER UPDATE ON detalle_compra
                 BEGIN
@@ -96,9 +106,11 @@ object DatabaseMigrations {
                     SET stock = stock + (NEW.cantidad - OLD.cantidad)
                     WHERE id = NEW.idProducto;
                 END;
-            """.trimIndent())
+            """.trimIndent()
+            )
 
-            db.execSQL("""
+            db.execSQL(
+                """
                 CREATE TRIGGER actualizar_stock
                 AFTER INSERT ON detalle_venta
                 BEGIN
@@ -106,9 +118,11 @@ object DatabaseMigrations {
                     SET stock = stock - NEW.cantidad
                     WHERE id = NEW.idProducto;
                 END;
-            """.trimIndent())
+            """.trimIndent()
+            )
 
-            db.execSQL("""
+            db.execSQL(
+                """
                 CREATE TRIGGER actualizar_abono_y_estado_venta
                 AFTER INSERT ON detalle_abono_venta
                 BEGIN
@@ -124,14 +138,16 @@ object DatabaseMigrations {
                         WHERE id = NEW.idAbonoVenta AND totalPendiente <= 0
                     );
                 END;
-            """.trimIndent())
+            """.trimIndent()
+            )
 
             // Evitar duplicaciones
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_stock_compra")
             db.execSQL("DROP TRIGGER IF EXISTS actualizar_abono_y_estado_compra")
 
             // Trigger para stock de productos al hacer una compra
-            db.execSQL("""
+            db.execSQL(
+                """
             CREATE TRIGGER actualizar_stock_compra
             AFTER INSERT ON detalle_compra
             BEGIN
@@ -139,10 +155,12 @@ object DatabaseMigrations {
                 SET stock = stock + NEW.cantidad
                 WHERE id = NEW.idProducto;
             END;
-        """.trimIndent())
+        """.trimIndent()
+            )
 
             // Trigger para actualizar abono y estado de compra
-            db.execSQL("""
+            db.execSQL(
+                """
             CREATE TRIGGER actualizar_abono_y_estado_compra
             AFTER INSERT ON detalle_abono_compra
             BEGIN
@@ -158,7 +176,8 @@ object DatabaseMigrations {
                     WHERE id = NEW.idAbonoCompra AND totalPendiente <= 0
                 );
             END;
-        """.trimIndent())
+        """.trimIndent()
+            )
         }
     }
 

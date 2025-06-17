@@ -284,15 +284,17 @@ fun PurchaseDetailScreen(
 
                 val oldTable = productsTable.toList()  // Copia inmutable (segura)
 
-                productsTable.toMutableList().apply {
-                    removeIf { it.id == productToModify.id }
-                    productsTable = this
-                }
-
                 coroutine.launch {
+
+                    // Modificar el producto en la tabla con su cantidad
+                    val modifiedTable = productsTable.toMutableList().apply {
+                        removeIf { it.id == productToModify.id }
+                        add(productToModify.copy(quantity = quantity))
+                    }
+
                     val message = viewModel.updateProduct(
                         productToModify.copy(quantity = quantity),
-                        productsTable.sumOf { it.subtotal }
+                        modifiedTable.sumOf { it.subtotal } // Calcular nuevo total de la factura
                     )
 
                     if (message == "Error: El nuevo total es menor a la cantidad ya abonada") {
@@ -301,7 +303,6 @@ fun PurchaseDetailScreen(
                         return@launch
                     }
                 }
-
 
                 quantityToModify = 0
             },
@@ -368,8 +369,6 @@ fun PurchaseDetailScreen(
                         Toast.makeText(context, message1, Toast.LENGTH_SHORT).show()
                         return@launch
                     }
-
-
 
                     showEdiDeleteDialog = false
                 }

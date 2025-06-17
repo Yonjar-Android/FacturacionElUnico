@@ -270,6 +270,17 @@ class InvoiceRepositoryImp @Inject constructor(
                     )
                 )
 
+                val invoiceDetail = detailInvoiceDao.getByInvoiceDetailId(newDetail.id)
+
+                // Si la nueva cantidad de producto a adquirir es mayor que la anterior
+                // Entonces comprobar que haya suficiente stock para realizar la venta
+                if (newDetail.cantidad > invoiceDetail.cantidad){
+                    val validate = stockValidationOneProduct(newDetail.idProducto, newDetail.cantidad - invoiceDetail.cantidad)
+                    if (validate.isNotEmpty()) {
+                        throw IllegalArgumentException("No hay suficiente stock para realizar la actualización")
+                    }
+                }
+
                 // Actualizar el total de la factura
                 val invoice = invoiceDao.getInvoiceById(newDetail.idVenta)
                 invoiceDao.update(
@@ -335,10 +346,8 @@ class InvoiceRepositoryImp @Inject constructor(
     suspend fun stockValidationOneProduct(productId: Long, quantity: Int): String {
         val product = productoDao.getDetailedById(productId)
         product?.stock?.let {
-            println("Stock Validation $it")
-            println("Quantity $quantity")
             if (it < quantity) {
-                return "No hay suficiente stock de ${product.name}. Stock: ${product?.stock}"
+                return "No hay suficiente stock de ${product.name}. Stock: ${product.stock}"
             }
         }
         return ""

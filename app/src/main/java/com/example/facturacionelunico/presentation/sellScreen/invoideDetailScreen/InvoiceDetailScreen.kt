@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,7 @@ import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
 import com.example.facturacionelunico.ui.theme.blueUi
+import kotlinx.coroutines.launch
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -70,6 +72,7 @@ fun InvoiceDetailScreen(
 ) {
 
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
     val products: LazyPagingItems<DetailedProductModel> =
         viewModel.products.collectAsLazyPagingItems()
@@ -282,6 +285,8 @@ fun InvoiceDetailScreen(
             onEditClick = {
                 showEdiDeleteDialog = false
 
+                val oldTableProducts = productsTable.toList() // Copia inmutable (segura)
+
                 productsTable.toMutableList().apply {
                     val index = indexOfFirst { it.id == productToModify.id }
                     if (index != -1) {
@@ -291,12 +296,21 @@ fun InvoiceDetailScreen(
                     }
                 }
 
-                viewModel.updateProduct(
-                    productToModify.copy(quantity = it),
-                    productsTable.sumOf { it.subtotal }
-                )
+                coroutine.launch {
+                    val message = viewModel.updateProduct(
+                        productToModify.copy(quantity = it),
+                        productsTable.sumOf { it.subtotal }
+                    )
 
-                quantityToModify = 0
+                    if (message == "Error: No hay suficiente stock para realizar la actualización") {
+                        productsTable = oldTableProducts.toMutableList()
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
+
+                    quantityToModify = 0
+                }
+
             },
             onDismiss = {
                 showEdiDeleteDialog = false
@@ -323,22 +337,48 @@ fun InvoiceDetailScreen(
                     return@ProductOptionsDialog
                 }
 
-                // Remover el item a eliminar de la tabla para luego calcular el nuevo total
-                productsTable.toMutableList().apply {
-                    remove(productToModify)
-                }
 
-                if (productToModify in productsForUpdate) {
-                    productsForUpdate.remove(productToModify)
+                // Cálculo del nuevo total
+                val totalSinProductoModificado = productsTable
+                    .filter { it.id != productToModify.id }
+                    .sumOf { it.subtotal }
+
+                coroutine.launch {
+
+                    /* Si el producto a modificar está en la lista de productos a actualizar, entonces lo removemos de la tabla y no llamamos a la función de eliminar
+                    ya que no se encuentra en la base de datos */
+                    if (productToModify in productsForUpdate) {
+                        productsForUpdate.remove(productToModify)
+                        showEdiDeleteDialog = false
+
+                        productsTable.toMutableList().apply {
+                            removeIf { it.id == productToModify.id }
+                            productsTable = this
+                        }
+                        return@launch
+                    }
+
+                    val oldProductsTable = productsTable.toList() // Copia inmutable (segura)
+
+                    // Remover el item a eliminar de la tabla para luego calcular el nuevo total
+                    productsTable.toMutableList().apply {
+                        remove(productToModify)
+                        productsTable = this
+                    }
+
+                   val message = viewModel.deleteProduct(
+                        productToModify,
+                        totalSinProductoModificado
+                    ) // Cálculo del nuevo total
+
+                    if (message == "Error: El nuevo total es menor a la cantidad ya abonada") {
+                        productsTable = oldProductsTable.toMutableList() // Restaurar
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
+
                     showEdiDeleteDialog = false
-                    return@ProductOptionsDialog
                 }
-
-                viewModel.deleteProduct(
-                    productToModify,
-                    productsTable.sumOf { it.subtotal }) // Cálculo del nuevo total
-
-                showEdiDeleteDialog = false
             })
     }
 }

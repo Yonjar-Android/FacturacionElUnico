@@ -29,7 +29,7 @@ import javax.inject.Inject
 class InvoiceDetailViewModel @Inject constructor(
     private val repository: InvoiceRepository,
     private val productRepository: ProductRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
@@ -44,8 +44,9 @@ class InvoiceDetailViewModel @Inject constructor(
                     is ResultPattern.Success -> {
                         _invoice.value = result.data
                     }
+
                     is ResultPattern.Error -> {
-                    _message.value = result.message
+                        _message.value = result.message
                     }
                 }
             }
@@ -53,47 +54,60 @@ class InvoiceDetailViewModel @Inject constructor(
     }
 
     // Función para actualizar un producto de la factura
-    fun updateProduct(product: ProductItem, newTotal:Double){
-        viewModelScope.launch {
+    suspend fun updateProduct(product: ProductItem, newTotal: Double): String {
 
-            val newDetail = DetalleVentaEntity(
-                id = product.detailId,
-                idVenta = invoice.value?.invoiceId ?: 0,
-                idProducto = product.id,
-                cantidad = product.quantity,
-                precio = product.price,
-                subtotal = product.subtotal,
-                fechaActualizacion = System.currentTimeMillis(),
-                precioCompra = product.purchasePrice
-            )
-            _message.value = repository.updateInvoiceDetail(newDetail, newTotal)
+        val newDetail = DetalleVentaEntity(
+            id = product.detailId,
+            idVenta = invoice.value?.invoiceId ?: 0,
+            idProducto = product.id,
+            cantidad = product.quantity,
+            precio = product.price,
+            subtotal = product.subtotal,
+            fechaActualizacion = System.currentTimeMillis(),
+            precioCompra = product.purchasePrice
+        )
+
+        val message = repository.updateInvoiceDetail(newDetail, newTotal)
+        if (message == "Error: No hay suficiente stock para realizar la actualización") {
+            return message
         }
+
+        _message.value = message
+        return ""
+
     }
 
     // Función para eliminar un producto de la factura
-    fun deleteProduct(product: ProductItem, newTotal:Double){
-        viewModelScope.launch {
-            val detail = DetalleVentaEntity(
-                id = product.detailId,
-                idVenta = invoice.value?.invoiceId ?: 0,
-                idProducto = product.id,
-                cantidad = product.quantity,
-                precio = product.price,
-                subtotal = product.subtotal,
-                fechaActualizacion = System.currentTimeMillis(),
-                precioCompra = product.purchasePrice
-            )
-            _message.value = repository.deleteInvoiceDetail(detail, newTotal)
+    suspend fun deleteProduct(product: ProductItem, newTotal: Double): String {
+
+        val detail = DetalleVentaEntity(
+            id = product.detailId,
+            idVenta = invoice.value?.invoiceId ?: 0,
+            idProducto = product.id,
+            cantidad = product.quantity,
+            precio = product.price,
+            subtotal = product.subtotal,
+            fechaActualizacion = System.currentTimeMillis(),
+            precioCompra = product.purchasePrice
+        )
+
+
+        val message = repository.deleteInvoiceDetail(detail, newTotal)
+        if (message == "Error: El nuevo total es menor a la cantidad ya abonada") {
+            return message
         }
+        _message.value = message
+        return ""
     }
+
 
     fun payInvoice(invoiceId: Long, amount: Double) {
         viewModelScope.launch {
-            _message.value =repository.payInvoice(invoiceId, amount)
+            _message.value = repository.payInvoice(invoiceId, amount)
         }
     }
 
-    fun addProductsToInvoice(products: List<ProductItem>){
+    fun addProductsToInvoice(products: List<ProductItem>) {
         viewModelScope.launch {
             _message.value = repository.createInvoiceDetail(
                 invoiceId = invoice.value?.invoiceId ?: 0,
@@ -138,7 +152,7 @@ class InvoiceDetailViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    fun restartMessage(){
+    fun restartMessage() {
         _message.value = null
     }
 
