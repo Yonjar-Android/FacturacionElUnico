@@ -86,7 +86,7 @@ fun ClientScreen(
                 viewModel.updateQuery(newQuery)
             })
 
-            Spacer(modifier = Modifier.size(25.dp))
+            Spacer(modifier = Modifier.size(15.dp))
 
             LazyColumn {
                 items(

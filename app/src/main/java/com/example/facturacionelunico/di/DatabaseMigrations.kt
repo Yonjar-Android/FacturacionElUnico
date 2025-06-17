@@ -79,7 +79,7 @@ object DatabaseMigrations {
                 AFTER UPDATE ON detalle_venta
                 BEGIN
                 UPDATE producto
-                SET stock = stock + (NEW.cantidad - OLD.cantidad)
+                SET stock = stock + OLD.cantidad - NEW.cantidad
                 WHERE id = NEW.idProducto;
                 END;
             """.trimIndent()

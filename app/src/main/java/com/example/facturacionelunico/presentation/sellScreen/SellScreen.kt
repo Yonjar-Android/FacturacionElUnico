@@ -166,8 +166,16 @@ fun SellScreen(
                                     ).show()
                                     return@GenericBlueUiButton
                                 }
-                            }
 
+                                if(moneyToPay.toDouble() > total) {
+                                    Toast.makeText(
+                                        context,
+                                        "El dinero a pagar no puede ser mayor al total de la compra",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@GenericBlueUiButton
+                                }
+                            }
 
                             viewModel.createInvoice(
                                 invoice = InvoiceDomainModel(

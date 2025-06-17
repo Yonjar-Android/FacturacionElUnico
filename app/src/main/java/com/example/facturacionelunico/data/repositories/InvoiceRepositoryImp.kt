@@ -259,16 +259,9 @@ class InvoiceRepositoryImp @Inject constructor(
         return runCatching {
             appDatabase.withTransaction {
 
-                // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+
                 val abono = abonosDao.getAbonoByInvoiceId(newDetail.idVenta)
                 val abonos = abonosDetalleDao.getAllByAbonoId(abono.id)
-
-                abonosDao.update(
-                    abono.copy(
-                        totalPendiente = newTotal - abonos.sumOf { it.monto },
-                        totalAPagar = newTotal
-                    )
-                )
 
                 val invoiceDetail = detailInvoiceDao.getByInvoiceDetailId(newDetail.id)
 
@@ -280,6 +273,20 @@ class InvoiceRepositoryImp @Inject constructor(
                         throw IllegalArgumentException("No hay suficiente stock para realizar la actualización")
                     }
                 }
+
+                if (newTotal < abonos.sumOf { it.monto }) {
+                    throw IllegalArgumentException("El nuevo total es menor a la cantidad ya abonada")
+                }
+
+                // Actualizar el nuevo total a abonar y el total pendiente correspondiente
+                abonosDao.update(
+                    abono.copy(
+                        totalPendiente = newTotal - abonos.sumOf { it.monto },
+                        totalAPagar = newTotal
+                    )
+                )
+
+
 
                 // Actualizar el total de la factura
                 val invoice = invoiceDao.getInvoiceById(newDetail.idVenta)
@@ -309,6 +316,10 @@ class InvoiceRepositoryImp @Inject constructor(
                 // Actualizar el nuevo total a abonar y el total pendiente correspondiente
                 val abono = abonosDao.getAbonoByInvoiceId(invoiceDetail.idVenta)
                 val abonos = abonosDetalleDao.getAllByAbonoId(abono.id)
+
+                if(newTotal < abonos.sumOf { it.monto }){
+                    throw IllegalArgumentException("El nuevo total es menor a la cantidad ya abonada")
+                }
 
                 abonosDao.update(
                     abono.copy(

@@ -68,7 +68,7 @@ class InvoiceDetailViewModel @Inject constructor(
         )
 
         val message = repository.updateInvoiceDetail(newDetail, newTotal)
-        if (message == "Error: No hay suficiente stock para realizar la actualización") {
+        if (message == "Error: No hay suficiente stock para realizar la actualización" || message == "Error: El nuevo total es menor a la cantidad ya abonada") {
             return message
         }
 

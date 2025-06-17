@@ -302,7 +302,7 @@ fun InvoiceDetailScreen(
                         productsTable.sumOf { it.subtotal }
                     )
 
-                    if (message == "Error: No hay suficiente stock para realizar la actualización") {
+                    if (message == "Error: No hay suficiente stock para realizar la actualización" || message == "Error: El nuevo total es menor a la cantidad ya abonada") {
                         productsTable = oldTableProducts.toMutableList()
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         return@launch

@@ -145,7 +145,7 @@ fun BuyScreen(
                                     ).show()
                                     return@GenericBlueUiButton
                                 }
-                                if (moneyToPay.toDouble() < 0) {
+                                if(moneyToPay.toDouble() < 0) {
                                     Toast.makeText(
                                         context,
                                         "Rellene el campo de dinero a pagar con un valor positivo",
@@ -153,7 +153,18 @@ fun BuyScreen(
                                     ).show()
                                     return@GenericBlueUiButton
                                 }
+
+                                if(moneyToPay.toDouble() > total) {
+                                    Toast.makeText(
+                                        context,
+                                        "El dinero a pagar no puede ser mayor al total de la compra",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@GenericBlueUiButton
+                                }
                             }
+
+
 
                             viewModel.createPurchase(
                                 purchase = PurchaseDomainModel(
