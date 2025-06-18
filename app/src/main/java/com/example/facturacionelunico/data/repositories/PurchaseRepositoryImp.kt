@@ -170,7 +170,7 @@ class PurchaseRepositoryImp @Inject constructor(
                         idCompra = purchaseId,
                         idProducto = it.id,
                         cantidad = it.quantity,
-                        precio = it.price,
+                        precio = it.purchasePrice,
                         subtotal = it.subtotal
                     )
                     purchaseDetailDao.insert(detailEntity)
@@ -246,11 +246,14 @@ class PurchaseRepositoryImp @Inject constructor(
                     )
                 )
 
+                val totalPagado = abonos.sumOf { it.monto }
+
                 // Actualizar el total de la factura
                 val purchase = purchaseDao.getPurchaseById(purchaseDetail.idCompra)
                 purchaseDao.update(
                     purchase.copy(
                         total = newTotal,
+                        estado = if (newTotal - totalPagado == 0.0) "COMPLETADO" else "PENDIENTE"
                     )
                 )
 
@@ -288,11 +291,14 @@ class PurchaseRepositoryImp @Inject constructor(
                     )
                 )
 
+                val totalPagado = abonos.sumOf { it.monto }
+
                 // Actualizar el total de la factura
                 val purchase = purchaseDao.getPurchaseById(purchaseDetail.idCompra)
                 purchaseDao.update(
                     purchase.copy(
                         total = newTotal,
+                        estado = if (newTotal - totalPagado == 0.0) "COMPLETADO" else "PENDIENTE"
                     )
                 )
 

@@ -289,10 +289,13 @@ class InvoiceRepositoryImp @Inject constructor(
 
 
                 // Actualizar el total de la factura
+                val totalPagado = abonos.sumOf { it.monto }
+
                 val invoice = invoiceDao.getInvoiceById(newDetail.idVenta)
                 invoiceDao.update(
                     invoice.copy(
                         total = newTotal,
+                        estado = if (newTotal - totalPagado == 0.0) "COMPLETADO" else "PENDIENTE"
                     )
                 )
 
@@ -328,11 +331,16 @@ class InvoiceRepositoryImp @Inject constructor(
                     )
                 )
 
+
+
                 // Actualizar el total de la factura
+                val totalPagado = abonos.sumOf { it.monto }
+
                 val invoice = invoiceDao.getInvoiceById(invoiceDetail.idVenta)
                 invoiceDao.update(
                     invoice.copy(
                         total = newTotal,
+                        estado = if (newTotal - totalPagado == 0.0) "COMPLETADO" else "PENDIENTE"
                     )
                 )
                 "Detalle eliminado con éxito"

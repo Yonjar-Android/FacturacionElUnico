@@ -52,7 +52,6 @@ import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLoc
 import com.example.facturacionelunico.presentation.sellScreen.ClickableTextField
 import com.example.facturacionelunico.presentation.sellScreen.InvoiceTable
 import com.example.facturacionelunico.presentation.sellScreen.ProductOptionsDialog
-import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
 import com.example.facturacionelunico.presentation.sellScreen.TextFieldInvoice
 import com.example.facturacionelunico.presentation.sellScreen.validations
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
@@ -349,13 +348,13 @@ fun BuyScreen(
         }
 
         if (showProducts) {
-            SelectProductTable(
+            SelectProductTablePurchase(
                 products = products,
                 closeTable = { showProducts = false },
-                getValues = { name, id, precio, precioNoUsar ->
+                getValues = { name, id, precio, precioCompra ->
                     productId = id.toString()
                     product = name
-                    price = precio.toString()
+                    price = precioCompra.toString()
                     showProducts = false
                 },
                 searchQuery = { query ->
@@ -502,6 +501,112 @@ fun SupplierItemTable(
                     getValues.invoke(
                         supplier.company,
                         supplier.id
+                    )
+                }
+            )
+        }
+    }
+}
+
+/*Tabla de productos para seleccionar*/
+@Composable
+fun SelectProductTablePurchase(
+    products: LazyPagingItems<DetailedProductModel>,
+    closeTable: () -> Unit,
+    getValues: (String, Long, Double, Double) -> Unit,
+    searchQuery: (String) -> Unit,
+    searchQueryProduct: String
+) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+
+        IconButton(
+            modifier = Modifier.align(Alignment.TopEnd),
+            onClick = {
+                closeTable.invoke()
+            }
+        ) {
+            Icon(
+                modifier = Modifier.size(32.dp),
+                imageVector = Icons.Default.Close, contentDescription = "Close Icon",
+            )
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Buscar producto", fontSize = 28.sp, fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+
+            Spacer(modifier = Modifier.size(5.dp))
+
+            SearchBarComponent(
+                value = searchQueryProduct,
+                onChangeValue = {
+                    searchQuery.invoke(it)
+                })
+
+            Spacer(modifier = Modifier.size(5.dp))
+
+            LazyColumn {
+                items(
+                    count = products.itemCount,
+                    key = { index -> products[index]?.id ?: index },
+                    contentType = products.itemContentType { "Products" }
+                ) { index ->
+
+                    val product = products[index]
+
+                    if (product != null) {
+                        ProductItemTablePurchase(
+                            product,
+                            getValues = { name, id, precio, precioCompra ->
+                                getValues.invoke(name, id, precio, precioCompra)
+                            })
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*Item que se muestra en la tabla de productos*/
+@Composable
+fun ProductItemTablePurchase(
+    product: DetailedProductModel,
+    getValues: (String, Long, Double, Double) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
+            Text(product.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+            Text("Precio: ${product.purchasePrice} C$", fontSize = 16.sp, color = Color.Gray)
+        }
+
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+            GenericBlueUiButton(
+                buttonText = "Seleccionar",
+                onFunction = {
+                    getValues.invoke(
+                        product.name,
+                        product.id,
+                        product.salePrice,
+                        product.purchasePrice
                     )
                 }
             )

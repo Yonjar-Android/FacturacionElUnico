@@ -47,6 +47,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.facturacionelunico.domain.models.DetailedProductModel
 import com.example.facturacionelunico.domain.models.ProductItem
+import com.example.facturacionelunico.presentation.buyScreen.SelectProductTablePurchase
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
 import com.example.facturacionelunico.presentation.sellScreen.ProductOptionsDialog
 import com.example.facturacionelunico.presentation.sellScreen.SelectProductTable
@@ -217,18 +218,19 @@ fun PurchaseDetailScreen(
     }
 
     if (showProductDialog) {
-        SelectProductTable(
+        SelectProductTablePurchase(
             products = products,
             closeTable = { showProductDialog = false },
-            getValues = { name, id, precio, precioNoUsar ->
+            getValues = { name, id, precio, precioCompra ->
                 showDialogConfirm = true
                 productItem.value = ProductItem(
                     id = id,
                     name = name,
-                    price = precio,
+                    price = precioCompra,
                     quantity = 0,
-                    purchasePrice = precioNoUsar
+                    purchasePrice = precioCompra
                 )
+                println(productItem.value)
             },
             searchQuery = {
                 viewModel.updateQueryProduct(it)
