@@ -26,9 +26,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
@@ -106,6 +108,9 @@ class DatabaseViewModel @Inject constructor(
 
                 val backupData = Gson().fromJson(json, BackupData::class.java)
 
+                // 🔴 Desactiva triggers temporalmente
+                deshabilitarTriggers()
+
                 // 🔥 Eliminar todos los datos primero (respetar dependencias)
                 db.detalleAbonoVentaDao().deleteAll()
                 db.abonoVentaDao().deleteAll()
@@ -140,6 +145,10 @@ class DatabaseViewModel @Inject constructor(
                 db.abonoVentaDao().insertAll(backupData.abonosVenta)
                 db.detalleAbonoVentaDao().insertAll(backupData.detallesAbonoVenta)
 
+                // 🟢 Volver a activar triggers
+                restaurarTriggers()
+
+
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -147,6 +156,141 @@ class DatabaseViewModel @Inject constructor(
             }
 
             _importStatus.value = success
+        }
+    }
+
+    suspend fun deshabilitarTriggers() {
+        withContext(Dispatchers.IO) {
+            db.openHelper.writableDatabase.apply {
+                execSQL("DROP TRIGGER IF EXISTS actualizar_stock")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_abono_y_estado_venta")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_stock_detalle_compra")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_stock_al_eliminar_detalle_compra")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_stock_detalle_venta")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_stock_al_eliminar_detalle_venta")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_stock_compra")
+                execSQL("DROP TRIGGER IF EXISTS actualizar_abono_y_estado_compra")
+            }
+        }
+    }
+
+    suspend fun restaurarTriggers() {
+        withContext(Dispatchers.IO) {
+            db.openHelper.writableDatabase.apply {
+                execSQL(
+                    """
+                CREATE TRIGGER actualizar_stock_al_eliminar_detalle_venta
+                AFTER DELETE ON detalle_venta
+                BEGIN
+                    UPDATE producto
+                    SET stock = stock + OLD.cantidad
+                    WHERE id = OLD.idProducto;
+                END;
+            """.trimIndent()
+                )
+
+                execSQL(
+                    """
+                CREATE TRIGGER actualizar_stock_detalle_venta
+                AFTER UPDATE ON detalle_venta
+                BEGIN
+                UPDATE producto
+                SET stock = stock + OLD.cantidad - NEW.cantidad
+                WHERE id = NEW.idProducto;
+                END;
+            """.trimIndent()
+                )
+
+                execSQL(
+                    """
+                CREATE TRIGGER actualizar_stock_al_eliminar_detalle_compra
+                AFTER DELETE ON detalle_compra
+                BEGIN
+                    UPDATE producto
+                    SET stock = stock - OLD.cantidad
+                    WHERE id = OLD.idProducto;
+                END;
+            """.trimIndent()
+                )
+
+                execSQL(
+                    """
+                CREATE TRIGGER actualizar_stock_detalle_compra
+                AFTER UPDATE ON detalle_compra
+                BEGIN
+                    UPDATE producto
+                    SET stock = stock + (NEW.cantidad - OLD.cantidad)
+                    WHERE id = NEW.idProducto;
+                END;
+            """.trimIndent()
+                )
+
+                execSQL(
+                    """
+                CREATE TRIGGER actualizar_stock
+                AFTER INSERT ON detalle_venta
+                BEGIN
+                    UPDATE producto
+                    SET stock = stock - NEW.cantidad
+                    WHERE id = NEW.idProducto;
+                END;
+            """.trimIndent()
+                )
+
+                execSQL(
+                    """
+                CREATE TRIGGER actualizar_abono_y_estado_venta
+                AFTER INSERT ON detalle_abono_venta
+                BEGIN
+                    UPDATE abono_venta
+                    SET totalPendiente = totalPendiente - NEW.monto
+                    WHERE id = NEW.idAbonoVenta;
+
+                    UPDATE venta
+                    SET estado = 'COMPLETADO'
+                    WHERE id IN (
+                        SELECT idVenta
+                        FROM abono_venta
+                        WHERE id = NEW.idAbonoVenta AND totalPendiente <= 0
+                    );
+                END;
+            """.trimIndent()
+                )
+
+                // Trigger para stock de productos al hacer una compra
+                execSQL(
+                    """
+            CREATE TRIGGER actualizar_stock_compra
+            AFTER INSERT ON detalle_compra
+            BEGIN
+                UPDATE producto
+                SET stock = stock + NEW.cantidad
+                WHERE id = NEW.idProducto;
+            END;
+        """.trimIndent()
+                )
+
+                // Trigger para actualizar abono y estado de compra
+                execSQL(
+                    """
+            CREATE TRIGGER actualizar_abono_y_estado_compra
+            AFTER INSERT ON detalle_abono_compra
+            BEGIN
+                UPDATE abono_compra
+                SET totalPendiente = totalPendiente - NEW.monto
+                WHERE id = NEW.idAbonoCompra;
+
+                UPDATE compra
+                SET estado = 'COMPLETADO'
+                WHERE id IN (
+                    SELECT idCompra
+                    FROM abono_compra
+                    WHERE id = NEW.idAbonoCompra AND totalPendiente <= 0
+                );
+            END;
+        """.trimIndent()
+                )
+            }
         }
     }
 
