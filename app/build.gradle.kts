@@ -66,6 +66,9 @@ dependencies {
 
     testImplementation(libs.kotlinx.coroutines.test)
 
+    //Gson
+    implementation(libs.google.gson)
+
     // Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
