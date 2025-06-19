@@ -816,7 +816,7 @@ fun ClientItemTable(
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
             GenericBlueUiButton(
-                buttonText = "Seleccionar",
+                buttonText = "Elegir",
                 onFunction = {
                     getValues.invoke(
                         "${client.name} ${client.lastName}",
@@ -919,7 +919,7 @@ fun ProductItemTable(
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
             GenericBlueUiButton(
-                buttonText = "Seleccionar",
+                buttonText = "Elegir",
                 onFunction = {
                     getValues.invoke(
                         product.name,

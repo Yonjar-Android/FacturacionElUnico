@@ -25,7 +25,7 @@ fun GenericBlueUiButton(
         enabled = enabled
     ) {
         Text(
-            buttonText, fontWeight = FontWeight.Bold, fontSize = 24.sp,
+            buttonText, fontWeight = FontWeight.Bold, fontSize = 22.sp,
             color = Color.White
         )
     }

@@ -498,7 +498,7 @@ fun SupplierItemTable(
 
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
             GenericBlueUiButton(
-                buttonText = "Seleccionar",
+                buttonText = "Elegir",
                 onFunction = {
                     getValues.invoke(
                         supplier.company,
