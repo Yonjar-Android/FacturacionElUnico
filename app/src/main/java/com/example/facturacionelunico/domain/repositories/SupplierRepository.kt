@@ -2,7 +2,6 @@ package com.example.facturacionelunico.domain.repositories
 
 import androidx.paging.PagingData
 import com.example.facturacionelunico.domain.models.ResultPattern
-import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierDomainModel
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel

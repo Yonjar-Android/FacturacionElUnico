@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierDomainModel
 import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel

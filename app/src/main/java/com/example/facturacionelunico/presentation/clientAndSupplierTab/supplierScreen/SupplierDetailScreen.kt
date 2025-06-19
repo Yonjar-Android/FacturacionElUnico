@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BasicAlertDialog
@@ -42,7 +41,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
