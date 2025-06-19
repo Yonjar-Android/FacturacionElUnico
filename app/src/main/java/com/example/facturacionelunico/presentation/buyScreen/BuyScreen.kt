@@ -381,6 +381,7 @@ fun BuyScreen(
                     }
 
                     quantityToModify = 0
+                    total = productList.sumOf { it.subtotal } // Calcular nuevamente el total después de editar
                 },
                 onDismiss = {
                     showEdiDeleteDialog = false
@@ -394,6 +395,7 @@ fun BuyScreen(
                     if (productList.isEmpty()) enabledRadioButtons = true
 
                     showEdiDeleteDialog = false
+                    total = productList.sumOf { it.subtotal } // Calcular nuevamente el total después de eliminar
                 })
         }
     }

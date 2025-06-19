@@ -437,6 +437,7 @@ fun SellScreen(
                 }
 
                 quantityToModify = 0
+                total = productList.sumOf { it.subtotal }
             },
             onDismiss = {
                 showEdiDeleteDialog = false
@@ -450,6 +451,7 @@ fun SellScreen(
                 if (productList.isEmpty()) enabledRadioButtons = true
 
                 showEdiDeleteDialog = false
+                total = productList.sumOf { it.subtotal }
             })
     }
 }
