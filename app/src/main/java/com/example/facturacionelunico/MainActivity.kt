@@ -35,6 +35,7 @@ import com.example.facturacionelunico.presentation.buyScreen.purchaseDetail.Purc
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.ClientSupplierTab
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientDetailScreen
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.supplierScreen.SupplierDetailScreen
+import com.example.facturacionelunico.presentation.databaseScreen.DatabaseScreen
 import com.example.facturacionelunico.presentation.productScreenTab.ProductScreenTab
 import com.example.facturacionelunico.presentation.productScreenTab.brandScreen.brandDetailScreen.BrandDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.categoryScreen.categoryDetailScreen.CategoryDetailScreen
@@ -220,6 +221,11 @@ class MainActivity : ComponentActivity() {
                                 navController = controller
                             )
                         }
+
+                        /*Pantalla para exportar e importar la base de datos*/
+                        composable(route = "DatabaseScreen") {
+                            DatabaseScreen()
+                        }
                     }
                 }
             }
@@ -301,7 +307,7 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected = selectedScreen == 4, onClick = {
                     onChangeScreen.invoke(4)
-                    navController.navigate("ProductScreen")
+                    navController.navigate("DatabaseScreen")
                 }, icon = {
                     NavIcon(
                         icon = R.drawable.report,
