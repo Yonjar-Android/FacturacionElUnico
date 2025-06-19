@@ -40,7 +40,7 @@ interface VentaDao {
         CASE WHEN estado = 'PENDIENTE' THEN 0 ELSE 1 END,
         fechaVenta DESC
 """)
-    suspend fun getInvoicesByClientId(id: Long): List<VentaEntity>
+    fun getInvoicesByClientId(id: Long): PagingSource<Int, VentaEntity>
 
     @Query("""
     SELECT 

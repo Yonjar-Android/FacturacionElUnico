@@ -42,7 +42,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.facturacionelunico.domain.models.client.ClientDomainModel
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
 import com.example.facturacionelunico.presentation.sharedComponents.GenericBlueUiButton
 import com.example.facturacionelunico.presentation.sharedComponents.TopAppBarCustom
 import com.example.facturacionelunico.ui.theme.blueUi
@@ -60,6 +63,8 @@ fun ClientDetailScreen(
 
     val client by viewModel.client.collectAsStateWithLifecycle()
 
+    val invoices: LazyPagingItems<InvoiceDomainModel> = viewModel.invoices.collectAsLazyPagingItems()
+
     val id:Long? = client?.id
 
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -67,7 +72,6 @@ fun ClientDetailScreen(
     var showDialog by remember { mutableStateOf(false) }
 
     // Campos para actualizar cliente
-
 
     var code by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -134,13 +138,21 @@ fun ClientDetailScreen(
             Spacer(modifier = Modifier.size(10.dp))
 
             // Cargar facturas
-            if (client?.invoices?.isNotEmpty() == true){
+            if (invoices.itemCount != 0){
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(client!!.invoices){
-                        FacturaItem(it.id,"Factura #${it.id}", it.state,
-                            goToDetail = {
-                                navController.navigate("InvoiceDetailScreen/${it}")
-                            })
+                    items(
+                        count = invoices.itemCount,
+                        key = { index -> invoices[index]?.id ?: index },
+                        contentType = { "Invoices" }
+                    ){
+                        val invoice = invoices[it]
+
+                        if (invoice != null){
+                            FacturaItem(invoice.id,"Factura #${invoice.id}", invoice.state,
+                                goToDetail = {
+                                    navController.navigate("InvoiceDetailScreen/${it}")
+                                })
+                        }
                     }
                 }
             }

@@ -38,6 +38,8 @@ fun InvoiceScreen(
 
     val invoices: LazyPagingItems<InvoiceDomainModel> = viewModel.invoices.collectAsLazyPagingItems()
 
+    println("InvoiceInInvoiceScreen: ${invoices.itemCount}")
+
     val dept = listOf<String>("Todas", "Pendientes")
     var deptSelectedOption by remember { mutableStateOf(dept[0]) }
 

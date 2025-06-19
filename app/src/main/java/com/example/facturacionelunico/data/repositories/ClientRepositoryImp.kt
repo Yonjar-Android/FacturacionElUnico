@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.repositories
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import com.example.facturacionelunico.data.database.dao.ClienteDao
 import com.example.facturacionelunico.data.database.dao.VentaDao
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
@@ -31,7 +32,6 @@ class ClientRepositoryImp @Inject constructor(
                 ResultPattern.Success(pagingData)
             }.catch { e ->
                 ResultPattern.Error(exception = e, message = "Error: ${e.message}")
-
             }
     }
 
@@ -50,8 +50,6 @@ class ClientRepositoryImp @Inject constructor(
 
     override suspend fun getClientById(id: Long): Flow<DetailedClientDomainModel> {
 
-        val invoices = invoiceDao.getInvoicesByClientId(id)
-
         return clientDao.getClientById(id).map {
             DetailedClientDomainModel(
                 id = it.id,
@@ -59,18 +57,28 @@ class ClientRepositoryImp @Inject constructor(
                 lastName = it.lastName,
                 phone = it.phone,
                 numberIdentifier = it.numberIdentifier,
-                deptTotal = it.deptTotal,
-                invoices = invoices.map {
+                deptTotal = it.deptTotal
+            )
+        }
+    }
+
+    override fun getInvoicesByClientId(clientId: Long): Flow<PagingData<InvoiceDomainModel>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { invoiceDao.getInvoicesByClientId(clientId) }
+        ).flow
+            .map {
+                it.map {
                     InvoiceDomainModel(
                         id = it.id,
                         sellDate = it.fechaVenta,
-                        state = it.estado,
                         total = it.total,
                         clientId = it.idCliente,
+                        state = it.estado,
                         paymentMethod = it.tipoPago
                     )
-                })
-        }
+                }
+            }
     }
 
     // Función para crear un cliente
