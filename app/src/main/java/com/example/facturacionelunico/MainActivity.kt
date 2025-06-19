@@ -1,9 +1,11 @@
 package com.example.facturacionelunico
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,6 +44,7 @@ import com.example.facturacionelunico.presentation.productScreenTab.categoryScre
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.ProductCreateScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductDetailScreen
 import com.example.facturacionelunico.presentation.productScreenTab.productScreen.productDetailScreen.ProductUpdateScreen
+import com.example.facturacionelunico.presentation.reportScreen.ReportScreen
 import com.example.facturacionelunico.presentation.sellScreen.SellScreenTab
 import com.example.facturacionelunico.presentation.sellScreen.invoideDetailScreen.InvoiceDetailScreen
 import com.example.facturacionelunico.ui.theme.FacturacionElUnicoTheme
@@ -49,6 +52,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -226,6 +230,11 @@ class MainActivity : ComponentActivity() {
                         composable(route = "DatabaseScreen") {
                             DatabaseScreen()
                         }
+
+                        /*Pantalla para exportar e importar la base de datos*/
+                        composable(route = "ReporteScreen") {
+                            ReportScreen()
+                        }
                     }
                 }
             }
@@ -307,7 +316,7 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected = selectedScreen == 4, onClick = {
                     onChangeScreen.invoke(4)
-                    navController.navigate("DatabaseScreen")
+                    navController.navigate("ReporteScreen")
                 }, icon = {
                     NavIcon(
                         icon = R.drawable.report,
@@ -319,6 +328,24 @@ class MainActivity : ComponentActivity() {
                     selectedIconColor = Color.White
                 )
             )
+
+            NavigationBarItem(
+                selected = selectedScreen == 5, onClick = {
+                    onChangeScreen.invoke(5)
+                    navController.navigate("DatabaseScreen")
+                }, icon = {
+                    NavIcon(
+                        icon = R.drawable.database,
+                        description = "Reports icon interface"
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Blue,
+                    selectedIconColor = Color.White
+                )
+            )
+
+
         }
     }
 
