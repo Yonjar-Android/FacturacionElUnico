@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.ProductoEntity
@@ -28,7 +29,17 @@ interface ProductoDao {
     @Query("SELECT * FROM producto")
     fun getAll(): Flow<List<ProductoEntity>>
 
-    @Query("""
+    @Query("SELECT * FROM producto")
+    suspend fun getAllJson(): List<ProductoEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(productos: List<ProductoEntity>)
+
+    @Query("DELETE FROM producto")
+    suspend fun deleteAll()
+
+    @Query(
+        """
     SELECT producto.id, 
            producto.nombre as name,
            COALESCE(Categoria.nombre, 'Sin categoria') as category,
@@ -43,10 +54,12 @@ interface ProductoDao {
     FROM producto
     LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
-""")
+"""
+    )
     fun getAllDetailed(): PagingSource<Int, DetailedProductModel>
 
-    @Query("""
+    @Query(
+        """
     SELECT producto.id, 
            producto.nombre as name,
            COALESCE(Categoria.nombre, 'Sin categoria') as category,
@@ -62,10 +75,12 @@ interface ProductoDao {
     LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
     WHERE producto.id = :idProduct
-""")
+"""
+    )
     suspend fun getDetailedById(idProduct: Long): DetailedProductModel?
 
-    @Query("""
+    @Query(
+        """
     SELECT producto.id, 
            producto.nombre as name,
            COALESCE(Categoria.nombre, 'Sin categoria') as category,
@@ -81,7 +96,8 @@ interface ProductoDao {
     LEFT JOIN categoria ON producto.idCategoria = categoria.id
     LEFT JOIN marca ON producto.idMarca = marca.id
     WHERE producto.nombre LIKE '%' || :query || '%'
-""")
+"""
+    )
     fun getProductsBySearch(query: String): PagingSource<Int, DetailedProductModel>
 
 }

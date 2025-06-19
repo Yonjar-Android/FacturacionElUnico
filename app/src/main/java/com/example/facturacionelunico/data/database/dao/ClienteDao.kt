@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.ClienteEntity
@@ -19,6 +20,15 @@ interface ClienteDao {
 
     @Query("SELECT * FROM cliente")
     fun getAll(): PagingSource<Int, ClienteEntity>
+
+    @Query("SELECT * FROM cliente")
+    suspend fun getAllJson(): List<ClienteEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(clientes: List<ClienteEntity>)
+
+    @Query("DELETE FROM cliente")
+    suspend fun deleteAll()
 
     @Query(
         """

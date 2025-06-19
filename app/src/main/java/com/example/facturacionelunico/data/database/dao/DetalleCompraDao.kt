@@ -2,6 +2,7 @@ package com.example.facturacionelunico.data.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.DetalleCompraEntity
@@ -21,6 +22,12 @@ interface DetalleCompraDao {
 
     @Query("SELECT * FROM detalle_compra")
     suspend fun getAll(): List<DetalleCompraEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(detalles: List<DetalleCompraEntity>)
+
+    @Query("DELETE FROM detalle_compra")
+    suspend fun deleteAll()
 
     @Query("""SELECT 
         dc.id AS detailId,

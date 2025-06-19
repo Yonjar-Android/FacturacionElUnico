@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.MarcaEntity
@@ -27,6 +28,15 @@ interface MarcaDao {
 
     @Query("SELECT * FROM marca")
     fun getAll(): PagingSource<Int, MarcaEntity>
+
+    @Query("SELECT * FROM marca")
+    suspend fun getAllJson(): List<MarcaEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(marcas: List<MarcaEntity>)
+
+    @Query("DELETE FROM marca")
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM marca WHERE id = :brandId LIMIT 1")
     fun getBrandById(brandId: Long): Flow<MarcaEntity>

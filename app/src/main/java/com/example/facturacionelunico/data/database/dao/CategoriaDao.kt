@@ -3,6 +3,7 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.CategoriaEntity
@@ -27,6 +28,15 @@ interface CategoriaDao {
 
     @Query("SELECT * FROM categoria")
     fun getAll(): PagingSource<Int, CategoriaEntity>
+
+    @Query("SELECT * FROM categoria")
+    suspend fun getAllJson(): List<CategoriaEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(categorias: List<CategoriaEntity>)
+
+    @Query("DELETE FROM categoria")
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM categoria WHERE id = :categoryId LIMIT 1")
     fun getCategoryById(categoryId: Long): Flow<CategoriaEntity>

@@ -3,11 +3,12 @@ package com.example.facturacionelunico.data.database.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.facturacionelunico.data.database.entities.AbonoCompraEntity
 import com.example.facturacionelunico.data.database.entities.ProveedorEntity
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierLocalModel
-import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,6 +21,15 @@ interface ProveedorDao {
 
     @Query("SELECT * FROM proveedor")
     fun getAll(): PagingSource<Int, ProveedorEntity>
+
+    @Query("SELECT * FROM proveedor")
+    suspend fun getAllJson(): List<ProveedorEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(proveedores: List<ProveedorEntity>)
+
+    @Query("DELETE FROM proveedor")
+    suspend fun deleteAll()
 
     @Query("""
         SELECT 
