@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.CompraEntity
-import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailDomainModel
 import com.example.facturacionelunico.domain.models.purchase.PurchaseDetailLocalModel
 import kotlinx.coroutines.flow.Flow
 
@@ -49,5 +48,5 @@ interface CompraDao {
             CASE WHEN estado = 'PENDIENTE' THEN 0 ELSE 1 END,
              fechaCompra DESC
     """)
-    suspend fun getPurchasesBySupplierId(id: Long): List<CompraEntity>
+    fun getPurchasesBySupplierId(id: Long): PagingSource<Int, CompraEntity>
 }

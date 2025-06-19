@@ -49,8 +49,6 @@ class SupplierRepositoryImp @Inject constructor(
 
     override suspend fun getSupplierById(id: Long): Flow<DetailedSupplierDomainModel?> {
 
-        val purchases = purchaseDao.getPurchasesBySupplierId(id)
-
         return supplierDao.getSupplierById(id).map {
             DetailedSupplierDomainModel(
                 id = it.id,
@@ -59,18 +57,27 @@ class SupplierRepositoryImp @Inject constructor(
                 phone = it.phone.toString(),
                 email = it.email.toString(),
                 address = it.address.toString(),
-                debt = it.deptTotal,
-                purchases = purchases.map {
+                debt = it.deptTotal
+            )
+        }
+    }
+
+    override fun getPurchasesBySupplierId(supplierId: Long): Flow<PagingData<PurchaseDomainModel>> {
+        return Pager(
+            config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+            pagingSourceFactory = { purchaseDao.getPurchasesBySupplierId(supplierId) }
+        ).flow
+            .map {
+                it.map {
                     PurchaseDomainModel(
                         purchaseId = it.id,
                         purchaseDate = it.fechaCompra,
                         total = it.total,
                         supplierId = it.idProveedor,
                         state = it.estado
-                        )
+                    )
                 }
-            )
-        }
+            }
     }
 
     override suspend fun getSuppliersBySearch(query: String): Flow<ResultPattern<PagingData<DetailedSupplierLocalModel>>> {

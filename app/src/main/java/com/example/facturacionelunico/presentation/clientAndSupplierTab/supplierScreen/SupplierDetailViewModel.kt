@@ -2,16 +2,25 @@ package com.example.facturacionelunico.presentation.clientAndSupplierTab.supplie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
+import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.DetailedSupplierDomainModel
 import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.domain.repositories.SupplierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SupplierDetailViewModel @Inject constructor(
     private val repository: SupplierRepository
@@ -19,6 +28,15 @@ class SupplierDetailViewModel @Inject constructor(
 
     private val _supplier = MutableStateFlow<DetailedSupplierDomainModel?>(null)
     val supplier  = _supplier.asStateFlow()
+
+    private val _supplierId = MutableStateFlow<Long?>(null)
+
+    val purchases: Flow<PagingData<PurchaseDomainModel>> = _supplierId
+        .filterNotNull()
+        .flatMapLatest { id ->
+            repository.getPurchasesBySupplierId(id)
+        }
+        .cachedIn(viewModelScope)
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
@@ -28,6 +46,7 @@ class SupplierDetailViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getSupplierById(id).collect{ supplierEntity ->
                 _supplier.value = supplierEntity
+                _supplierId.value = supplierEntity?.id
             }
         }
     }

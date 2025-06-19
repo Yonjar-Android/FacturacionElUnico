@@ -40,6 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.facturacionelunico.domain.models.invoice.InvoiceDomainModel
+import com.example.facturacionelunico.domain.models.purchase.PurchaseDomainModel
 import com.example.facturacionelunico.domain.models.supplier.SupplierDomainModel
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.ClientText
 import com.example.facturacionelunico.presentation.clientAndSupplierTab.clientScreen.FacturaItem
@@ -60,6 +64,8 @@ fun SupplierDetailScreen(
     }
 
     val supplier by viewModel.supplier.collectAsStateWithLifecycle()
+
+    val purchases: LazyPagingItems<PurchaseDomainModel> = viewModel.purchases.collectAsLazyPagingItems()
 
     val message by viewModel.message.collectAsStateWithLifecycle()
 
@@ -136,11 +142,21 @@ fun SupplierDetailScreen(
             Spacer(modifier = Modifier.size(10.dp))
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                if (supplier?.purchases != null && supplier?.purchases?.isNotEmpty() == true) {
-                    items(supplier!!.purchases) {
-                        FacturaItem(it.purchaseId, "Compra #${it.purchaseId}", it.state, {
-                            navController.navigate("PurchaseDetailScreen/${it}")
-                        })
+                if (purchases.itemCount > 0) {
+                    items(
+                        count = purchases.itemCount,
+                        key = { index -> purchases[index]?.purchaseId ?: index },
+                        contentType = { "Purchases" }
+                    ) {
+
+                        val purchase = purchases[it]
+
+                        if (purchase != null){
+                            FacturaItem(purchase.purchaseId, "Compra #${purchase.purchaseId}", purchase.state,
+                                goToDetail = {
+                                    navController.navigate("PurchaseDetailScreen/${it}")
+                                })
+                        }
                     }
                 }
             }
