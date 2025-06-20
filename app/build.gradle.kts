@@ -96,4 +96,8 @@ dependencies {
 
     // turbine unit testing
     testImplementation(libs.turbine)
+
+    // Compose Charts
+
+    implementation (libs.compose.charts)
 }

@@ -53,7 +53,9 @@ FROM detalle_venta dv
         INNER JOIN venta ON venta.id = detalle_venta.idVenta
         WHERE strftime('%m', datetime(fechaVenta / 1000, 'unixepoch')) = :mes
           AND strftime('%Y', datetime(fechaVenta / 1000, 'unixepoch')) = :anio
-          AND venta.estado = 'COMPLETADO'
+          
     """)
     suspend fun getReporteMensual(mes: String, anio: String): ReporteMensualDto
+
+    //AND venta.estado = 'COMPLETADO'
 }

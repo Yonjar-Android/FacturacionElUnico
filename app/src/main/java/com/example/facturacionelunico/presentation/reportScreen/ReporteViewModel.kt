@@ -28,6 +28,8 @@ class ReporteViewModel @Inject constructor(
             val anio = actual.year.toString()                        // "2025"
             val reporte = db.detalleVentaDao().getReporteMensual(mes, anio)
             _reporteMensual.value = reporte
+
+            println("Reporte mensual: $reporte")
         }
     }
 }
