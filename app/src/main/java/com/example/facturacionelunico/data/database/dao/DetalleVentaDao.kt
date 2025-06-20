@@ -7,7 +7,8 @@ import androidx.room.Query
 import androidx.room.Update
 import com.example.facturacionelunico.data.database.entities.DetalleVentaEntity
 import com.example.facturacionelunico.domain.models.ProductItem
-import com.example.facturacionelunico.domain.models.ReporteMensualDto
+import com.example.facturacionelunico.domain.models.reports.ReporteMensualDto
+import com.example.facturacionelunico.domain.models.reports.ReporteMensualRaw
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -56,6 +57,22 @@ FROM detalle_venta dv
           
     """)
     suspend fun getReporteMensual(mes: String, anio: String): ReporteMensualDto
+
+    //AND venta.estado = 'COMPLETADO'
+
+    @Query("""
+        SELECT 
+            strftime('%m', datetime(venta.fechaVenta / 1000, 'unixepoch')) AS mes,
+            strftime('%Y', datetime(venta.fechaVenta / 1000, 'unixepoch')) AS anio,
+            SUM(detalle_venta.subtotal) AS totalVendido,
+            SUM((detalle_venta.precio - detalle_venta.precioCompra) * detalle_venta.cantidad) AS gananciaNeta
+        FROM detalle_venta
+        INNER JOIN venta ON venta.id = detalle_venta.idVenta
+        WHERE strftime('%Y', datetime(venta.fechaVenta / 1000, 'unixepoch')) = :anio
+        GROUP BY mes
+        ORDER BY mes ASC
+    """)
+    suspend fun getResumenPorAnio(anio: String): List<ReporteMensualRaw>
 
     //AND venta.estado = 'COMPLETADO'
 }
