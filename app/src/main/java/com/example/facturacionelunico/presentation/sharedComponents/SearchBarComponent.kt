@@ -28,12 +28,12 @@ fun SearchBarComponent(
     ) {
         TextField(
             modifier = Modifier
-                .fillMaxWidth(fraction = 0.95f)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                     shape = RoundedCornerShape(30.dp)
-                ),
+                )
+                .fillMaxWidth(fraction = 0.95f),
             shape = RoundedCornerShape(20.dp),
             value = value,
             onValueChange = { onChangeValue(it) },
@@ -45,7 +45,8 @@ fun SearchBarComponent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "search icon"
+                        contentDescription = "search icon",
+                        tint = Color.Black
                     )
                 }
             },
@@ -53,7 +54,9 @@ fun SearchBarComponent(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                unfocusedContainerColor = Color.White,
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black
             )
         )
     }

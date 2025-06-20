@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -314,7 +315,7 @@ fun BuyScreen(
                                 selected = deptSelectedOption == dept,
                                 onClick = { deptSelectedOption = dept },
                             )
-                            Text(text = dept, color = Color.Black)
+                            Text(text = dept, color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -414,7 +415,7 @@ fun SelectSupplierTable(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         IconButton(
@@ -523,7 +524,7 @@ fun SelectProductTablePurchase(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         IconButton(

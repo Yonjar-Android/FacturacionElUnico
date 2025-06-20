@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -137,7 +136,7 @@ fun ProductCreateScreen(
         TextFieldComponent(
             textFieldName = "Nombre del Producto",
             textValue = productName,
-            onTextValueChange = { productName = it }
+            onTextValueChange = { productName = it },
         )
 
         TextFieldDrawer(
@@ -279,9 +278,7 @@ fun TextFieldComponent(
             value = textValue, onValueChange = { onTextValueChange(it) },
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                unfocusedIndicatorColor = Color.Transparent
             ),
             shape = RoundedCornerShape(30.dp),
             maxLines = 1,
@@ -386,8 +383,6 @@ fun TextFieldDescription(
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
             ),
             shape = RoundedCornerShape(30.dp),
             maxLines = 3,

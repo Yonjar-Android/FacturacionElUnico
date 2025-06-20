@@ -28,6 +28,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -237,7 +238,7 @@ fun SellScreen(
                                 },
                                 enabled = enabledRadioButtons
                             )
-                            Text(text = client, color = Color.Black)
+                            Text(text = client, color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -365,7 +366,7 @@ fun SellScreen(
                                 onClick = { deptSelectedOption = dept },
                                 enabled = if (selectedOption == clientList[1]) false else true
                             )
-                            Text(text = dept, color = Color.Black)
+                            Text(text = dept, color = MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
@@ -484,7 +485,9 @@ fun TextFieldInvoice(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedContainerColor = Color(0xFFdfdfdf),
-                unfocusedContainerColor = Color(0xFFdfdfdf)
+                unfocusedContainerColor = Color(0xFFdfdfdf),
+                focusedTextColor =  Color.Black,
+                unfocusedTextColor = Color.Black
             ),
             shape = RoundedCornerShape(30.dp),
             maxLines = 1,
@@ -630,7 +633,7 @@ fun ProductOptionsDialog(
                 .fillMaxWidth(fraction = 0.8f)
                 .fillMaxHeight(fraction = 0.2f)
                 .clip(RoundedCornerShape(30.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -670,7 +673,7 @@ fun ProductOptionsDialog(
                     .fillMaxWidth(fraction = 0.8f)
                     .fillMaxHeight(fraction = 0.25f)
                     .clip(RoundedCornerShape(30.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(30.dp)
             ) {
                 Text("Cantidad actual", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -732,7 +735,7 @@ fun SelectClientTable(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         IconButton(
@@ -841,7 +844,7 @@ fun SelectProductTable(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         IconButton(

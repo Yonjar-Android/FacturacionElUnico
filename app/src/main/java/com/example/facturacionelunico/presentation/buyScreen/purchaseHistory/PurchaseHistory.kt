@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,7 +65,7 @@ fun PurchaseHistory(
                             viewModel.getInvoicesBySelectedOption(dept)
                         },
                     )
-                    Text(text = dept, color = Color.Black)
+                    Text(text = dept, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
