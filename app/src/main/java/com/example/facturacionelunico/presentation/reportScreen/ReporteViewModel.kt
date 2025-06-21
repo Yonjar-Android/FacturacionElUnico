@@ -25,6 +25,13 @@ class ReporteViewModel @Inject constructor(
     private val _reporteAnual = MutableStateFlow<List<ReporteMensualResumen>?>(null)
     val reporteAnual: StateFlow<List<ReporteMensualResumen>?> = _reporteAnual
 
+    private val _aniosDisponibles = MutableStateFlow<List<Int>>(emptyList())
+    val aniosDisponibles: StateFlow<List<Int>> = _aniosDisponibles
+
+    init {
+        cargarAniosDisponibles()
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun cargarReporteDelMes(actual: LocalDate = LocalDate.now()) {
         viewModelScope.launch {
@@ -68,6 +75,12 @@ class ReporteViewModel @Inject constructor(
             11 -> "Nov"
             12 -> "Dic"
             else -> "Mes inválido"
+        }
+    }
+
+    fun cargarAniosDisponibles() {
+        viewModelScope.launch {
+            _aniosDisponibles.value = db.detalleVentaDao().getAniosConVentas()
         }
     }
 }

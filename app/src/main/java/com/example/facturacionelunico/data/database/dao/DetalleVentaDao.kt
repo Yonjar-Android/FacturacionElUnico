@@ -75,4 +75,13 @@ FROM detalle_venta dv
     suspend fun getResumenPorAnio(anio: String): List<ReporteMensualRaw>
 
     //AND venta.estado = 'COMPLETADO'
+
+    @Query(
+        """
+    SELECT DISTINCT CAST(strftime('%Y', datetime(fechaVenta / 1000, 'unixepoch')) AS INTEGER) AS anio
+    FROM venta
+    ORDER BY anio DESC
+    """
+    )
+    suspend fun getAniosConVentas(): List<Int>
 }

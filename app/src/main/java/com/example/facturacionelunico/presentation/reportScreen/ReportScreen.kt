@@ -4,20 +4,34 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +59,10 @@ fun ReportScreen(
     val reporte by viewModel.reporteMensual.collectAsStateWithLifecycle()
 
     val reporteAnual by viewModel.reporteAnual.collectAsStateWithLifecycle()
+
+    val aniosDisponibles by viewModel.aniosDisponibles.collectAsStateWithLifecycle()
+
+    var anioActual by remember { mutableIntStateOf(LocalDate.now().year) }
 
     val ventasPorMes by remember(reporteAnual) {
         derivedStateOf {
@@ -82,7 +100,16 @@ fun ReportScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text("Reporte de Ventas Anual", style = MaterialTheme.typography.titleLarge)
-            Text("Año: ${LocalDate.now().year}", style = MaterialTheme.typography.titleLarge)
+            Text("Año: ${anioActual}", style = MaterialTheme.typography.titleLarge)
+
+            SelectorDeAnios(
+                anios = aniosDisponibles,
+                anioSeleccionado = LocalDate.now().year,
+                onAnioSeleccionado = {
+                    viewModel.cargarResumenAnual(it)
+                    anioActual = it
+                }
+            )
 
             val lines = listOf(
                 Line(
@@ -124,5 +151,66 @@ fun ReportScreen(
             CircularProgressIndicator()
         }
 
+    }
+}
+
+@Composable
+fun SelectorDeAnios(
+    anios: List<Int>,
+    anioSeleccionado: Int?,
+    onAnioSeleccionado: (Int) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        OutlinedTextField(
+            value = anioSeleccionado?.toString() ?: "Seleccionar año",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Año") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true },
+            trailingIcon = {
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+            },
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface
+            )
+        )
+
+        // Detectar click manualmente con Box que cubre el TextField
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) {
+                    expanded = true
+                }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            anios.forEach { anio ->
+                DropdownMenuItem(
+                    text = { Text(anio.toString()) },
+                    onClick = {
+                        onAnioSeleccionado(anio)
+                        expanded = false
+                    }
+                )
+            }
+        }
     }
 }
